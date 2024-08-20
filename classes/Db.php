@@ -5,6 +5,10 @@ class Db {
   
   private static $instance = null;
   
+  private $db_conn = null;
+  
+  
+  
   
   private function __construct() {
 
@@ -16,21 +20,21 @@ class Db {
   
   
   private function db_init() {
-   
-    echo 'root: ' . ROOT_PATH . '<br>';
-    
     
     // Define the path to the SQLite database file
-    $databaseFile = ROOT_PATH . 'data/db.sqlite';
-
-    echo 'databaseFile: ' . $databaseFile . '<br>';
+    $db_file = ROOT_PATH . 'data/db.sqlite';
+    $db_conn = false;
+    $db_conn_err = false;
+   
     
     
     // Check if the database file exists
-    if (!file_exists($databaseFile)) {
+    if ( !file_exists($db_file) ) {
+      
       try {
+        
           // Create the database by connecting to it
-          $pdo = new PDO('sqlite:' . $databaseFile);
+          $pdo = new PDO('sqlite:' . $db_file);
           
           // Set the error mode to exception
           $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
@@ -42,26 +46,43 @@ class Db {
               password TEXT NOT NULL
           )");
     
-          echo "Database created and connection established.";
+          $db_conn = $pdo;
+          
       } catch (PDOException $e) {
-          echo "Failed to create the database(1): " . $e->getMessage();
+      
+        $db_conn_err = "Failed to create the database: " . $e->getMessage();
+        
       }
+      
     } else {
-      echo "Database already exists.";
+      
       try {
+        
           // Connect to the existing database
-          $pdo = new PDO('sqlite:' . $databaseFile);
+          $pdo = new PDO('sqlite:' . $db_file);
           $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-          echo " Connected to the existing database.";
+          $db_conn = $pdo;
+          
       } catch (PDOException $e) {
-          echo "Failed to connect to the existing database: " . $e->getMessage();
+        
+          $db_conn_err = "Failed to connect to the existing database: " . $e->getMessage();
+      
       }
+      
     }
-
+    
+    
+    $this->db_conn = $pdo;
    
     
-  }
+    if ( $db_conn_err ):
+      
+      echo $db_conn_err;
+      
+    endif;
+    
+  } // db_init()
   
   
   
