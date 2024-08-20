@@ -7,6 +7,10 @@ error_reporting(E_ALL);
 
 
 
+define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
+
+
+
 spl_autoload_register(function ($class) {
     include 'classes/' . $class . '.php';
 });

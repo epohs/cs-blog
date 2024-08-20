@@ -3,23 +3,25 @@
 class Page {
 
   
-    private static $instance = null;
-    
+  private static $instance = null;
+  
+  
+  private function __construct() {
 
-    private function __construct() {
-        // Private constructor to prevent multiple instances.
+    Db::get_instance();
+    
+  }
+  
+  
+  public static function get_instance() {
+  
+    if (self::$instance === null) {
+      self::$instance = new Page();
     }
-    
-
-    public static function get_instance() {
-    
-      if (self::$instance === null) {
-        self::$instance = new Page();
-      }
-
-      return self::$instance;
-    
-    } // get_instance()
+  
+    return self::$instance;
+  
+  } // get_instance()
 
     
 } // ::Page
