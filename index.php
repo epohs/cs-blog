@@ -1,3 +1,11 @@
+<?php
+
+include('functions.php');
+
+$page = Page::get_instance();
+
+
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>
