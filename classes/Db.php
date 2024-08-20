@@ -23,7 +23,6 @@ class Db {
     
     // Define the path to the SQLite database file
     $db_file = ROOT_PATH . 'data/db.sqlite';
-    $db_conn = false;
     $db_conn_err = false;
    
     
@@ -38,15 +37,13 @@ class Db {
           
           // Set the error mode to exception
           $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-          // Optionally, create tables or perform other setup tasks here
-          $pdo->exec("CREATE TABLE IF NOT EXISTS users (
-              id INTEGER PRIMARY KEY,
-              username TEXT NOT NULL,
-              password TEXT NOT NULL
-          )");
-    
-          $db_conn = $pdo;
+          
+          // Save database connection
+          $this->db_conn = $pdo;
+          
+          
+          $this->make_tables();
+
           
       } catch (PDOException $e) {
       
@@ -62,7 +59,7 @@ class Db {
           $pdo = new PDO('sqlite:' . $db_file);
           $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     
-          $db_conn = $pdo;
+          $this->db_conn = $pdo;
           
       } catch (PDOException $e) {
         
@@ -73,7 +70,7 @@ class Db {
     }
     
     
-    $this->db_conn = $pdo;
+    
    
     
     if ( $db_conn_err ):
@@ -83,6 +80,74 @@ class Db {
     endif;
     
   } // db_init()
+  
+  
+  
+  
+  
+  
+  
+  
+  private function make_tables() {
+    
+    
+    $db = $this->get_conn();
+    
+    
+    if ( $db ):
+    
+      $db->beginTransaction();
+    
+      // Optionally, create tables or perform other setup tasks here
+      $db->exec("CREATE TABLE IF NOT EXISTS users (
+        id INTEGER PRIMARY KEY,
+        username TEXT NOT NULL,
+        password TEXT NOT NULL
+      )");
+      
+      $db->commit();
+      
+      echo "i think we made some tables.";
+      
+      
+    else:
+      
+      echo "can't find db connection";
+      
+    endif;
+    
+    
+    
+  } // make_tables;
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function get_conn() {
+    
+    
+    return $this->db_conn;
+    
+    
+  } // get_conn()
+  
+  
+  
+  
+  
   
   
   
