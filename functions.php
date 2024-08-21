@@ -11,6 +11,15 @@ define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 
 
 
+// Auto-include files in the /classes/ directory
+// when a class is referenced
 spl_autoload_register(function ($class) {
-    include 'classes/' . $class . '.php';
+
+  include 'classes/' . $class . '.php';
+
 });
+
+
+
+
+Config::get_instance();
