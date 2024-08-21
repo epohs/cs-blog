@@ -29,21 +29,25 @@ class Config {
 
     $config_path = ROOT_PATH . '/config.php';
     
-    if (file_exists( $config_path) ):
+    if ( file_exists($config_path) ):
       
       // Use output buffering to strip PHP code from config file
       ob_start();
       
       require_once($config_path);
       
-      $json_content = ob_get_clean();
+      $file_content = ob_get_clean();
       
-      $this->config_vars = json_decode($json_content, true);
-
-    else:
-        
-      // Handle error if config file does not exist
-      $this->config_vars = [];
+      
+      $json_content = json_decode($file_content, true);
+      
+      
+      // Test whether the json file is valie
+      if ( json_last_error() === JSON_ERROR_NONE ):
+      
+        $this->config_vars = $json_content;
+      
+      endif;
         
     endif; 
     
