@@ -33,23 +33,23 @@ class Page {
     
     // Build the full path to the partial based 
     // on what was passed.
-    $filename = ROOT_PATH . '/partials/' . $file;  
+    $partial_path = ROOT_PATH . '/partials/' . $file;  
     
     
     if ( !is_null($suffix) ):
       
-      $filename .= '-' . $suffix;  
+      $partial_path .= '-' . $suffix;  
     
     endif;  
     
     
-    $filename .= '.php';  
+    $partial_path .= '.php';  
     
     
 
     // Include the specified partial file only if
     // it is found.
-    if ( file_exists($filename) ):
+    if ( file_exists($partial_path) ):
    
       // Always make the Page class available.
       $page = Page::get_instance();
@@ -64,7 +64,7 @@ class Page {
       endif;  
       
       
-      include $filename;
+      include $partial_path;
       
       
     else:
