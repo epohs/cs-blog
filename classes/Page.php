@@ -12,23 +12,24 @@ class Page {
     
   }
   
-  
-  public static function get_instance() {
-  
-    if (self::$instance === null) {
-      self::$instance = new Page();
-    }
-  
-    return self::$instance;
-  
-  } // get_instance()
 
   
   
   
   
+  public function get_page_title() {
+    
+    $config = Config::get_instance();
+    
+    return $config->get('site_name');
+    
+  } // get_page_title()
   
-  function get_partial(string $file, ?string $suffix = null, $args = false)   {  
+  
+  
+  
+  
+  public function get_partial(string $file, ?string $suffix = null, $args = false)   {  
     
     
     // Build the full path to the partial based 
@@ -78,6 +79,20 @@ class Page {
 
   
   
+  
+  
+  
+  public static function get_instance() {
+  
+    if (self::$instance === null):
+      
+      self::$instance = new Page();
+
+    endif;
+  
+    return self::$instance;
+  
+  } // get_instance()
   
   
     

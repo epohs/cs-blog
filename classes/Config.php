@@ -27,11 +27,16 @@ class Config {
   // Initialize the configuration by loading the config.json file
   public function init() {
 
-    $config_path = ROOT_PATH . '/config.json';
+    $config_path = ROOT_PATH . '/config.php';
     
     if (file_exists( $config_path) ):
       
-      $json_content = file_get_contents($config_path);
+      // Use output buffering to strip PHP code from config file
+      ob_start();
+      
+      require_once($config_path);
+      
+      $json_content = ob_get_clean();
       
       $this->config_vars = json_decode($json_content, true);
 
@@ -55,7 +60,7 @@ class Config {
       
       return $this->config_vars;
 
-    elseif ( array_key_exists($key, $this->config_vars) ):
+    elseif ( is_array($this->config_vars) && array_key_exists($key, $this->config_vars) ):
       
       return $this->config_vars[$key];
       
