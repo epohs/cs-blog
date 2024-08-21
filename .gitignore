@@ -3,6 +3,10 @@
 *.sqlite3
 
 
+# Config
+config.json
+
+
 # Log Files
 /log/
 *.log
