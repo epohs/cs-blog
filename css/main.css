@@ -1,0 +1,83 @@
+/*
+@todo Add support for light and dark themes
+*/
+
+
+html {
+  font-size: 62.5%;
+  line-height: 1.4;
+  box-sizing: border-box;
+}
+
+*,
+*:before, *:after {
+  box-sizing: inherit;
+}
+
+body {
+  font-family: system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 1.5rem;
+  font-weight: 300;
+  color: #fff;
+  letter-spacing: 0.075em;
+  background-color: #343434;
+}
+
+a {
+  color: #ffbe00;
+}
+
+a:visited {
+  color: #cd9800;
+}
+
+a:hover {
+  color: #ffce00;
+}
+
+p {
+  margin: 1.5em 0;
+}
+
+
+input,
+select,
+textarea {
+  appearance: none;
+  padding: 1em;
+  font-family: monospace, sans-serif;
+  font-size: 1.5rem;
+  color: #171717;
+  letter-spacing: 0.025em;
+  border: none;
+  border-radius: 0.25em;
+  background-color: #fff;
+  box-sizing: border-box;
+}
+
+
+select {
+  width: auto;
+  padding-right: 4em;
+  background-image:
+    linear-gradient(45deg, transparent 50%, gray 50%),
+    linear-gradient(135deg, gray 50%, transparent 50%),
+    linear-gradient(to right, #ccc, #ccc);
+  background-position:
+    calc(100% - 1.4em) 50%,
+    calc(100% - 0.9em) 50%,
+    calc(100% - 2.75em) 50%;
+  background-size:
+    0.5em 0.5em,
+    0.5em 0.5em,
+    1px 80%;
+  background-repeat: no-repeat;
+}
+
+
+
+/* temp below here */
+
+h1 {
+  font-family: Charter, 'Bitstream Charter', 'Sitka Text', Cambria, serif;
+}
