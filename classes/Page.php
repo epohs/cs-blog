@@ -22,13 +22,23 @@ class Page {
     
     // We need to grab any errors that were stashed
     // when our Config class ran at the begining of 
-    // the page load, and merge them into our page
-    // errors propery.
+    // the page load and merge them into our Page
+    // errors property.
     $this->config = Config::get_instance();
     
     $config_errors = $this->config->get_errors();
     
     $this->errors = array_merge($this->errors, $config_errors);
+    
+    
+    
+    
+    $this->add_error('Test info one', 'info');
+    $this->add_error('Test warn one', 'warn');
+    $this->add_error('Test error one', 'error');
+    $this->add_error('Test Error two', 'error');
+    $this->add_error('Test info two', 'info');    
+    
     
     
   } // __construct();
@@ -172,11 +182,43 @@ class Page {
 
   public function get_errors($level = false) {
     
-    // @todo add ability to only get errors of a certain level
-    // @todo strip out info and warn level msgs when not in debug mode
-    
 
-    return $this->errors;
+    // Strip out info and warn level msgs when not in debug mode
+    if ( !$this->config->get('debug') && !$level ):
+
+      $filtered_errors = array_filter($this->errors, function($item) {
+        
+        return $item['level'] === 'error';
+        
+      });
+      
+
+      // re-index the array to correct gaps
+      // left when we filtered.
+      return array_values($filtered_errors);
+      
+    else:
+      
+      // If a specific level was requested return only errors
+      // of that level, otherwise return all errors.
+      if ( $level ):
+        
+        $filtered_errors = array_filter($this->errors, function($item) use ($level) {
+      
+          return $item['level'] === $level;
+          
+        });
+       
+        return array_values($filtered_errors);
+
+      else:
+        
+        return $this->errors;
+        
+      endif;
+      
+      
+    endif;
     
     
   } // get_errors()
