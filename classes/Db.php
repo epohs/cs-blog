@@ -69,7 +69,6 @@ class Db {
         
         $page = Page::get_instance();
         
-        
         $page->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
@@ -161,9 +160,12 @@ class Db {
   
   public static function get_instance() {
   
-    if (self::$instance === null) {
+    if (self::$instance === null):
+      
       self::$instance = new Db();
-    }
+    
+    endif;
+    
   
     return self::$instance;
   

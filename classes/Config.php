@@ -89,7 +89,11 @@ class Config {
       
     else:
       
+      
+      $this->config_errors[] = ['level' => 'warn', 'msg' => "Config key {$key} not found"];
+      
       return false;
+      
       
     endif;  
 

@@ -92,6 +92,8 @@ class Page {
       
       
     else:
+      
+      $this->add_error("Partial {$file} not found.", 'warn');
 
       return false;
     
@@ -110,19 +112,30 @@ class Page {
   
   
   
-  public function add_error($error_msg, $level = 'error') {
-    
-    
+  public function add_error($error_msg, $level = null) {
+
+
     $acceptable_levels = [
       'info',
       'warn',
       'error'
     ];
     
+    $default_level = 'error';
+    
     
     // Only allow levels listed in the array above.
     // Default to 'error' if something else is passed.
-    $level = ( in_array($level, $acceptable_levels, true) ) ? $level : 'error';
+    if ( !is_null($level) ): 
+      
+      $level = ( in_array($level, $acceptable_levels, true) ) ? $level : $default_level;
+      
+    else:
+      
+      $level = $default_level;
+      
+    endif;
+      
     
     
     $this->errors[] = ['level' => $level, 'msg' => $error_msg];
@@ -141,7 +154,8 @@ class Page {
   public function has_errors($level = false) {
     
     // @todo add ability to only get errors of a certain level
-    
+
+    // @todo ignore info and warn level msgs when not in debug mode
 
     return ( is_array($this->errors) && !empty($this->errors) );
     
@@ -158,6 +172,7 @@ class Page {
   public function get_errors($level = false) {
     
     // @todo add ability to only get errors of a certain level
+    // @todo strip out info and warn level msgs when not in debug mode
     
 
     return $this->errors;
