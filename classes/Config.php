@@ -8,7 +8,11 @@ class Config {
   // Array to hold configuration variables
   private $config_vars = [];  
   
-  
+  // Config has it's own error stash because
+  // This file runs before our Page class is
+  // ready.  We'll grab these and display them
+  // later.
+  private $config_errors = [];
   
   
   
@@ -19,6 +23,10 @@ class Config {
     $this->init();
     
   } // __construct()
+  
+  
+  
+  
   
   
   
@@ -46,8 +54,16 @@ class Config {
       if ( json_last_error() === JSON_ERROR_NONE ):
       
         $this->config_vars = $json_content;
-      
+
+      else:
+        
+        $this->config_errors[] = ['level' => 'error', 'msg' => 'Invalid config file.'];
+        
       endif;
+      
+    else:
+      
+      $this->config_errors[] = ['level' => 'error', 'msg' => 'No config file found.'];
         
     endif; 
     
@@ -55,6 +71,9 @@ class Config {
  
  
  
+  
+  
+  
   
   
   // Get a configuration value by key or return the entire config array
@@ -75,6 +94,20 @@ class Config {
     endif;  
 
   } // get()
+  
+  
+  
+  
+  
+  
+  public function get_errors() {
+    
+    
+    return $this->config_errors;
+    
+    
+  } // get_errors()
+  
   
   
   

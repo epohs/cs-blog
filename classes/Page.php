@@ -5,25 +5,48 @@ class Page {
   
   private static $instance = null;
   
+  private $config = null;
+  
+  private $errors = [];
+  
+  
+  
+  
+  
   
   private function __construct() {
 
+    
     Db::get_instance();
     
-  }
+    
+    // We need to grab any errors that were stashed
+    // when our Config class ran at the begining of 
+    // the page load, and merge them into our page
+    // errors propery.
+    $this->config = Config::get_instance();
+    
+    $config_errors = $this->config->get_errors();
+    
+    $this->errors = array_merge($this->errors, $config_errors);
+    
+    
+  } // __construct();
   
 
+  
   
   
   
   
   public function get_page_title() {
     
-    $config = Config::get_instance();
-    
-    return $config->get('site_name');
+    return $this->config->get('site_name');
     
   } // get_page_title()
+  
+  
+  
   
   
   
@@ -77,6 +100,74 @@ class Page {
   
   } // get_partial()
 
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function add_error($error_msg, $level = 'error') {
+    
+    
+    $acceptable_levels = [
+      'info',
+      'warn',
+      'error'
+    ];
+    
+    
+    // Only allow levels listed in the array above.
+    // Default to 'error' if something else is passed.
+    $level = ( in_array($level, $acceptable_levels, true) ) ? $level : 'error';
+    
+    
+    $this->errors[] = ['level' => $level, 'msg' => $error_msg];
+    
+    
+    
+  } // add_error()
+  
+  
+  
+  
+  
+  
+  
+  
+  public function has_errors($level = false) {
+    
+    // @todo add ability to only get errors of a certain level
+    
+
+    return ( is_array($this->errors) && !empty($this->errors) );
+    
+    
+  } // has_errors()
+  
+
+
+
+
+
+
+
+  public function get_errors($level = false) {
+    
+    // @todo add ability to only get errors of a certain level
+    
+
+    return $this->errors;
+    
+    
+  } // get_errors()
+
+
+  
+  
   
   
   

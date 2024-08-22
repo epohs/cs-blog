@@ -13,8 +13,8 @@ class Db {
   private function __construct() {
 
     $this->db_init();
-    
-  }
+      
+  } // __construct()
   
   
   
@@ -46,8 +46,12 @@ class Db {
 
           
       } catch (PDOException $e) {
+        
+        
+        $page = Page::get_instance();
+        
       
-        $db_conn_err = "Failed to create the database: " . $e->getMessage();
+        $page->add_error( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -55,15 +59,18 @@ class Db {
       
       try {
         
-          // Connect to the existing database
-          $pdo = new PDO('sqlite:' . $db_file);
-          $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
-          $this->db_conn = $pdo;
+        // Connect to the existing database
+        $pdo = new PDO('sqlite:' . $db_file);
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        $this->db_conn = $pdo;
           
       } catch (PDOException $e) {
         
-          $db_conn_err = "Failed to connect to the existing database: " . $e->getMessage();
+        $page = Page::get_instance();
+        
+        
+        $page->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
       
@@ -107,12 +114,11 @@ class Db {
       
       $db->commit();
       
-      echo "i think we made some tables.";
-      
-      
     else:
-      
-      echo "can't find db connection";
+
+      $page = Page::get_instance();
+            
+      $page->add_error("can't find db connection");
       
     endif;
     
