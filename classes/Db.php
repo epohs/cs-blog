@@ -23,7 +23,6 @@ class Db {
     
     // Define the path to the SQLite database file
     $db_file = ROOT_PATH . 'data/db.sqlite';
-    $db_conn_err = false;
    
     
     
@@ -73,17 +72,10 @@ class Db {
       
       }
       
-    }
+    } // file_exists(config)
     
     
     
-   
-    
-    if ( $db_conn_err ):
-      
-      echo $db_conn_err;
-      
-    endif;
     
   } // db_init()
   

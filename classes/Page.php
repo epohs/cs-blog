@@ -126,7 +126,7 @@ class Page {
     
     // Only allow levels listed in the array above.
     // Default to 'error' if something else is passed.
-    if ( !is_null($level) ): 
+    if ( !is_null($level) ):
       
       $level = ( in_array($level, $acceptable_levels, true) ) ? $level : $default_level;
       
@@ -136,6 +136,7 @@ class Page {
       
     endif;
       
+    
     
     
     $this->errors[] = ['level' => $level, 'msg' => $error_msg];
