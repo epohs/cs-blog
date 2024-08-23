@@ -16,7 +16,7 @@ $page = Page::get_instance();
 <?php $page->get_partial('errors'); ?>
   
   
-<h1>Hello.</h1>
+<h1>Hi.</h1>
 
 <p><?= date("F j, Y, g:i a"); ?></p>
 
