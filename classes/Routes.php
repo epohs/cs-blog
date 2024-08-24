@@ -38,25 +38,23 @@ class Routes {
   
   
   private function serve_route( $path ) {
-    
-    
-    
 
-    
-    
-    
-    
+
     if (
       is_countable($path['segments']) && 
       ( count($path['segments']) == 1 ) &&
       ( $path['segments'][0] == '' )
     ):
     
+    
       $this->page->get_template( "index" );
+      
       
     else:
       
+      
       $this->page->get_template( "404" );
+      
       
     endif;
     
@@ -74,7 +72,22 @@ class Routes {
   
   private function process_path( $request_uri ) {
     
-
+    $parsed_request = [
+      'segments' => [],
+      'query_str' => []
+    ];
+    
+    
+    // If request_uri is null we can't figure out what
+    // page we need to serve so log an error and bail.
+    if ( is_null($request_uri) ):
+      
+      $this->page->add_error('Bad REQUEST_URI.');
+      
+      return $parsed_request;
+      
+    endif;
+    
     
     // Parse the URL to get the path and query string vars
     $parsed_url = parse_url($request_uri);
