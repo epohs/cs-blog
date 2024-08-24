@@ -9,15 +9,20 @@ class Page {
   
   private $errors = [];
   
+  private $db = null;
   
-  
+  private $partial_root = 'partials';
   
   
   
   private function __construct() {
+    
+    
+    $this->block_direct_access();
 
     
-    Db::get_instance();
+    // Setup our database
+    $this->db = Db::get_instance();
     
     
     // We need to grab any errors that were stashed
@@ -33,17 +38,41 @@ class Page {
     
     
     
-    $this->add_error('Test info one', 'info');
-    $this->add_error('Test warn one', 'warn');
-    $this->add_error('Test error one', 'error');
-    $this->add_error('Test Error two', 'error');
-    $this->add_error('Test info two', 'info');    
+    
+    $request_uri = $_SERVER['REQUEST_URI'];
+    
+    Routes::get_instance( $this, $request_uri );
+    
+    // $this->add_error('Test info one', 'info');
+    // $this->add_error('Test warn one', 'warn');
+    // $this->add_error('Test error one', 'error');
+    // $this->add_error('Test Error two', 'error');
+    // $this->add_error('Test info two', 'info');    
     
     
     
   } // __construct();
   
 
+  
+  
+  
+  
+  
+  
+  
+
+  
+  
+  public function site_root() {
+    
+    return rtrim($this->config->get('site_root'), '/');
+    
+  } // site_root()
+  
+  
+  
+  
   
   
   
@@ -61,13 +90,54 @@ class Page {
   
   
   
+  /**
+   * We treat template files the same as partials
+   * except instead of being served from the /partials/
+   * sub-directory, they're served directly out of
+   * the theme root. So, this function is just a thin
+   * wrapper around the get_partial() function, but we
+   * change the root directory.
+   */
+  public function get_template(string $file, ?string $suffix = null, $args = false) {
+    
+    
+    $this->get_partial($file, $suffix, $args, true);
+    
+    
+  } // get_template()
   
-  public function get_partial(string $file, ?string $suffix = null, $args = false)   {  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function get_partial(string $file, ?string $suffix = null, $args = false, $theme_root = false) {  
+    
+    
+    $theme = $this->config->get('theme');
+    
+    
+    // If we're looking for a "template" file, look in the root
+    // of the theme. Otherwise, look in the partials directory.
+    if ( $theme_root ):
+      
+      $file_base = '';
+      
+    else:
+      
+      $file_base = "{$this->partial_root}/";
+      
+    endif;
     
     
     // Build the full path to the partial based 
     // on what was passed.
-    $partial_path = ROOT_PATH . '/partials/' . $file;  
+    $partial_path = ROOT_PATH . "themes/{$theme}/" . $file_base . $file;  
+    
     
     
     if ( !is_null($suffix) ):
@@ -86,7 +156,7 @@ class Page {
     if ( file_exists($partial_path) ):
    
       // Always make the Page class available.
-      $page = Page::get_instance();
+      $page = $this;
       
    
       // If we have args, extract them into variables
@@ -98,7 +168,7 @@ class Page {
       endif;  
       
       
-      include $partial_path;
+      include( $partial_path );
       
       
     else:
@@ -224,6 +294,27 @@ class Page {
   } // get_errors()
 
 
+  
+  
+  
+  
+  
+  
+  /**
+   * If this class is instantiated outside the proper
+   * scope prevent further instantiation.
+   */
+  private function block_direct_access() {
+    
+    if ( !defined('ROOT_PATH') ):
+      
+      die('Class called incorrectly.');
+    
+    endif;
+    
+    
+  } // block_direct_access()
+  
   
   
   
