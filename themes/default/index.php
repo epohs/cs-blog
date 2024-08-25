@@ -5,14 +5,24 @@
 
 <body>
   
-<?php $page->get_partial('errors'); ?>
+
   
+
+<div class="page-wrap">
+
   
-<h1>Hello.</h1>
+  <?php $page->get_partial('page-header'); ?>
+  
 
-<p><?= date("F j, Y, g:i a"); ?></p>
-
-
+  <main class="content">
+    
+    <?php $page->get_partial('errors'); ?>
+  
+    <h1>Hello.</h1>
+  
+    <p><?= date("F j, Y, g:i a"); ?></p>
+  
+  </main>
 
 
 </div>
