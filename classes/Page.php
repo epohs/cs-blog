@@ -39,8 +39,7 @@ class Page {
     
     
     
-    //$request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
-    $request_uri = null;
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
     
     Routes::get_instance( $this, $request_uri );
     

@@ -36,7 +36,11 @@ class Routes {
   
   
   
-  
+  /**
+   * Determine which template will handle our
+   * request, and prepare the data for that 
+   * page.
+   */
   private function serve_route( $path ) {
 
 
