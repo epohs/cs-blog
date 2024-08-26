@@ -19,6 +19,10 @@ config.php
 # Local History for Visual Studio Code
 .history/
 
+# Composer
+composer.phar
+/vendor/
 
 # PHP
-.user.ini
+*.ini
+*.env
