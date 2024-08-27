@@ -1,5 +1,7 @@
 {
     "require": {
-        "wildbit/postmark-php": "^6.0"
+        "wildbit/postmark-php": "^6.0",
+        "league/html-to-markdown": "^5.1",
+        "erusev/parsedown": "^1.7"
     }
 }
