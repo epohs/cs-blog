@@ -1,7 +1,7 @@
 <?php
 
 
-require_once('./vendor/autoload.php');
+
 use Postmark\PostmarkClient;
 use Postmark\Models\PostmarkException;
 

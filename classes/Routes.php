@@ -1,5 +1,8 @@
 <?php
 
+
+use League\HTMLToMarkdown\HtmlConverter;
+
 class Routes {
 
   
@@ -52,6 +55,13 @@ class Routes {
     
     
       $this->page->get_template( "index" );
+      
+      
+    elseif ( $path['segments'][0] == 'post' ):  
+  
+      $converter = new HtmlConverter(array('strip_tags' => true));
+      
+      $this->page->get_template( 'post', null, ['converter' => $converter] );
       
       
     else:
