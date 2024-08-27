@@ -3,9 +3,13 @@
 define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 
 
+// Include the autoloader for our Composer packages.
+require_once(ROOT_PATH . 'vendor/autoload.php');
+
+
 
 // Auto-include files in the /classes/ directory
-// when a class is referenced
+// when a class is referenced.
 spl_autoload_register(function ($class) {
 
   include 'classes/' . $class . '.php';
