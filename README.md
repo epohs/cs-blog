@@ -4,4 +4,4 @@ Super basic blog, built for my dad.
 
 ## To-Do
 
-- Try using [Trix](https://github.com/basecamp/trix) as a markdown editor with [Turndown](https://github.com/mixmark-io/turndown) to convert the HTML to Markdown before saving in the database.
+- Proceed with [HTML to Markdown](https://github.com/thephpleague/html-to-markdown) and [Parsedown](https://github.com/erusev/parsedown) and [Trix](https://github.com/basecamp/trix) to handle post formatting as HTML and saving as Markdown.
