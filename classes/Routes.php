@@ -11,8 +11,15 @@ class Routes {
   private $page = null;
   
   private $path = null;
-  
-  
+
+
+
+
+
+
+
+
+
   
   private function __construct( $page, $request_uri ) {
 
@@ -55,9 +62,20 @@ class Routes {
     
     
       $this->page->get_template( "index" );
+    
+    
+    // If we're serving a andmin route we need to use
+    // the the route handling from the Admin class.
+    elseif ( ($path['segments'][0] == 'admin') || ($path['segments'][0] == 'login') ):
       
       
-    elseif ( $path['segments'][0] == 'post' ):  
+      $admin = Admin::get_instance();
+    
+      $admin->serve_route( $path );
+      
+      
+    elseif ( $path['segments'][0] == 'post' ):
+      
   
       $converter = new HtmlConverter(array('strip_tags' => true));
       
