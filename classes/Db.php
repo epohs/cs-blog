@@ -166,7 +166,7 @@ class Db {
   
     if (self::$instance === null):
       
-      self::$instance = new Db();
+      self::$instance = new self();
     
     endif;
     
