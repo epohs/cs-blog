@@ -2,5 +2,5 @@
 
 include('functions.php');
 
-$page = Page::get_instance();
+$page = Page::get_instance(true);
 
