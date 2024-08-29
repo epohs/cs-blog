@@ -121,6 +121,11 @@ class Routes {
     endif;
     
     
+    // Remove all characters except letters, digits and 
+    // $-_.+!*'(),{}|\\^~[]`<>#%";/?:@&=.
+    $request_uri = filter_var($request_uri, FILTER_SANITIZE_URL);
+
+    
     // Parse the URL to get the path and query string vars
     $parsed_url = parse_url($request_uri);
     
