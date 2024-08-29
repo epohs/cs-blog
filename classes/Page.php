@@ -17,7 +17,7 @@ class Page {
   
   
   
-  private function __construct() {
+  private function __construct( $process_route ) {
     
     
     $this->block_direct_access();
@@ -38,12 +38,17 @@ class Page {
     $this->errors = array_merge($this->errors, $config_errors);
     
     
-    
-    
-    
     $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
     
-    Routes::get_instance( $this, $request_uri );
+    
+    // The only time we want to automatically process
+    // routes when we instantiate the Page object is
+    // during the first page load process.
+    if ( $process_route ):
+    
+      Routes::get_instance( $this, $request_uri );
+      
+    endif;
     
     // $this->add_error('Test info one', 'info');
     // $this->add_error('Test warn one', 'warn');
@@ -103,7 +108,7 @@ class Page {
   public function get_template(string $file, ?string $suffix = null, $args = false) {
     
     
-    $this->get_partial($file, $suffix, $args, true);
+    $this->get_partial($file, $suffix, $args, '');
     
     
   } // get_template()
@@ -117,28 +122,49 @@ class Page {
   
   
   
-  public function get_partial(string $file, ?string $suffix = null, $args = false, $theme_root = false) {  
+  public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false) {
     
     
-    $theme = $this->config->get('theme');
+    $config = Config::get_instance();
+    
+    $theme = $config->get('theme');
     
     
-    // If we're looking for a "template" file, look in the root
-    // of the theme. Otherwise, look in the partials directory.
-    if ( $theme_root ):
+    
+    // If $partial_root is false we're looking for a true
+    // partial, so look in the theme's partials folder.
+    if ( $partial_root === false ):
       
-      $file_base = '';
       
+      $file_base = "/themes/{$theme}/{$this->partial_root}/";
+
+      
+    // If $partial_root is an empty string we're looking for
+    // a file in the root of the theme.
+    elseif( $partial_root === '' ):
+      
+      
+      $file_base = "/themes/{$theme}/";
+    
+    
+    // If $partial_root is anything else we overrite the 
+    // entire path to the partial file from the root up by
+    // with the string passed.
+    // This is to accomodate for admin page being outside the
+    // theme directory.
     else:
+    
       
-      $file_base = "{$this->partial_root}/";
+      $file_base = "$partial_root/";
+      
       
     endif;
     
     
+    
     // Build the full path to the partial based 
     // on what was passed.
-    $partial_path = ROOT_PATH . "themes/{$theme}/" . $file_base . $file;  
+    $partial_path = ROOT_PATH . $file_base . $file;  
     
     
     
@@ -324,11 +350,11 @@ class Page {
   
   
   
-  public static function get_instance() {
+  public static function get_instance( $process_route = false ) {
   
     if (self::$instance === null):
       
-      self::$instance = new Page();
+      self::$instance = new Page( $process_route );
 
     endif;
   
