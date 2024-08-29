@@ -103,7 +103,7 @@ class Email {
   
     if (self::$instance === null):
       
-      self::$instance = new Email();
+      self::$instance = new self();
     
     endif;
     
