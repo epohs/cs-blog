@@ -27,6 +27,7 @@ class Page {
     $this->db = Db::get_instance();
     
     
+    
     // We need to grab any errors that were stashed
     // when our Config class ran at the begining of 
     // the page load and merge them into our Page
@@ -38,7 +39,7 @@ class Page {
     $this->errors = array_merge($this->errors, $config_errors);
     
     
-    $request_uri = isset($_SERVER['REQUEST_URI']) ? $_SERVER['REQUEST_URI'] : null;
+    $request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
     
     
     // The only time we want to automatically process

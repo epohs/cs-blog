@@ -47,12 +47,18 @@ class Admin {
       $this->get_template( 'login', null, false );
       
       
+    elseif ( $path['segments'][0] == 'signup' ):
+      
+      
+      $this->get_template( 'signup' );
+      
+      
     else:
     
       
       $page = Page::get_instance();
       
-      $page->get_template( "404" );
+      $page->get_template( '404' );
       
       
     endif;

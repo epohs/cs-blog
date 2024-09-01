@@ -50,9 +50,30 @@ class Routes {
    * Determine which template will handle our
    * request, and prepare the data for that 
    * page.
+   *
+   * @todo clean up segment parsing
    */
   private function serve_route( $path ) {
 
+    
+    
+    if ( isset($path['segments'][0]) &&
+      ( $path['segments'][0] !== 'signup' ) ):
+      
+      $db = Db::get_instance();
+    
+      // Ensure that we have at least one admin user
+      if ( !$db->row_exists('users', 'role', 'admin') ):
+        
+        self::redirect_to('signup');
+        
+      endif;
+      
+    endif;
+    
+    
+    
+    
 
     if (
       is_countable($path['segments']) && 
@@ -66,7 +87,10 @@ class Routes {
     
     // If we're serving a andmin route we need to use
     // the the route handling from the Admin class.
-    elseif ( ($path['segments'][0] == 'admin') || ($path['segments'][0] == 'login') ):
+    elseif ( ($path['segments'][0] == 'admin') ||
+      ($path['segments'][0] == 'signup') ||
+      ($path['segments'][0] == 'login') ||
+      ($path['segments'][0] == 'logout') ):
       
       
       $admin = Admin::get_instance();
@@ -158,6 +182,32 @@ class Routes {
   } // process_path()
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  public static function redirect_to(string $url, int $statusCode = 302): void {
+    
+    if ( !headers_sent() ):
+      
+      http_response_code($statusCode);
+      header("Location: " . $url);
+      exit();
+    
+    else:
+      
+      // Handle the case where headers have already been sent
+      echo "<script type='text/javascript'>window.location.href='{$url}';</script>";
+      exit();
+    
+    endif;
+    
+  } // redirect_to()
+
   
   
   

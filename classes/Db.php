@@ -19,6 +19,62 @@ class Db {
   
   
   
+  
+  
+  
+  
+    
+  public function get_row_by_id( string $table, int $id, array $columns = ['*'] ) {
+    
+    $columnList = implode(', ', $columns);
+    
+    $stmt = $this->db_conn->prepare("SELECT $columnList FROM $table WHERE id = :id LIMIT 1");
+    
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    
+    $stmt->execute();
+    
+    $row = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    return $row ?: null;
+    
+  } // get_row_by_id()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function row_exists(string $table, string $column = 'id', $value = null): bool {
+    
+    
+    $stmt = $this->db_conn->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
+    
+    // Use the appropriate PDO::PARAM_* based on your data type
+    $stmt->bindParam(':value', $value, PDO::PARAM_STR); 
+    
+    $stmt->execute();
+    
+    
+    return $stmt->fetchColumn() !== false;
+    
+ 
+  } // row_exists()
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
   private function db_init() {
     
     // Define the path to the SQLite database file
