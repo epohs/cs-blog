@@ -219,6 +219,56 @@ class Page {
   
   
   
+  public function set_nonce(string $action, int $ttl = 3600): string {
+    
+    $nonce = bin2hex(random_bytes(16));
+    $expires = time() + $ttl;
+    
+    $nonceData = [
+        'nonce' => $nonce,
+        'expires' => $expires,
+        'action' => $action
+    ];
+    
+    $_SESSION['nonces'][$nonce] = $nonceData;
+    
+    return $nonce;
+
+  } // set_nonce()
+
+  
+  
+  
+  
+  
+  
+  public function validate_nonce(string $nonce, string $action): bool {
+    
+    if (isset($_SESSION['nonces'][$nonce])):
+  
+      $nonceData = $_SESSION['nonces'][$nonce];
+      
+      if ( $nonceData['action'] === $action && $nonceData['expires'] >= time() ):
+        
+        // Remove the nonce after validation
+        unset($_SESSION['nonces'][$nonce]);
+        
+        return true;
+        
+      endif;
+  
+    endif;
+    
+    return false;
+
+  } // validate_nonce()
+
+  
+  
+  
+  
+  
+  
   
   
   public function add_error($error_msg, $level = null) {
