@@ -72,7 +72,7 @@ class Page {
 
   
   
-  public function site_root() {
+  public function site_root(): string {
     
     return rtrim($this->config->get('site_root'), '/');
     
@@ -86,11 +86,28 @@ class Page {
   
   
   
-  public function get_page_title() {
+  public function get_page_title(): string {
     
     return $this->config->get('site_name');
     
   } // get_page_title()
+  
+  
+  
+  
+  
+  
+  
+  
+  public function url_for( $path ): string {
+    
+    $site_root = $this->site_root();
+    
+    return $site_root . '/' . $path;
+    
+  } // url_for()
+  
+  
   
   
   
@@ -230,7 +247,9 @@ class Page {
         'action' => $action
     ];
     
-    $_SESSION['nonces'][$nonce] = $nonceData;
+    // This origionally had $nonce as the key
+    // test to see which method works out better
+    $_SESSION['nonces'][$action] = $nonceData;
     
     return $nonce;
 
