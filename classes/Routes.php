@@ -58,12 +58,23 @@ class Routes {
     
     
     if ( isset($path['segments'][0]) &&
-      ( $path['segments'][0] !== 'signup' ) ):
+        (
+          ( $path['segments'][0] !== 'signup' ) &&
+          ( 
+            isset($path['segments'][1]) &&
+            $path['segments'][0] !== 'admin' && 
+            $path['segments'][1] !== 'form-handler'
+          )
+        )
+      ):
       
       $db = Db::get_instance();
     
       // Ensure that we have at least one admin user
       if ( !$db->row_exists('users', 'role', 'admin') ):
+        
+        
+        echo 'redirecting path: ' . var_export($path, true) . '<br>';
         
         self::redirect_to('signup');
         
@@ -208,6 +219,43 @@ class Routes {
     
   } // redirect_to()
 
+  
+  
+  
+  
+  
+  
+  
+  public static function clean_post_vars(array $post): array {
+    
+    $sanitized = [];
+    
+    foreach ($post as $key => $value) :
+    
+      if (is_array($value)):
+        
+        // Recursively sanitize arrays
+        $sanitized[$key] = $this->clean_post_vars($value);
+        
+      else:
+        
+        // Trim whitespace
+        $value = trim($value);
+        
+        // Remove HTML tags and encode special characters
+        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
+        
+        // Add to the sanitized array
+        $sanitized[$key] = $value;
+        
+      endif;
+      
+    endforeach;
+    
+    return $sanitized;
+    
+  } // clean_post_vars()
+  
   
   
   

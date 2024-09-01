@@ -49,8 +49,24 @@ class Admin {
       
     elseif ( $path['segments'][0] == 'signup' ):
       
+      // @todo Add a message to indicate it if the reason
+      // you were redirected to this page is because no users
+      // existed yet.
       
-      $this->get_template( 'signup' );
+      $page = Page::get_instance();
+      
+      $nonce = $page->set_nonce('signup');
+      
+      $this->get_template( 'signup', null, ['nonce' => $nonce] );
+      
+      
+    elseif (
+            $path['segments'][0] == 'admin' &&
+            $path['segments'][1] == 'form-handler'
+          ):
+      
+      
+      $this->form_handler();
       
       
     else:
@@ -97,6 +113,27 @@ class Admin {
   
   
   
+  
+  
+  
+  
+  
+  
+  
+  private function form_handler() {
+    
+    $post_vars = Routes::clean_post_vars( $_POST );
+    
+    if ( !isset($post_vars['form_name']) || !isset($post_vars['nonce']) ):
+      
+      echo '<br>bad post<br>';
+      
+      echo 'Post vars: ' . var_export($post_vars, true);
+      
+    endif;
+    
+    
+  } // form_handler()
   
   
   
