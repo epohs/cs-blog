@@ -112,13 +112,16 @@ class Admin {
   
   
   
-  
-  private function form_handler() {
+  /**
+   * Endpoint for all admin forms
+   *
+   *
+   */
+  private function form_handler(): void {
     
       
-    //echo 'on form handler<br>';
-      
     $post_vars = Routes::clean_post_vars( $_POST );
+    
     
     if ( !isset($post_vars['form_name']) || !isset($post_vars['nonce']) ):
       
@@ -128,7 +131,24 @@ class Admin {
       
     else:
       
-      echo '<br>good post<br>';
+      $page = Page::get_instance();
+      
+      $form_name = $post_vars['form_name'];
+      $nonce = $post_vars['nonce'];
+      
+      
+      if ( $form_name == 'signup' ):
+        
+      
+        Routes::nonce_redirect($nonce, 'signup', 'signup');
+          
+          
+        echo 'nonce was good.<br>';
+      
+        
+      
+      endif;
+      
       
     endif;
     

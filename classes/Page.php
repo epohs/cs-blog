@@ -42,6 +42,12 @@ class Page {
     $request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
     
     
+    
+    // Handle error codes passed in the query string
+    $this->handle_queryvar_errs();
+    
+    
+    
     // The only time we want to automatically process
     // routes when we instantiate the Page object is
     // during the first page load process.
@@ -237,7 +243,7 @@ class Page {
   
   
   
-  public function set_nonce(string $action, int $ttl = 3600): string {
+  public static function set_nonce(string $action, int $ttl = 3600): string {
     
     $nonce = bin2hex(random_bytes(16));
     $expires = time() + $ttl;
@@ -262,22 +268,24 @@ class Page {
   
   
   
-  public function validate_nonce(string $nonce, string $action): bool {
+  public static function validate_nonce(string $nonce, string $action): bool {
     
-    if (isset($_SESSION['nonces'][$nonce])):
+    
+    if (isset($_SESSION['nonces'][$action])):
   
-      $nonceData = $_SESSION['nonces'][$nonce];
+      $nonceData = $_SESSION['nonces'][$action];
       
       if ( $nonceData['action'] === $action && $nonceData['expires'] >= time() ):
         
         // Remove the nonce after validation
-        unset($_SESSION['nonces'][$nonce]);
+        unset($_SESSION['nonces'][$action]);
         
         return true;
         
       endif;
   
     endif;
+    
     
     return false;
 
@@ -399,9 +407,60 @@ class Page {
   
   
   
+  function handle_queryvar_errs(): bool {
+    
+    $is_error = false;
+    $err_code = null;
+    $queryvar_err_msg = [];
+    
+      
+    // Check if the 'err' key exists in the query string
+    if ( isset($_GET['err']) ) :
+
+      // Sanitize the 'err' value
+      $err_code = htmlspecialchars( trim($_GET['err']) );
+      
+      // Determine the error message based on the 'err' value
+      switch ( $err_code ) :
+      
+        case '001':
+          
+          $is_error = true;
+        
+          $this->add_error( 'Timed out. Please try again.' );
+          
+          break;
+          
+        default:
+          
+          // Error code not found so just return false and
+          // add no custom error.
+          break;
+        
+      endswitch;
+      
+
+    endif;
+    
+    
+    return $is_error;
+    
+  } // handle_queryvar_errs()
+
+  
+  
+  
+  
+  
+  
+  
+  
+  
   /**
    * If this class is instantiated outside the proper
    * scope prevent further instantiation.
+   *
+   * @internal I don't think this method is needed.
    */
   private function block_direct_access() {
     
