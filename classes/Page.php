@@ -165,11 +165,10 @@ class Page {
       $file_base = "/themes/{$theme}/";
     
     
-    // If $partial_root is anything else we overrite the 
-    // entire path to the partial file from the root up by
-    // with the string passed.
-    // This is to accomodate for admin page being outside the
-    // theme directory.
+    // If $partial_root has any other value, build the path
+    // using the string we passed.
+    // This is to accomodate admin pages being served from
+    // outside the theme directory.
     else:
     
       
@@ -201,7 +200,7 @@ class Page {
     // it is found.
     if ( file_exists($partial_path) ):
    
-      // Always make the Page class available.
+      // Make the Page class available inside the included file.
       $page = $this;
       
    
