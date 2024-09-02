@@ -89,6 +89,7 @@ class Routes {
     elseif (
             $this->is_route('admin', $path) ||
             $this->is_route('signup', $path) ||
+            $this->is_route('verify', $path) ||
             $this->is_route('login', $path) ||
             $this->is_route('logout', $path) ||
             $this->is_route('admin/form-handler', $path)
@@ -258,6 +259,34 @@ class Routes {
     endif;
     
   } // redirect_to()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public static function nonce_redirect(string $nonce, string $action, string $redir_path, ?string $err = '001'): void {
+    
+    
+    if ( !Page::validate_nonce($nonce, $action) ):
+      
+      $page = Page::get_instance();
+      
+      $redir_path = $page->site_root() . '/' . $redir_path;
+      
+      //echo 'Redirecting to: ' . $redir_path . '?err=' . $err . '<br>';
+      
+      self::redirect_to( $redir_path . '?err=' . rawurlencode($err) );
+      
+    endif;
+    
+    
+    
+  } // nonce_redirect()
+  
 
   
   
