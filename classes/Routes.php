@@ -57,40 +57,28 @@ class Routes {
 
     
     
-    if ( isset($path['segments'][0]) &&
-        (
-          ( $path['segments'][0] !== 'signup' ) &&
-          ( 
-            isset($path['segments'][1]) &&
-            $path['segments'][0] !== 'admin' && 
-            $path['segments'][1] !== 'form-handler'
-          )
-        )
-      ):
-      
+    if ( !$this->is_route('signup', $path) &&
+         !$this->is_route('admin/form-handler', $path) ):
+    
       $db = Db::get_instance();
     
       // Ensure that we have at least one admin user
       if ( !$db->row_exists('users', 'role', 'admin') ):
         
         
-        echo 'redirecting path: ' . var_export($path, true) . '<br>';
-        
         self::redirect_to('signup');
         
+        
       endif;
+      
       
     endif;
     
     
     
-    
 
-    if (
-      is_countable($path['segments']) && 
-      ( count($path['segments']) == 1 ) &&
-      ( $path['segments'][0] == '' )
-    ):
+    // Homepage
+    if ( $this->is_route('/', $path) ):
     
     
       $this->page->get_template( "index" );
@@ -98,25 +86,31 @@ class Routes {
     
     // If we're serving a andmin route we need to use
     // the the route handling from the Admin class.
-    elseif ( ($path['segments'][0] == 'admin') ||
-      ($path['segments'][0] == 'signup') ||
-      ($path['segments'][0] == 'login') ||
-      ($path['segments'][0] == 'logout') ):
-      
+    elseif (
+            $this->is_route('admin', $path) ||
+            $this->is_route('signup', $path) ||
+            $this->is_route('login', $path) ||
+            $this->is_route('logout', $path) ||
+            $this->is_route('admin/form-handler', $path)
+          ):
+    
       
       $admin = Admin::get_instance();
     
       $admin->serve_route( $path );
       
       
-    elseif ( $path['segments'][0] == 'post' ):
+    elseif ( $this->is_route('post', $path) ):
       
   
       $converter = new HtmlConverter(array('strip_tags' => true));
       
       $this->page->get_template( 'post', null, ['converter' => $converter] );
       
-      
+    
+    
+    // If all of the other route checks failed
+    // serve a 404.
     else:
       
       
@@ -128,6 +122,8 @@ class Routes {
     
     
   } // serve_route()
+  
+  
   
   
   
@@ -164,7 +160,7 @@ class Routes {
     // Parse the URL to get the path and query string vars
     $parsed_url = parse_url($request_uri);
     
-    $path = $parsed_url['path'];
+    $path = ( isset($parsed_url['path']) ) ? $parsed_url['path'] : '';
     
     // Remove the trailing slash if present
     $path = rtrim($path, '/');
@@ -191,6 +187,50 @@ class Routes {
     
     
   } // process_path()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public static function is_route(string $url, array $path): bool {
+    
+    $return = false;
+    
+    
+    // If eithier the string $url, or the array $path
+    // are empty, or if If the 'segments' key doesn't 
+    // exist in $path something is wrong so we return
+    // false without the need to look further.
+    if ( 
+        ( !empty($url) && !empty($path) ) &&
+        array_key_exists('segments', $path) 
+      ):
+      
+      
+      $url_arr = explode('/', trim($url, '/'));
+      
+      // We're not concerned with the query string when
+      // figuring out the route to serve.
+      $path = $path['segments'];
+      
+
+      return ( $url_arr === $path );
+      
+      
+    endif;
+    
+    
+    return $return;
+    
+    
+  } // is_route()
   
   
   

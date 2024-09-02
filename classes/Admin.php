@@ -35,19 +35,15 @@ class Admin {
    *
    */
   public function serve_route( $path ) {
+    
 
-
-    if (
-      is_countable($path['segments']) && 
-      ( count($path['segments']) == 1 ) &&
-      ( $path['segments'][0] == 'login' )
-    ):
+    if ( Routes::is_route('login', $path) ):
     
     
       $this->get_template( 'login', null, false );
       
       
-    elseif ( $path['segments'][0] == 'signup' ):
+    elseif ( Routes::is_route('signup', $path) ):
       
       // @todo Add a message to indicate it if the reason
       // you were redirected to this page is because no users
@@ -60,10 +56,7 @@ class Admin {
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
       
       
-    elseif (
-            $path['segments'][0] == 'admin' &&
-            $path['segments'][1] == 'form-handler'
-          ):
+    elseif ( Routes::is_route('admin/form-handler', $path) ):
       
       
       $this->form_handler();
@@ -122,6 +115,9 @@ class Admin {
   
   private function form_handler() {
     
+      
+    //echo 'on form handler<br>';
+      
     $post_vars = Routes::clean_post_vars( $_POST );
     
     if ( !isset($post_vars['form_name']) || !isset($post_vars['nonce']) ):
@@ -129,6 +125,10 @@ class Admin {
       echo '<br>bad post<br>';
       
       echo 'Post vars: ' . var_export($post_vars, true);
+      
+    else:
+      
+      echo '<br>good post<br>';
       
     endif;
     
