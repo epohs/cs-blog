@@ -218,6 +218,8 @@ class Page {
       
     else:
       
+      // @internal This error will never be been in any case where
+      // the errors.php partial isn't included.
       $this->add_error("Partial {$file} not found.", 'warn');
 
       return false;
