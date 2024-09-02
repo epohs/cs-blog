@@ -421,13 +421,37 @@ class Page {
       $err_code = htmlspecialchars( trim($_GET['err']) );
       
       // Determine the error message based on the 'err' value
-      switch ( $err_code ) :
+      switch ( $err_code ):
       
         case '001':
           
           $is_error = true;
         
           $this->add_error( 'Timed out. Please try again.' );
+          
+          break;
+      
+        case '002':
+          
+          $is_error = true;
+        
+          $this->add_error( 'User already exists.' );
+          
+          break;
+      
+        case '003':
+          
+          $is_error = true;
+        
+          $this->add_error( 'Password invalid.' );
+          
+          break;
+      
+        case '070':
+          
+          $is_error = true;
+        
+          $this->add_error( 'Something went wrong.' );
           
           break;
           

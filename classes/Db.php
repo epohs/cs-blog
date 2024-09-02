@@ -149,6 +149,8 @@ class Db {
     
     
     if ( $db ):
+      
+      echo 'Making user tables.<br>';
     
       User::make_tables( $db );
       

@@ -54,6 +54,16 @@ class Admin {
       $nonce = $page->set_nonce('signup');
       
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
+    
+
+    elseif ( Routes::is_route('verify', $path) ):
+      
+      
+      $page = Page::get_instance();
+      
+      $nonce = $page->set_nonce('signup');
+      
+      $this->get_template( 'verify', null, ['nonce' => $nonce] );
       
       
     elseif ( Routes::is_route('admin/form-handler', $path) ):
@@ -137,14 +147,54 @@ class Admin {
       $nonce = $post_vars['nonce'];
       
       
+      // New user sign up form
       if ( $form_name == 'signup' ):
         
       
         Routes::nonce_redirect($nonce, 'signup', 'signup');
+        
+        $user = User::get_instance();
+        
+        $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
+        
+        $user_pass = isset($post_vars['password']) ? $post_vars['password'] : '';
+        
+        
+        
+        if ( $user_email && !$user->user_exists($user_email) && $user->validate_pass($user_pass) ):
           
           
-        echo 'nonce was good.<br>';
-      
+          $user_data = [
+            'email' => $user_email,
+            'password' => $user_pass
+          ];
+          
+          $result = $user->new($user_data);
+          
+          if ( $result ):
+            
+            Routes::redirect_to( $page->url_for('verify') );
+            
+          else:
+            
+            Routes::redirect_to( $page->url_for('signup') . '?err=070' );
+            
+          endif;
+          
+          
+        elseif ( $user->user_exists($user_email) ):
+          
+          Routes::redirect_to( $page->url_for('signup') . '?err=002' );
+            
+        elseif ( !$user->validate_pass($user_pass) ):
+          
+          Routes::redirect_to( $page->url_for('signup') . '?err=003' );
+            
+        else:
+          
+          Routes::redirect_to( $page->url_for('signup') . '?err=070' );
+          
+        endif;
         
       
       endif;

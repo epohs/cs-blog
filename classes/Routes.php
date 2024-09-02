@@ -63,7 +63,7 @@ class Routes {
       $db = Db::get_instance();
     
       // Ensure that we have at least one admin user
-      if ( !$db->row_exists('users', 'role', 'admin') ):
+      if ( !$db->row_exists('Users', 'role', 'admin') ):
         
         
         self::redirect_to('signup');
@@ -276,8 +276,6 @@ class Routes {
       $page = Page::get_instance();
       
       $redir_path = $page->site_root() . '/' . $redir_path;
-      
-      //echo 'Redirecting to: ' . $redir_path . '?err=' . $err . '<br>';
       
       self::redirect_to( $redir_path . '?err=' . rawurlencode($err) );
       
