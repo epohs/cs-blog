@@ -3,6 +3,9 @@
 define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 
 
+session_start();
+
+
 // Include the autoloader for our Composer packages.
 require_once(ROOT_PATH . 'vendor/autoload.php');
 
