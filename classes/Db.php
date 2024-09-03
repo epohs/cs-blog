@@ -49,6 +49,8 @@ class Db {
   
   
   
+  
+  
   public function row_exists(string $table, string $column = 'id', $value = null): bool {
     
     
@@ -149,8 +151,6 @@ class Db {
     
     
     if ( $db ):
-      
-      echo 'Making user tables.<br>';
     
       User::make_tables( $db );
       
@@ -165,9 +165,6 @@ class Db {
     
     
   } // make_tables;
-  
-  
-  
   
   
   
