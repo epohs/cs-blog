@@ -25,11 +25,17 @@ class User {
   
   public function new( array $user_data ): int|false {
     
+    
+    $result = false;
+    
     $db = Db::get_instance();
     
     $db_conn = $db->get_conn();
     
+    
+    // If th
     $user_role = ( !$db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';
+    
     
     // @todo this needs to be unique
     $verify_key = substr(bin2hex(random_bytes(4)), 0, 8);
@@ -91,7 +97,7 @@ class User {
   
   
   
-  public function get_by(string $key = null, $value) {
+  public function get_by($value, string $key = 'id') {
 
     
     $db = Db::get_instance();
@@ -190,15 +196,17 @@ class User {
       $result = $db->exec(
         "CREATE TABLE IF NOT EXISTS Users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
+          selector VARCHAR(16) UNIQUE,
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
           display_name VARCHAR(255) NOT NULL,
+          remember_me VARCHAR(64) UNIQUE,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           last_login DATETIME,
           is_active BOOLEAN DEFAULT 1,
           is_verified BOOLEAN DEFAULT 0,
-          verify_key VARCHAR(16) NULL,
+          verify_key VARCHAR(16) UNIQUE,
           failed_login_attempts INTEGER DEFAULT 0,
           locked_until DATETIME,
           role TEXT DEFAULT 'user',
