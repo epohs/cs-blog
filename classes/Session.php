@@ -50,6 +50,9 @@ class Session {
   
   
   
+  
+  
+  
   public static function get_key($keys) {
     
     
@@ -167,8 +170,8 @@ class Session {
     elseif ( is_array($keys) ):
       
       
-      // Reference to the session array to traverse
-      $cur_array = &$_SESSION;
+      // Copy the session array to a variable
+      $cur_array = $_SESSION;
       
       // Traverse all but the last key
       foreach ( $keys as $i => $key ):
@@ -183,7 +186,7 @@ class Session {
           else:
           
             // Move deeper into the array
-            $cur_array = &$cur_array[$key];
+            $cur_array = $cur_array[$key];
           
           endif;
         
@@ -195,12 +198,16 @@ class Session {
         endif;
         
       endforeach;
+
+      // Rebuild the session array without the deleted key
+      $_SESSION = array_replace_recursive($_SESSION, $cur_array);
       
       
     endif;
     
     
   } // delete_key()
+
 
   
   
