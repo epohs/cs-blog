@@ -21,6 +21,7 @@
     <h1>Signup</h1>
     
     <p>Nonce: <?php echo $nonce; ?></p>
+    
   
     <p><?= date("F j, Y, g:i a"); ?></p>
 
