@@ -248,7 +248,7 @@ class Page {
     $nonce = bin2hex(random_bytes(16));
     $expires = time() + $ttl;
     
-    $nonceData = [
+    $nonce_data = [
         'nonce' => $nonce,
         'expires' => $expires,
         'action' => $action
@@ -256,7 +256,7 @@ class Page {
     
     // This origionally had $nonce as the key
     // test to see which method works out better
-    $_SESSION['nonces'][$action] = $nonceData;
+    Session::set_key(['nonces', $action], $nonce_data);
     
     return $nonce;
 
@@ -271,14 +271,16 @@ class Page {
   public static function validate_nonce(string $nonce, string $action): bool {
     
     
-    if (isset($_SESSION['nonces'][$action])):
-  
-      $nonceData = $_SESSION['nonces'][$action];
+    if ( Session::key_isset(['nonces', $action]) ):
+      
+      
+      $nonceData = Session::get_key(['nonces', $action]);
+      
       
       if ( $nonceData['action'] === $action && $nonceData['expires'] >= time() ):
         
         // Remove the nonce after validation
-        unset($_SESSION['nonces'][$action]);
+        Session::delete_key(['nonces', $action]);
         
         return true;
         
