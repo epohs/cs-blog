@@ -96,7 +96,9 @@ class User {
   
   
   
-  
+  /**
+   * @internal I think renaming this to get() would be nicer
+   */
   public function get_by($value, string $key = 'id') {
 
     
@@ -105,10 +107,15 @@ class User {
     $db_conn = $db->get_conn();
     
     
-    $query = "SELECT * FROM Users WHERE {$key} = :value";
+    $valid_keys = [
+      'id',
+      'selector'
+    ];
+    
+    $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
     
     
-    echo 'Getting user: ' . $query . '| Value: ' . $value . '<br>';
+    $query = "SELECT * FROM Users WHERE `{$key}` = :value";
     
     
     $stmt = $db_conn->prepare($query);
@@ -153,12 +160,22 @@ class User {
     $db_conn = $db->get_conn();
     
     
-    $current_time = date('Y-m-d H:i:s'); // Use PHP to generate the current timestamp
+    $valid_keys = [
+      'id',
+      'selector'
+    ];
+    
+    $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
     
     
-    $query = "UPDATE Users SET last_login = :current_time WHERE {$key} = :value";
+    // @internal when/if mariadb support is added
+    // this can be switched to datetime('now') with
+    // a db type check.
+    $current_time = date('Y-m-d H:i:s');
     
-    echo 'Doing this: ' . $query . '| Value: ' . $value . '<br>';
+    
+    $query = "UPDATE Users SET last_login = :current_time WHERE `{$key}` = :value";
+    
     
     $stmt = $db_conn->prepare($query);
     
