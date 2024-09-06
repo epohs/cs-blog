@@ -50,11 +50,11 @@ class User {
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
   
       // Prepare the SQL statement
-      $sql = "INSERT INTO Users (email, password, display_name, role, verify_key) 
-              VALUES (:email, :password, :display_name, :role, :verify_key)";
+      $query = "INSERT INTO Users (email, password, display_name, role, verify_key) 
+                VALUES (:email, :password, :display_name, :role, :verify_key)";
       
       
-      $stmt = $db_conn->prepare($sql);
+      $stmt = $db_conn->prepare( $query );
   
       // Bind the parameters
       $stmt->bindParam(':email', $user_data['email'], PDO::PARAM_STR);
@@ -102,11 +102,73 @@ class User {
     
     $db = Db::get_instance();
     
+    $db_conn = $db->get_conn();
     
+    
+    $query = "SELECT * FROM Users WHERE {$key} = :value";
+    
+    
+    echo 'Getting user: ' . $query . '| Value: ' . $value . '<br>';
+    
+    
+    $stmt = $db_conn->prepare($query);
 
+    $param_type = is_numeric($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+    
+    // Bind the parameters
+    $stmt->bindParam(':value', $value, $param_type);
+    
+    
+    $stmt->execute();
+    
+    
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    
   } // get_by()
   
   
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Update the last login time for the user.
+   *
+   * @param int $value User ID or selector.
+   * @param string $key
+   * 
+   * @return void
+   */
+  public function update_last_login(int $value, string $key = 'id'): void {
+    
+    
+    $db = Db::get_instance();
+    
+    $db_conn = $db->get_conn();
+    
+    
+    $current_time = date('Y-m-d H:i:s'); // Use PHP to generate the current timestamp
+    
+    
+    $query = "UPDATE Users SET last_login = :current_time WHERE {$key} = :value";
+    
+    echo 'Doing this: ' . $query . '| Value: ' . $value . '<br>';
+    
+    $stmt = $db_conn->prepare($query);
+    
+    $stmt->bindParam(':value', $value, PDO::PARAM_STR);
+    $stmt->bindValue(':current_time', $current_time);
+    
+    $stmt->execute();
+    
+
+  } // update_last_login()
   
   
   

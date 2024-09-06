@@ -133,13 +133,8 @@ class Admin {
     $post_vars = Routes::clean_post_vars( $_POST );
     
     
-    if ( !isset($post_vars['form_name']) || !isset($post_vars['nonce']) ):
+    if ( isset($post_vars['form_name']) && isset($post_vars['nonce']) ):
       
-      echo '<br>bad post<br>';
-      
-      echo 'Post vars: ' . var_export($post_vars, true);
-      
-    else:
       
       $page = Page::get_instance();
       
@@ -169,9 +164,15 @@ class Admin {
             'password' => $user_pass
           ];
           
-          $result = $user->new($user_data);
+          $new_user_id = $user->new($user_data);
           
-          if ( $result ):
+          if ( $new_user_id ):
+            
+            $auth = Auth::get_instance();
+            
+            // Manually set logged in cookie and session but
+            // do not set last login.            
+            $auth->login($new_user_id, false);
             
             Routes::redirect_to( $page->url_for('verify') );
             
@@ -196,6 +197,12 @@ class Admin {
           
         endif;
         
+        
+      else:
+        
+        echo '<br>bad post<br>';
+        
+        echo 'Post vars: ' . var_export($post_vars, true);  
       
       endif;
       
