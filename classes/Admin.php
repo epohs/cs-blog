@@ -63,7 +63,24 @@ class Admin {
       
       $nonce = $page->set_nonce('signup');
       
-      $this->get_template( 'verify', null, ['nonce' => $nonce] );
+      $user_id = Session::get_key('user_id');
+      
+      if ( $user_id ):
+    
+        $user = User::get_instance();
+        
+        $cur_user = $user->get_by($user_id);
+        
+        $verify_key = $cur_user['verify_key'];
+      
+      else:
+        
+        $verify_key = null;
+        
+      endif;
+          
+        
+      $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
       
       
     elseif ( Routes::is_route('admin/form-handler', $path) ):
@@ -171,8 +188,9 @@ class Admin {
             $auth = Auth::get_instance();
             
             // Manually set logged in cookie and session but
-            // do not set last login.            
+            // do not set last login timestamp.            
             $auth->login($new_user_id, false);
+            
             
             Routes::redirect_to( $page->url_for('verify') );
             

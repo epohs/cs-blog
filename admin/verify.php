@@ -23,6 +23,8 @@
     <p>Nonce: <?php echo $nonce; ?></p>
   
     <p><?= date("F j, Y, g:i a"); ?></p>
+    
+    <p>Verify key: <?= var_export($verify_key, true); ?></p>
 
     
     <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
