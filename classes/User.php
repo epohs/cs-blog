@@ -109,7 +109,8 @@ class User {
     
     $valid_keys = [
       'id',
-      'selector'
+      'selector',
+      'verify_key'
     ];
     
     $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
@@ -137,6 +138,44 @@ class User {
   
   
   
+  
+  
+  
+  /**
+   * Private function to set any single column
+   */
+  private function set_column(int $user_id, string $column, $value): bool {
+    
+    $db = Db::get_instance();
+    
+    $db_conn = $db->get_conn();
+    
+    $query = "UPDATE Users SET `{$column}` = :value WHERE id = :id";
+    
+    
+    $stmt = $db_conn->prepare($query);
+    
+    $stmt->bindParam(':id', $value, PDO::PARAM_INT);
+    $stmt->bindValue(':value', $value);
+    
+    return ( $stmt->execute() ) ? true : false;
+    
+    
+  } // set_key()
+  
+  
+  
+  
+  
+  
+  
+  public function remove_verify_key(int $user_id ): bool {
+    
+    
+    return $this->set_column($user_id, 'verify_key', null);
+    
+    
+  } // $remove_verify_key()
   
   
   
