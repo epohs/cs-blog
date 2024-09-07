@@ -29,6 +29,7 @@ $config = Config::get_instance();
 
 
 
+
 // If we're in debug mode display errors
 if ( $config->get('debug') ):
   
@@ -39,3 +40,8 @@ if ( $config->get('debug') ):
   
 endif;
 
+
+
+
+// Include functions.php from the active theme
+// require_once();
