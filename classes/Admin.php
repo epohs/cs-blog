@@ -184,7 +184,7 @@ class Admin {
         // If there is a user with a key entered
         // and that user_id matches the user_id in the session
         // then log the user in setting the last login
-        // timestamp, remove their verify key, and
+        // timestamp, verify the user, and
         // redirect to their profile page.
         if ( isset($user_to_verify['id']) && ($user_to_verify['id'] === $user_id) ):
           
@@ -193,8 +193,7 @@ class Admin {
           
           $auth->login( $user_id );
           
-          
-          $user->remove_verify_key( $user_id );
+          $user->verify( $user_id );
           
           
           // If the user is an admin user use that profile page

@@ -168,11 +168,23 @@ class User {
   
   
   
-  
-  public function remove_verify_key(int $user_id ): bool {
+  /**
+   * @internal instead of doing separate db calls, think
+   *            of a nice way to do this with a transaction.
+   *            Add a flag to set_column to allow for this.
+   */
+  public function verify(int $user_id ): bool {
     
     
-    return $this->set_column($user_id, 'verify_key', null);
+    $remove_verifiy_key = $this->set_column($user_id, 'verify_key', null);
+    
+    $set_verified = $this->set_column($user_id, 'is_verified', 1);
+    
+    // @internal Probably should reset faild login attempts,
+    // updated_at, and locked_until.
+    
+    
+    return ($remove_verifiy_key && $set_verified);
     
     
   } // $remove_verify_key()
