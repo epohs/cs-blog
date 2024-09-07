@@ -32,8 +32,8 @@
       <input type="hidden" name="form_name" value="verify">
       <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
       
-      <label for="VerifiyCode">One time code:</label>
-      <input type="text" id="VerifyCode" name="verify_code" required>
+      <label for="VerifiyKey">One time code:</label>
+      <input type="text" id="VerifyKey" name="verify_key" required>
       
       <button type="submit">Sign up</button>
     
