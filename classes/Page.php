@@ -449,6 +449,14 @@ class Page {
           
           break;
       
+        case '004':
+          
+          $is_error = true;
+        
+          $this->add_error( 'Incorrect verification code.' );
+          
+          break;
+      
         case '070':
           
           $is_error = true;
