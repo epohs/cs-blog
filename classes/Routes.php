@@ -108,6 +108,13 @@ class Routes {
       
       $this->page->get_template( 'post', null, ['converter' => $converter] );
       
+      
+    elseif ( $this->is_route('profile', $path) ):
+      
+      
+      
+      $this->page->get_template( 'profile' );
+      
     
     
     // If all of the other route checks failed
