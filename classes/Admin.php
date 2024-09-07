@@ -159,8 +159,69 @@ class Admin {
       $nonce = $post_vars['nonce'];
       
       
+      // Verify new user email
+      if ( $form_name == 'verify' ):
+        
+        
+        // If there is not a user_id in the session
+        // Redirect back to the login screen.
+        if ( !$user_id = Session::get_key('user_id') ):
+          
+          // @todo logging in a non-verified user should
+          // not set last login timestame and redirect to
+          // verify page.
+          Routes::redirect_to( $page->url_for('login') );
+          
+        endif;
+        
+        
+        $user = User::get_instance();
+        
+        $passed_verify_code = ( isset($post_vars['verify_key']) ) ? $post_vars['verify_key'] : false;
+        
+        $user_to_verify = $user->get_by($passed_verify_code, 'verify_key');
+        
+        // If there is a user with a key entered
+        // and that user_id matches the user_id in the session
+        // then log the user in setting the last login
+        // timestamp, remove their verify key, and
+        // redirect to their profile page.
+        if ( isset($user_to_verify['id']) && ($user_to_verify['id'] === $user_id) ):
+          
+          
+          $auth = Auth::get_instance();
+          
+          $auth->login( $user_id );
+          
+          
+          $user->remove_verify_key( $user_id );
+          
+          
+          // If the user is an admin user use that profile page
+          // otherwise, use the non-admin profile page.
+          if ( Session::get_key('user_role') == 'admin' ):
+            
+            Routes::redirect_to( $page->url_for('admin/profile') );
+            
+          else:
+            
+            Routes::redirect_to( $page->url_for('profile') );
+            
+          endif;
+          
+          
+        // Otherwise, redirect back to verify page with an error
+        else:
+          
+          Routes::redirect_to( $page->url_for('verify') . '?err=004' );
+          
+        endif;
+      
+        
+      
+      
       // New user sign up form
-      if ( $form_name == 'signup' ):
+      elseif ( $form_name == 'signup' ):
         
       
         Routes::nonce_redirect($nonce, 'signup', 'signup');
