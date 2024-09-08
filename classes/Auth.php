@@ -58,15 +58,11 @@ class Auth {
     endif;
     
     
+    Session::regenerate();
     
     
     // Generate a random string for remember me cookie
     $token = bin2hex(random_bytes(32)); // 64 chars long
-        
-    
-    // Store a hashed version of the token in the database
-    // @todo this function returns a bool, verify that it worked
-    $user->set_remember_me( $user_to_login['id'], $token );
     
     
     // 30 days in seconds
@@ -74,6 +70,11 @@ class Auth {
     
     // Store the token in a cookie for 30 days
     Cookie::set('remember_me', $token, $seconds);
+        
+    
+    // Store a hashed version of the token in the database
+    // @todo this function returns a bool, verify that it worked
+    $user->set_remember_me( $user_to_login['id'], $token );
       
     
   
