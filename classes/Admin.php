@@ -39,8 +39,11 @@ class Admin {
 
     if ( Routes::is_route('login', $path) ):
     
+      $page = Page::get_instance();
+      
+      $nonce = $page->set_nonce('login');
     
-      $this->get_template( 'login', null, false );
+      $this->get_template( 'login', null, ['nonce' => $nonce] );
       
       
     elseif ( Routes::is_route('signup', $path) ):
@@ -159,8 +162,73 @@ class Admin {
       $nonce = $post_vars['nonce'];
       
       
+      if ( $form_name == 'login' ):
+        
+        
+        Routes::nonce_redirect($nonce, 'login', 'login');
+        
+        $user = User::get_instance();
+               
+        $user_to_login = $user->get_by($post_vars['email'], 'email');
+        
+        
+        
+        if ( $user_to_login ):
+          
+          if ( password_verify($post_vars['password'], $user_to_login['password']) ):
+          
+            $auth = Auth::get_instance();
+            
+            $is_logged_in = $auth->login( $user_to_login['id'] );
+            
+          else:
+            
+            $is_logged_in = false;
+            
+          endif;
+          
+          
+        else:
+          
+          $is_logged_in = false;
+          
+        endif;
+        
+        
+        
+        
+        
+        if ( $is_logged_in ):
+          
+          
+          // If the user who just logged in is an admin
+          // go to the admin panel. Otherwise, go to the
+          // homepage.
+          if ( Session::get_key('user_role') == 'admin' ):
+            
+            Routes::redirect_to( $page->url_for('admin') );
+            
+          else:
+            
+            Routes::redirect_to( $page->url_for('/') );
+            
+          endif;
+          
+        else:
+          
+          
+          // If the login was bad, increment the failed_login_attempts
+          // column in the User table and redirect back to 
+          // the login page with an error.
+          //
+          // @toto add failed_login_attempts increment.
+          Routes::redirect_to( $page->url_for('login') . '?err=005' );
+          
+        endif;
+        
+      
       // Verify new user email
-      if ( $form_name == 'verify' ):
+      elseif ( $form_name == 'verify' ):
         
         
         // If there is not a user_id in the session

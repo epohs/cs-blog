@@ -37,9 +37,22 @@ class Cookie {
    * @todo turn args after $expiry into generic $args array
    * with defaults
    */
-  public function set($name, $value, $expiry = 3600, $path = '/', $domain = '', $secure = true, $httpOnly = true): void {
+  public static function set($name, $value, $expiry = 3600, array $args = []): void {
     
-    setcookie($name, $value, time() + $expiry, $path, $domain, $secure, $httpOnly);
+    
+    $defaults = [
+        'path' => '/',
+        'domain' => '',
+        'secure' => true,
+        'http_only' => true,
+    ];
+
+    // Merge passed arguments with defaults
+    $args = array_merge($defaults, $args);
+    
+    
+    
+    setcookie($name, $value, time() + $expiry, $args['path'], $args['domain'], $args['secure'], $args['http_only']);
   
   } // set()
   
@@ -48,7 +61,7 @@ class Cookie {
   
   
   
-  public function get($name) {
+  public static function get($name) {
     
     return $_COOKIE[$name] ?? null;
     
@@ -59,7 +72,7 @@ class Cookie {
   
   
   
-  public function delete($name): void {
+  public static function delete($name): void {
     
     setcookie($name, '', time() - 3600, '/');
     unset($_COOKIE[$name]);

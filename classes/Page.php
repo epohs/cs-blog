@@ -107,6 +107,8 @@ class Page {
   
   public function url_for( $path ): string {
     
+    $path = ( $path === '/' ) ? '' : $path;
+    
     $site_root = $this->site_root();
     
     return $site_root . '/' . $path;
@@ -454,6 +456,14 @@ class Page {
           $is_error = true;
         
           $this->add_error( 'Incorrect verification code.' );
+          
+          break;
+      
+        case '005':
+          
+          $is_error = true;
+        
+          $this->add_error( 'Incorrect email or password.' );
           
           break;
       

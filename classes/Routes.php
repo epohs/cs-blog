@@ -91,7 +91,6 @@ class Routes {
             $this->is_route('signup', $path) ||
             $this->is_route('verify', $path) ||
             $this->is_route('login', $path) ||
-            $this->is_route('logout', $path) ||
             $this->is_route('admin/form-handler', $path)
           ):
     
@@ -115,6 +114,16 @@ class Routes {
       
       $this->page->get_template( 'profile' );
       
+      
+      
+    elseif ( $this->is_route('logout', $path) ):
+      
+
+      $auth = Auth::get_instance();
+    
+      $auth->logout( Session::get_key('user_id') );
+      
+      self::redirect_to( $this->page->url_for('/') );
     
     
     // If all of the other route checks failed
@@ -122,7 +131,7 @@ class Routes {
     else:
       
       
-      $this->page->get_template( "404" );
+      $this->page->get_template( '404' );
       
       
     endif;
@@ -251,6 +260,7 @@ class Routes {
   
   public static function redirect_to(string $url, int $statusCode = 302): void {
     
+    
     if ( !headers_sent() ):
       
       http_response_code($statusCode);
@@ -264,6 +274,7 @@ class Routes {
       exit();
     
     endif;
+    
     
   } // redirect_to()
   

@@ -40,6 +40,10 @@ class User {
     // @todo this needs to be unique
     $verify_key = substr(bin2hex(random_bytes(4)), 0, 8);
     
+    // @todo this needs to be unique
+    $selector = substr(bin2hex(random_bytes(4)), 0, 6);
+    
+    
     // @todo Make this a config value
     $default_display_name = 'New user';
     
@@ -50,8 +54,8 @@ class User {
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
   
       // Prepare the SQL statement
-      $query = "INSERT INTO Users (email, password, display_name, role, verify_key) 
-                VALUES (:email, :password, :display_name, :role, :verify_key)";
+      $query = "INSERT INTO Users (email, password, selector, display_name, role, verify_key) 
+                VALUES (:email, :password, :selector, :display_name, :role, :verify_key)";
       
       
       $stmt = $db_conn->prepare( $query );
@@ -59,6 +63,7 @@ class User {
       // Bind the parameters
       $stmt->bindParam(':email', $user_data['email'], PDO::PARAM_STR);
       $stmt->bindParam(':password', $hashed_pass, PDO::PARAM_STR);
+      $stmt->bindParam(':selector', $selector, PDO::PARAM_STR);
       $stmt->bindParam(':display_name', $default_display_name, PDO::PARAM_STR);
       $stmt->bindParam(':role', $user_role, PDO::PARAM_STR);
       $stmt->bindParam(':verify_key', $verify_key, PDO::PARAM_STR);
@@ -109,6 +114,7 @@ class User {
     
     $valid_keys = [
       'id',
+      'email',
       'selector',
       'verify_key'
     ];
@@ -168,6 +174,9 @@ class User {
   
   
   
+  
+  
+  
   /**
    * @internal instead of doing separate db calls, think
    *            of a nice way to do this with a transaction.
@@ -188,6 +197,8 @@ class User {
     
     
   } // $remove_verify_key()
+  
+  
   
   
   
@@ -303,6 +314,27 @@ class User {
     
     
   } // validate_pass()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function set_remember_me( int $user_id, string $token ): bool {
+    
+    
+    // Store the hashed version in the database
+    // @todo research whether this is secure enough
+    $hashed_token = hash('sha256', $token);
+    
+
+    return $this->set_column($user_id, 'remember_me', $hashed_token);
+    
+  } // set_remember_me()
+  
   
   
   
