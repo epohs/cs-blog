@@ -22,7 +22,7 @@
     
     <p>Nonce: <?php echo $nonce; ?></p>
   
-    <p><?= date("F j, Y, g:i a"); ?></p>
+    <p>User selector: <?php echo Session::get_key('user_selector'); ?></p>
     
     <p>Verify key: <?= var_export($verify_key, true); ?></p>
 
