@@ -44,9 +44,6 @@ class User {
     $selector = substr(bin2hex(random_bytes(4)), 0, 6);
     
     
-    // @todo Make this a config value
-    $default_display_name = 'New user';
-    
     
     try {
       
@@ -54,8 +51,8 @@ class User {
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
   
       // Prepare the SQL statement
-      $query = "INSERT INTO Users (email, password, selector, display_name, role, verify_key) 
-                VALUES (:email, :password, :selector, :display_name, :role, :verify_key)";
+      $query = "INSERT INTO Users (email, password, selector, role, verify_key) 
+                VALUES (:email, :password, :selector, :role, :verify_key)";
       
       
       $stmt = $db_conn->prepare( $query );
@@ -64,7 +61,6 @@ class User {
       $stmt->bindParam(':email', $user_data['email'], PDO::PARAM_STR);
       $stmt->bindParam(':password', $hashed_pass, PDO::PARAM_STR);
       $stmt->bindParam(':selector', $selector, PDO::PARAM_STR);
-      $stmt->bindParam(':display_name', $default_display_name, PDO::PARAM_STR);
       $stmt->bindParam(':role', $user_role, PDO::PARAM_STR);
       $stmt->bindParam(':verify_key', $verify_key, PDO::PARAM_STR);
   
@@ -116,6 +112,7 @@ class User {
       'id',
       'email',
       'selector',
+      'remember_me',
       'verify_key'
     ];
     
@@ -156,12 +153,13 @@ class User {
     
     $db_conn = $db->get_conn();
     
+    
     $query = "UPDATE Users SET `{$column}` = :value WHERE id = :id";
     
     
     $stmt = $db_conn->prepare($query);
     
-    $stmt->bindParam(':id', $value, PDO::PARAM_INT);
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
     $stmt->bindValue(':value', $value);
     
     return ( $stmt->execute() ) ? true : false;
@@ -330,8 +328,9 @@ class User {
     // @todo research whether this is secure enough
     $hashed_token = hash('sha256', $token);
     
-
+    
     return $this->set_column($user_id, 'remember_me', $hashed_token);
+    
     
   } // set_remember_me()
   
@@ -361,11 +360,12 @@ class User {
           selector VARCHAR(16) UNIQUE,
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
-          display_name VARCHAR(255) NOT NULL,
+          display_name VARCHAR(255),
           remember_me VARCHAR(64) UNIQUE,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           last_login DATETIME,
+          last_active DATETIME,
           is_active BOOLEAN DEFAULT 1,
           is_verified BOOLEAN DEFAULT 0,
           verify_key VARCHAR(16) UNIQUE,
