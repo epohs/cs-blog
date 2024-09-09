@@ -6,14 +6,72 @@ class Auth {
   private static $instance = null;  
   
 
+  // @todo move this to a config setting
+  private $login_length_days = 30;
+  
+  private $login_length;
   
   
+    
+    
   
   private function __construct() {
     
-
+    $this->login_length = $this->login_length_days * 24 * 60 * 60;
     
   } // __construct()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function is_logged_in(): bool {
+    
+    
+    if ( Session::get_key('user_id') ):
+      
+      return true;
+      
+    elseif ( $token = Cookie::get('remember_me') ):
+      
+      $hashed_token = hash('sha256', $token);
+      
+      $user = User::get_instance();
+      
+      $user_to_check = $user->get_by($hashed_token, 'remember_me');
+      
+      
+      
+      if ( $user_to_check ):
+        
+        Session::set_key('user_id', $user_to_check['id']);
+        Session::set_key('user_selector', $user_to_check['selector']);
+        Session::set_key('user_role', $user_to_check['role']);
+        
+        return true;
+        
+      else:
+        
+        return false;
+        
+      endif;
+      
+      
+    else:
+      
+      return false;
+      
+    endif;
+      
+    
+    
+  } // is_logged_in()
+  
   
   
   
@@ -65,11 +123,10 @@ class Auth {
     $token = bin2hex(random_bytes(32)); // 64 chars long
     
     
-    // 30 days in seconds
-    $seconds = 30 * 24 * 60 * 60;
+
     
     // Store the token in a cookie for 30 days
-    Cookie::set('remember_me', $token, $seconds);
+    Cookie::set('remember_me', $token, $this->login_length);
         
     
     // Store a hashed version of the token in the database
