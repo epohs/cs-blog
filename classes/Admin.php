@@ -162,6 +162,7 @@ class Admin {
       $nonce = $post_vars['nonce'];
       
       
+      // User log in
       if ( $form_name == 'login' ):
         
         
