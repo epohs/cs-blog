@@ -29,15 +29,25 @@ class Auth {
   
   
   
-  
+  /**
+   *
+   */
   public function is_logged_in(): bool {
+    
+    
+    $_ret = false;
     
     
     if ( Session::get_key('user_id') ):
       
-      return true;
+      $user = User::get_instance();
+      
+      $user->update_last_active();
+      
+      $_ret = true;
       
     elseif ( $token = Cookie::get('remember_me') ):
+      
       
       $hashed_token = hash('sha256', $token);
       
@@ -46,28 +56,26 @@ class Auth {
       $user_to_check = $user->get_by($hashed_token, 'remember_me');
       
       
-      
+      // We found a user with a matching remember_me token.
+      // Set session variables for use throughout the page
+      // load and update the last_active db column.
       if ( $user_to_check ):
         
         Session::set_key('user_id', $user_to_check['id']);
         Session::set_key('user_selector', $user_to_check['selector']);
         Session::set_key('user_role', $user_to_check['role']);
         
-        return true;
+        $user->update_last_active();
         
-      else:
-        
-        return false;
+        $_ret = true;
         
       endif;
       
       
-    else:
-      
-      return false;
-      
     endif;
-      
+    
+    
+    return $_ret;
     
     
   } // is_logged_in()
