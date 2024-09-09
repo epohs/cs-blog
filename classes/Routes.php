@@ -65,6 +65,14 @@ class Routes {
       // Ensure that we have at least one admin user
       if ( !$db->row_exists('Users', 'role', 'admin') ):
         
+        $auth = Auth::get_instance();
+        
+        // This really should never matter in real world
+        // scenerios, but if the database is deleted while
+        // a user is logged in they could retain cookie and
+        // session data and confuse the is_logged_in() function
+        // so we clear it out.
+        $auth->logout();
         
         self::redirect_to('signup');
         
