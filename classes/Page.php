@@ -52,16 +52,17 @@ class Page {
     // routes when we instantiate the Page object is
     // during the first page load process.
     if ( $process_route ):
+      
+      // @todo Think of a better way to handle this initial
+      // logged in check.
+      $auth = Auth::get_instance();
+      
+      $auth->is_logged_in();
     
       Routes::get_instance( $this, $request_uri );
       
     endif;
     
-    // $this->add_error('Test info one', 'info');
-    // $this->add_error('Test warn one', 'warn');
-    // $this->add_error('Test error one', 'error');
-    // $this->add_error('Test Error two', 'error');
-    // $this->add_error('Test info two', 'info');    
     
     
     
@@ -463,7 +464,7 @@ class Page {
           
           $is_error = true;
         
-          $this->add_error( 'Incorrect email or password.' );
+          $this->add_error( 'Incorrect login info.' );
           
           break;
       
