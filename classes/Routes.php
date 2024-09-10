@@ -95,10 +95,11 @@ class Routes {
     // If we're serving a andmin route we need to use
     // the the route handling from the Admin class.
     elseif (
-            $this->is_route('admin', $path) ||
             $this->is_route('signup', $path) ||
             $this->is_route('verify', $path) ||
             $this->is_route('login', $path) ||
+            $this->is_route('admin/dash', $path) ||
+            $this->is_route('admin/profile', $path) ||
             $this->is_route('admin/form-handler', $path)
           ):
     

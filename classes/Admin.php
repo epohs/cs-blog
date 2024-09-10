@@ -36,16 +36,43 @@ class Admin {
    */
   public function serve_route( $path ) {
     
+    if ( Routes::is_route('admin/dash', $path) ):
+      
+      $auth = Auth::get_instance();
+      
+      
+      // If the current user is an admin load the 
+      // admin dashboard, otherwise redirect home.
+      if ( $auth->is_logged_in() && Session::get_key('user_role') == 'admin' ):
+        
+        $this->get_template( 'dashboard' );
+      
+      else:
+        
+        $page = Page::get_instance();
+        
+        Routes::redirect_to( $page->url_for('/') );
+        
+      endif;
+      
+      
+    elseif ( Routes::is_route('admin/profile', $path) ):
+      
+      $this->get_template( 'profile' );
 
-    if ( Routes::is_route('login', $path) ):
+    // Login page
+    elseif ( Routes::is_route('login', $path) ):
     
       $page = Page::get_instance();
       
       $nonce = $page->set_nonce('login');
+      
+      // @todo Check if user is already logged in and redirect
     
       $this->get_template( 'login', null, ['nonce' => $nonce] );
       
-      
+    
+    // Initial sign up page for creating new user
     elseif ( Routes::is_route('signup', $path) ):
       
       // @todo Add a message to indicate it if the reason
@@ -207,7 +234,7 @@ class Admin {
           // homepage.
           if ( Session::get_key('user_role') == 'admin' ):
             
-            Routes::redirect_to( $page->url_for('admin') );
+            Routes::redirect_to( $page->url_for('admin/dash') );
             
           else:
             

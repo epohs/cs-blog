@@ -20,7 +20,7 @@
   
     <h1>Hello.</h1>
   
-    <p><?= Utils::format_date(null, 'M j, Y'); ?></p>
+    <p><?= Utils::format_date(); ?></p>
     
   </main>
 
