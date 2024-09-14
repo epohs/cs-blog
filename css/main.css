@@ -84,25 +84,48 @@ select {
 
 /* temp below here */
 
+.page-header,
+.page-body,
+.page-footer {
+  max-width: 95em;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+
+.page-header {
+  margin-bottom: 1.5em;
+  overflow: hidden;
+}
+
+
+.page-wrap {
+  padding: 0 2.5em;
+}
 
 
 .page-body {
-  max-width: 1440px;
   display: flex;
-  gap: 1.5em;
-  flex-wrap: wrap;
+  gap: 0 1.5em;
+  flex-wrap: nowrap;
+  overflow: hidden;
 }
 
 .sidebar-primary,
 .sidebar-secondary {
-  flex-shrink: 0;
+  flex-shrink: 1;
   flex-grow: 1;
-  flex-basis: 30em;
-  max-width: 30em;
-  min-width: 20em;
+  flex-basis: 20%;
+  max-width: 17em;
+  min-width: 10em;
 }
 
 .content {
   flex-grow: 1;
+}
+
+.page-footer {
+  margin-top: 1.5em;
+  overflow: hidden;
 }
 
