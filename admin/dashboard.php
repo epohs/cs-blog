@@ -7,27 +7,35 @@
   
 
   
+<?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
+  
 
 <div class="page-wrap">
 
-  
-  <?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
-  
+  <div class="page-body">
 
-  <main class="content">
+    <?php $page->get_partial('primary', null, false, 'admin/partials/sidebar'); ?>
     
-    <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
-  
-    <h1>Admin Dashboard</h1>
-  
-    <a href="<?php echo $page->url_for('/'); ?>">Home</a>
+
+    <main class="content">
+      
+      <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
     
-  </main>
+      <h1>Admin Dashboard</h1>
+      
+    </main> <!-- .content -->
 
 
-</div>
+    <?php $page->get_partial('secondary', null, false, 'admin/partials/sidebar'); ?>
+    
+
+  </div> <!-- .page-body -->
 
 
+</div> <!-- .page-wrap -->
+
+
+<?php $page->get_partial('page-footer', null, false, 'admin/partials'); ?>
 
 
 
