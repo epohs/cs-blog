@@ -1,11 +1,5 @@
-<div class="sidebar-primary">
+<div class="sidebar-secondary">
 
-  <nav class="column column-1">
-    
-    <ul class="nav">
-      <li><a href="#">Home</a></li>
-    </ul>
-
-  </nav>
+  
 
 </div>
