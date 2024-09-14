@@ -7,40 +7,52 @@
   
 
   
+<?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
+  
 
 <div class="page-wrap">
 
-  
-  <?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
-  
+  <div class="page-body">
 
-  <main class="content">
+    <?php $page->get_partial('primary', null, false, 'admin/partials/sidebar'); ?>
     
-    <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
-  
-    <h1>Login</h1>
-  
-    <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
-    
-      <input type="hidden" name="form_name" value="login">
-      <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+
+    <main class="content">
       
-      <label for="Email">Email:</label>
-      <input type="text" id="Email" name="email" autocapitalize="off" required>
-      <br>
-      <label for="Password">Password:</label>
-      <input type="password" id="Password" name="password" required>
+      <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
+    
+      <h1>Login</h1>
+  
+      <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
       
-      <button type="submit">Sign in</button>
+        <input type="hidden" name="form_name" value="login">
+        <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+        
+        <label for="Email">Email:</label>
+        <input type="text" id="Email" name="email" autocapitalize="off" required>
+        <br>
+        <label for="Password">Password:</label>
+        <input type="password" id="Password" name="password" required>
+        <br>
+        <button type="submit">Sign in</button>
+
+        <p>Don't have an account? <a href ="<?php echo $page->url_for('signup'); ?>">Sign up</a>.</p>
+      
+      </form>
+      
+    </main> <!-- .content -->
+
+
+    <?php $page->get_partial('secondary', null, false, 'admin/partials/sidebar'); ?>
     
-    </form>
-    
-  </main>
+
+  </div> <!-- .page-body -->
 
 
-</div>
+</div> <!-- .page-wrap -->
 
 
+<?php $page->get_partial('page-footer', null, false, 'admin/partials'); ?>
 
 
 

@@ -62,6 +62,7 @@ class Admin {
 
     // Login page
     elseif ( Routes::is_route('login', $path) ):
+
     
       $page = Page::get_instance();
       
@@ -181,7 +182,7 @@ class Admin {
     
     
     if ( isset($post_vars['form_name']) && isset($post_vars['nonce']) ):
-      
+
       
       $page = Page::get_instance();
       
@@ -192,8 +193,6 @@ class Admin {
       // User log in
       if ( $form_name == 'login' ):
         
-        echo 'Login form handler.<br>';
-        
         Routes::nonce_redirect($nonce, 'login', 'login');
         
         $user = User::get_instance();
@@ -203,20 +202,14 @@ class Admin {
         
         
         if ( $user_to_login ):
-
-          echo 'User to log in: ' . var_export($user_to_login, true) . '<br>';
           
           if ( password_verify($post_vars['password'], $user_to_login['password']) ):
-
-            echo 'password verified.<br>';
           
             $auth = Auth::get_instance();
             
             $is_logged_in = $auth->login( $user_to_login['id'] );
             
           else:
-
-            echo 'Password not verified.<br>';
             
             $is_logged_in = false;
             
@@ -381,11 +374,18 @@ class Admin {
         
       else:
         
-        echo '<br>bad post<br>';
+        echo '<br>bad form name<br>';
         
-        echo 'Post vars: ' . var_export($post_vars, true);  
+        echo 'Post vars: ' . var_export($post_vars['form_name'], true);  
       
       endif;
+
+
+    else:
+
+      echo '<br>bad post<br>';
+        
+      echo 'Post vars: ' . var_export($post_vars, true);  
       
       
     endif;
