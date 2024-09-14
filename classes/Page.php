@@ -55,9 +55,7 @@ class Page {
       
       // @todo Think of a better way to handle this initial
       // logged in check.
-      $auth = Auth::get_instance();
-      
-      $auth->is_logged_in();
+      $this->is_logged_in();
     
       Routes::get_instance( $this, $request_uri );
       
@@ -73,6 +71,16 @@ class Page {
   
   
   
+
+  public function is_logged_in(): bool {
+
+    $auth = Auth::get_instance();
+
+    return $auth->is_logged_in();
+
+  } // is_logged_in()
+
+
   
   
   
