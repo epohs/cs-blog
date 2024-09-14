@@ -7,27 +7,38 @@
   
 
   
+<?php $page->get_partial('page-header'); ?>
+  
 
 <div class="page-wrap">
 
-  
-  <?php $page->get_partial('page-header'); ?>
-  
+  <div class="page-body">
 
-  <main class="content">
+
+    <?php $page->get_partial('sidebar/primary'); ?>
+
+
+    <main class="content">
+      
+      <?php $page->get_partial('errors'); ?>
     
-    <?php $page->get_partial('errors'); ?>
-  
-    <h1>Hello.</h1>
-  
-    <p><?= Utils::format_date(); ?></p>
+      <h1>Hello.</h1>
     
-  </main>
+      <p><?= Utils::format_date(); ?></p>
+      
+    </main> <!-- .content -->
 
 
-</div>
+    <?php $page->get_partial('sidebar/secondary'); ?>
+    
+
+  </div> <!-- .page-body -->
 
 
+</div> <!-- .page-wrap -->
+
+
+<?php $page->get_partial('page-footer'); ?>
 
 
 
