@@ -81,6 +81,20 @@ class Page {
   } // is_logged_in()
 
 
+
+
+
+
+
+  public function is_admin(): bool {
+
+    $auth = Auth::get_instance();
+
+    return $auth->is_admin();
+
+  }
+
+
   
   
   

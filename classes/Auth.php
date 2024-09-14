@@ -83,6 +83,24 @@ class Auth {
   
   
   
+
+
+
+
+
+
+  /**
+   * @internal Is this thorough enough?
+   */
+  public function is_admin(): bool {
+
+    return ( $this->is_logged_in() && (Session::get_key('user_role') == 'admin') );
+
+  } // is_admin
+
+
+
+
   
   
   
