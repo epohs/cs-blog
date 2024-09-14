@@ -192,6 +192,7 @@ class Admin {
       // User log in
       if ( $form_name == 'login' ):
         
+        echo 'Login form handler.<br>';
         
         Routes::nonce_redirect($nonce, 'login', 'login');
         
@@ -202,14 +203,20 @@ class Admin {
         
         
         if ( $user_to_login ):
+
+          echo 'User to log in: ' . var_export($user_to_login, true) . '<br>';
           
           if ( password_verify($post_vars['password'], $user_to_login['password']) ):
+
+            echo 'password verified.<br>';
           
             $auth = Auth::get_instance();
             
             $is_logged_in = $auth->login( $user_to_login['id'] );
             
           else:
+
+            echo 'Password not verified.<br>';
             
             $is_logged_in = false;
             
