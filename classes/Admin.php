@@ -8,12 +8,22 @@ class Admin {
   
   private static $instance = null;
   
-  
+  private $page = null;
+
+  private $auth = null;
+
+  private $user = null;
+
+
 
   
   private function __construct() {
 
-    
+    $this->page = Page::get_instance();
+
+    $this->auth = Auth::get_instance();
+
+    $this->user = User::get_instance();
       
   } // __construct()
   
@@ -38,35 +48,31 @@ class Admin {
     
     if ( Routes::is_route('admin/dash', $path) ):
       
-      $auth = Auth::get_instance();
-      
       
       // If the current user is an admin load the 
       // admin dashboard, otherwise redirect home.
-      if ( $auth->is_logged_in() && Session::get_key('user_role') == 'admin' ):
+      if ( $this->auth->is_logged_in() && Session::get_key('user_role') == 'admin' ):
         
         $this->get_template( 'dashboard' );
       
       else:
         
-        $page = Page::get_instance();
-        
-        Routes::redirect_to( $page->url_for('/') );
+        Routes::redirect_to( $this->page->url_for('/') );
         
       endif;
       
       
     elseif ( Routes::is_route('admin/profile', $path) ):
+
       
       $this->get_template( 'profile' );
 
+
     // Login page
     elseif ( Routes::is_route('login', $path) ):
-
-    
-      $page = Page::get_instance();
       
-      $nonce = $page->set_nonce('login');
+      
+      $nonce = $this->page->set_nonce('login');
       
       // @todo Check if user is already logged in and redirect
     
@@ -75,32 +81,28 @@ class Admin {
     
     // Initial sign up page for creating new user
     elseif ( Routes::is_route('signup', $path) ):
+
       
       // @todo Add a message to indicate it if the reason
       // you were redirected to this page is because no users
       // existed yet.
       
-      $page = Page::get_instance();
-      
-      $nonce = $page->set_nonce('signup');
+      $nonce = $this->page->set_nonce('signup');
       
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
+
     
 
     elseif ( Routes::is_route('verify', $path) ):
       
       
-      $page = Page::get_instance();
-      
-      $nonce = $page->set_nonce('signup');
+      $nonce = $this->page->set_nonce('signup');
       
       $user_id = Session::get_key('user_id');
       
       if ( $user_id ):
-    
-        $user = User::get_instance();
         
-        $cur_user = $user->get_by($user_id);
+        $cur_user = $this->user->get_by($user_id);
         
         $verify_key = $cur_user['verify_key'];
       
@@ -121,11 +123,9 @@ class Admin {
       
       
     else:
-    
+
       
-      $page = Page::get_instance();
-      
-      $page->get_template( '404' );
+      $this->page->get_template( '404' );
       
       
     endif;
@@ -155,9 +155,7 @@ class Admin {
   public function get_template(string $file, ?string $suffix = null, $args = false) {
     
     
-    $page = Page::get_instance();
-    
-    $page->get_partial($file, $suffix, $args, 'admin');
+    $this->page->get_partial($file, $suffix, $args, 'admin');
     
     
   } // get_template()
@@ -182,9 +180,7 @@ class Admin {
     
     
     if ( isset($post_vars['form_name']) && isset($post_vars['nonce']) ):
-
       
-      $page = Page::get_instance();
       
       $form_name = $post_vars['form_name'];
       $nonce = $post_vars['nonce'];
@@ -192,22 +188,19 @@ class Admin {
       
       // User log in
       if ( $form_name == 'login' ):
+
         
         Routes::nonce_redirect($nonce, 'login', 'login');
-        
-        $user = User::get_instance();
                
-        $user_to_login = $user->get_by($post_vars['email'], 'email');
+        $user_to_login = $this->user->get_by($post_vars['email'], 'email');
         
         
         
         if ( $user_to_login ):
           
           if ( password_verify($post_vars['password'], $user_to_login['password']) ):
-          
-            $auth = Auth::get_instance();
             
-            $is_logged_in = $auth->login( $user_to_login['id'] );
+            $is_logged_in = $this->auth->login( $user_to_login['id'] );
             
           else:
             
@@ -215,14 +208,11 @@ class Admin {
             
           endif;
           
-          
         else:
           
           $is_logged_in = false;
           
         endif;
-        
-        
         
         
         
@@ -234,11 +224,11 @@ class Admin {
           // homepage.
           if ( Session::get_key('user_role') == 'admin' ):
             
-            Routes::redirect_to( $page->url_for('admin/dash') );
+            Routes::redirect_to( $this->page->url_for('admin/dash') );
             
           else:
             
-            Routes::redirect_to( $page->url_for('/') );
+            Routes::redirect_to( $this->page->url_for('/') );
             
           endif;
           
@@ -250,7 +240,7 @@ class Admin {
           // the login page with an error.
           //
           // @toto add failed_login_attempts increment.
-          Routes::redirect_to( $page->url_for('login') . '?err=005' );
+          Routes::redirect_to( $this->page->url_for('login') . '?err=005' );
           
         endif;
         
@@ -266,16 +256,14 @@ class Admin {
           // @todo logging in a non-verified user should
           // not set last login timestame and redirect to
           // verify page.
-          Routes::redirect_to( $page->url_for('login') );
+          Routes::redirect_to( $this->page->url_for('login') );
           
         endif;
         
         
-        $user = User::get_instance();
-        
         $passed_verify_code = ( isset($post_vars['verify_key']) ) ? $post_vars['verify_key'] : false;
         
-        $user_to_verify = $user->get_by($passed_verify_code, 'verify_key');
+        $user_to_verify = $this->user->get_by($passed_verify_code, 'verify_key');
         
         // If there is a user with a key entered
         // and that user_id matches the user_id in the session
@@ -285,22 +273,20 @@ class Admin {
         if ( isset($user_to_verify['id']) && ($user_to_verify['id'] === $user_id) ):
           
           
-          $auth = Auth::get_instance();
+          $this->auth->login( $user_id );
           
-          $auth->login( $user_id );
-          
-          $user->verify( $user_id );
+          $this->user->verify( $user_id );
           
           
           // If the user is an admin user use that profile page
           // otherwise, use the non-admin profile page.
           if ( Session::get_key('user_role') == 'admin' ):
             
-            Routes::redirect_to( $page->url_for('admin/profile') );
+            Routes::redirect_to( $this->page->url_for('admin/profile') );
             
           else:
             
-            Routes::redirect_to( $page->url_for('profile') );
+            Routes::redirect_to( $this->page->url_for('profile') );
             
           endif;
           
@@ -308,10 +294,9 @@ class Admin {
         // Otherwise, redirect back to verify page with an error
         else:
           
-          Routes::redirect_to( $page->url_for('verify') . '?err=004' );
+          Routes::redirect_to( $this->page->url_for('verify') . '?err=004' );
           
         endif;
-      
         
       
       
@@ -321,7 +306,6 @@ class Admin {
       
         Routes::nonce_redirect($nonce, 'signup', 'signup');
         
-        $user = User::get_instance();
         
         $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
         
@@ -329,7 +313,7 @@ class Admin {
         
         
         
-        if ( $user_email && !$user->user_exists($user_email) && $user->validate_pass($user_pass) ):
+        if ( $user_email && !$this->user->user_exists($user_email) && $this->user->validate_pass($user_pass) ):
           
           
           $user_data = [
@@ -337,37 +321,35 @@ class Admin {
             'password' => $user_pass
           ];
           
-          $new_user_id = $user->new($user_data);
+          $new_user_id = $this->user->new($user_data);
           
           if ( $new_user_id ):
             
-            $auth = Auth::get_instance();
-            
             // Manually set logged in cookie and session but
             // do not set last login timestamp.            
-            $auth->login($new_user_id, false);
+            $this->auth->login($new_user_id, false);
             
             
-            Routes::redirect_to( $page->url_for('verify') );
+            Routes::redirect_to( $this->page->url_for('verify') );
             
           else:
             
-            Routes::redirect_to( $page->url_for('signup') . '?err=070' );
+            Routes::redirect_to( $this->page->url_for('signup') . '?err=070' );
             
           endif;
           
           
-        elseif ( $user->user_exists($user_email) ):
+        elseif ( $this->user->user_exists($user_email) ):
           
-          Routes::redirect_to( $page->url_for('signup') . '?err=002' );
+          Routes::redirect_to( $this->page->url_for('signup') . '?err=002' );
             
-        elseif ( !$user->validate_pass($user_pass) ):
+        elseif ( !$this->user->validate_pass($user_pass) ):
           
-          Routes::redirect_to( $page->url_for('signup') . '?err=003' );
+          Routes::redirect_to( $this->page->url_for('signup') . '?err=003' );
             
         else:
           
-          Routes::redirect_to( $page->url_for('signup') . '?err=070' );
+          Routes::redirect_to( $this->page->url_for('signup') . '?err=070' );
           
         endif;
         
