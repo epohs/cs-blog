@@ -23,6 +23,22 @@ class Utils {
   } // __construct()
   
   
+
+
+
+
+
+
+  public static function is_valid_json( $str ): bool {
+
+    json_decode($str);
+
+    return (json_last_error() === JSON_ERROR_NONE);
+  
+  } // is_valid_json()
+
+
+
   
   
   

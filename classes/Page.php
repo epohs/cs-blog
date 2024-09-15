@@ -241,7 +241,7 @@ class Page {
         
         extract($args);  
       
-      endif;  
+      endif;
       
       
       include( $partial_path );
@@ -294,8 +294,8 @@ class Page {
   
   
   public static function validate_nonce(string $nonce, string $action): bool {
-    
-    
+
+
     if ( Session::key_isset(['nonces', $action]) ):
       
       
@@ -312,7 +312,7 @@ class Page {
       endif;
   
     endif;
-    
+
     
     return false;
 

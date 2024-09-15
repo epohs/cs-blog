@@ -53,6 +53,7 @@ class Admin {
       // admin dashboard, otherwise redirect home.
       if ( $this->auth->is_logged_in() && Session::get_key('user_role') == 'admin' ):
         
+
         $this->get_template( 'dashboard' );
       
       else:
@@ -73,6 +74,7 @@ class Admin {
       
       
       $nonce = $this->page->set_nonce('login');
+
       
       // @todo Check if user is already logged in and redirect
     
@@ -88,6 +90,7 @@ class Admin {
       // existed yet.
       
       $nonce = $this->page->set_nonce('signup');
+      
       
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
 

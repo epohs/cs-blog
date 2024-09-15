@@ -149,6 +149,7 @@ class Auth {
     $token = bin2hex(random_bytes(32)); // 64 chars long
     
     
+    // @todo Remove all stored remember_me tokens that are older than 30 days
 
     
     // Store the token in a cookie for 30 days
@@ -192,12 +193,14 @@ class Auth {
   
   
   public function logout( ) {
-    
+
+    // @todo Check whether the person logging out has a user_id session variable.
+    //        If they do, check whether they have a remember_me token.
+    //        If they do, get their remember_me column from the database and remove
+    //        the matching token from their User.
     
     Session::destroy();
     Cookie::delete('remember_me');
-    
-    
     
   } // logout()
   

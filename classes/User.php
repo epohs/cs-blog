@@ -118,8 +118,21 @@ class User {
     
     $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
     
-    
-    $query = "SELECT * FROM Users WHERE `{$key}` = :value";
+    if ( $key == 'remember_me' ):
+
+      $query = "SELECT * 
+        FROM Users 
+        WHERE EXISTS ( 
+            SELECT 1 
+            FROM json_each(remember_me) 
+            WHERE json_each.value->>'token' = :value 
+        )";
+
+    else:
+
+      $query = "SELECT * FROM Users WHERE `{$key}` = :value";
+
+    endif;
     
     
     $stmt = $db_conn->prepare($query);
@@ -139,6 +152,43 @@ class User {
   } // get_by()
   
   
+
+
+
+
+
+
+  
+  
+  
+  
+  /**
+   * Private function to set any single column
+   */
+  private function get_column(int $user_id, string $column) {
+    
+    $db = Db::get_instance();
+    
+    $db_conn = $db->get_conn();
+    
+    
+    $query = "SELECT `{$column}` FROM Users WHERE id = :id";
+    
+    
+    $stmt = $db_conn->prepare($query);
+    
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+
+    $stmt->execute();
+    
+    return $stmt->fetchColumn();
+    
+    
+  } // get_key()
+
+
+
+
   
   
   
@@ -328,8 +378,32 @@ class User {
     // @todo research whether this is secure enough
     $hashed_token = hash('sha256', $token);
     
-    
-    return $this->set_column($user_id, 'remember_me', $hashed_token);
+    $created_at = date('Y-m-d H:i:s');
+
+    $new_token = ['token' => $hashed_token, 'created_at' => $created_at];
+
+    $existing_tokens = $this->get_column($user_id, 'remember_me');
+
+
+    if ( !Utils::is_valid_json($existing_tokens) ):
+
+      $existing_tokens = [];
+
+    else:
+
+      $existing_tokens = json_decode($existing_tokens, true);
+
+    endif;
+
+
+    $existing_tokens[] = $new_token;
+
+    $existing_tokens = json_encode($existing_tokens);
+
+    $new_col = $this->set_column($user_id, 'remember_me', $existing_tokens);
+
+
+    return $new_col;
     
     
   } // set_remember_me()
@@ -353,7 +427,7 @@ class User {
     return $this->set_column($user_id, 'last_active', $last_active);
     
     
-  } // set_remember_me()
+  } // update_last_active()
   
   
   
@@ -365,7 +439,6 @@ class User {
   public static function make_tables( $db ): bool {
 
 
-    //$db->beginTransaction();
     
     $result = null;
     
@@ -380,7 +453,7 @@ class User {
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
           display_name VARCHAR(255),
-          remember_me VARCHAR(64) UNIQUE,
+          remember_me JSON DEFAULT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           last_login DATETIME,
@@ -409,10 +482,9 @@ class User {
     
     return $result;
     
-    //$db->commit();
   
 
-  } // get_by()
+  } // make_tables()
     
     
     

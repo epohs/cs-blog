@@ -40,7 +40,7 @@ class Session {
       
       
     endif;
-    
+
     
   } // set_key()
 
@@ -218,7 +218,7 @@ class Session {
   
   
   public static function destroy(): void {
-  
+
     session_unset();
     session_destroy();
   
