@@ -7,46 +7,49 @@
   
 
   
+<?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
+  
 
 <div class="page-wrap">
 
-  
-  <?php $page->get_partial('page-header', null, false, 'admin/partials'); ?>
-  
+  <div class="page-body">
 
-  <main class="content">
+    <?php $page->get_partial('primary', null, false, 'admin/partials/sidebar'); ?>
     
-    <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
-  
-    <h1>Verify</h1>
-    
-    <p>Nonce: <?php echo $nonce; ?></p>
-  
-    <p>User selector: <?php echo Session::get_key('user_selector'); ?></p>
-    
-    <p>Verify key: <?= var_export($verify_key, true); ?></p>
 
-    
-    <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
-    
-      <input type="hidden" name="form_name" value="verify">
-      <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+    <main class="content">
       
-      <label for="VerifiyKey">One time code:</label>
-      <input type="text" id="VerifyKey" name="verify_key" required>
+      <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
+    
+      <h1>Verify</h1>
+
+      <p>Verify key: <?= var_export($verify_key, true); ?></p>
+    
+      <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+
+        <input type="hidden" name="form_name" value="verify">
+        <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+        
+        <label for="VerifiyKey">One time code:</label>
+        <input type="text" id="VerifyKey" name="verify_key" required>
+        
+        <button type="submit">Sign up</button>
+
+      </form>
       
-      <button type="submit">Sign up</button>
+    </main> <!-- .content -->
+
+
+    <?php $page->get_partial('secondary', null, false, 'admin/partials/sidebar'); ?>
     
-    </form>
 
-    
-    
-  </main>
+  </div> <!-- .page-body -->
 
 
-</div>
+</div> <!-- .page-wrap -->
 
 
+<?php $page->get_partial('page-footer', null, false, 'admin/partials'); ?>
 
 
 
