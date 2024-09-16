@@ -120,8 +120,26 @@ class Routes {
     elseif ( $this->is_route('profile', $path) ):
       
       
+      $auth = Auth::get_instance();
+
+
+      if ( $auth->is_logged_in() && $auth->is_admin() ):
+
+        Routes::redirect_to( $this->page->url_for('admin/profile') );
+
+      elseif ( $auth->is_logged_in() ):
+
+        $user = User::get_instance();
+
+        $cur_user = $user->get_by( Session::get_key('user_id') );
       
-      $this->page->get_template( 'profile' );
+        $this->page->get_template( 'profile', null, ['cur_user' => $cur_user] );
+
+      else:
+
+        Routes::redirect_to( $this->page->url_for('/') );
+
+      endif;
       
       
       
