@@ -76,9 +76,17 @@ class Admin {
       $nonce = $this->page->set_nonce('login');
 
       
-      // @todo Check if user is already logged in and redirect
+      if ( $this->auth->is_logged_in() ):
     
-      $this->get_template( 'login', null, ['nonce' => $nonce] );
+        $redirect_path = ( $this->auth->is_admin() ) ? 'admin/dash' : '/';
+
+        Routes::redirect_to( $this->page->url_for($redirect_path) );
+
+      else:
+
+        $this->get_template( 'login', null, ['nonce' => $nonce] );
+
+      endif;
       
     
     // Initial sign up page for creating new user
