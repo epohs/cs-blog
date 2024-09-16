@@ -126,6 +126,7 @@ class User {
             SELECT 1 
             FROM json_each(remember_me) 
             WHERE json_each.value->>'token' = :value 
+               AND date(json_each.value->>'created_at') >= date('now', '-30 days')
         )";
 
     else:
@@ -385,22 +386,14 @@ class User {
     $existing_tokens = $this->get_column($user_id, 'remember_me');
 
 
-    if ( !Utils::is_valid_json($existing_tokens) ):
-
-      $existing_tokens = [];
-
-    else:
-
-      $existing_tokens = json_decode($existing_tokens, true);
-
-    endif;
+    $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
 
 
-    $existing_tokens[] = $new_token;
+    $clean_tokens[] = $new_token;
 
-    $existing_tokens = json_encode($existing_tokens);
+    $clean_tokens = json_encode($clean_tokens);
 
-    $new_col = $this->set_column($user_id, 'remember_me', $existing_tokens);
+    $new_col = $this->set_column($user_id, 'remember_me', $clean_tokens);
 
 
     return $new_col;
@@ -430,6 +423,115 @@ class User {
   } // update_last_active()
   
   
+
+
+
+
+
+
+
+  public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
+
+
+    $existing_tokens = $this->get_column($user_id, 'remember_me');
+
+    $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
+
+
+    // Filter out the token to remove
+    $filtered_tokens = array_filter($clean_tokens, function ($t) use ($token_to_remove) {
+
+      $hashed_token = hash('sha256',  $token_to_remove);
+
+      return $t['token'] !== $hashed_token;
+
+    });
+    
+
+    $updated_tokens = json_encode(array_values($filtered_tokens));
+    
+    return $this->set_column($user_id, 'remember_me', $updated_tokens);
+
+
+  } // delete_remember_me_token()
+
+
+
+
+
+
+
+
+
+
+  private function clean_remember_me_tokens( $tokens ): array {
+
+
+    if ( Utils::is_valid_json($tokens) ):
+
+      $tokens = json_decode($tokens, true);
+
+    else:
+
+      $tokens = [];
+
+    endif;
+
+
+
+    $valid_tokens = [];
+
+
+
+    if ( !empty($tokens) ):
+
+
+      $now = new DateTime('now', new DateTimeZone('UTC'));
+
+      // Loop through the tokens array
+      foreach ($tokens as $token_data):
+
+          // Check if 'token' and 'created_at' keys exist and are properly formatted
+          if ( !isset($token_data['token'], $token_data['created_at']) ):
+              continue;
+          endif;
+
+          // Check if 'created_at' is a valid date
+          $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
+
+          // Skip if 'created_at' is not valid
+          if (!$created_at):
+              continue; 
+          endif;
+
+          // Get difference between the current date and 'created_at'
+          $interval = $now->diff($created_at);
+
+          // Skip tokens older than 30 days
+          if ($interval->days > 30):
+              continue; 
+          endif;
+
+          // If everything is valid, add it to the valid tokens array
+          $valid_tokens[] = [
+              'token' => $token_data['token'],
+              'created_at' => $token_data['created_at']
+          ];
+
+      endforeach;
+
+
+    endif;
+
+
+    // Return formatted JSON string as an array
+    return $valid_tokens;
+
+
+  } // clean_remember_me_tokens()
+
+
+
   
 
   
