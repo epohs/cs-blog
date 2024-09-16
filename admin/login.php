@@ -34,8 +34,10 @@
         <label for="Password">Password:</label>
         <input type="password" id="Password" name="password" required>
         <br>
-        <label for="RememberMe">Remember me:</label>
+        
         <input type="checkbox" id="RememberMe" name="remember_me" value="1">
+        <label for="RememberMe">Remember me</label>
+
         <br>
         <button type="submit">Sign in</button>
 

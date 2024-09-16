@@ -238,7 +238,7 @@ class User {
     
     $set_verified = $this->set_column($user_id, 'is_verified', 1);
     
-    // @internal Probably should reset faild login attempts,
+    // @internal Probably should reset failed login attempts,
     // updated_at, and locked_until.
     
     
