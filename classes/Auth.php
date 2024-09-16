@@ -113,10 +113,11 @@ class Auth {
   *
   * @param mixed $identifier Can be user ID or selector string.
   * @param bool $update_last_login Whether to update the last login timestamp.
+  * @param bool $remember_me
   * 
   * @return bool True on successful login, false otherwise.
   */
-  public function login( $identifier, bool $update_last_login = true ): bool {
+  public function login( $identifier, bool $update_last_login = true, bool $remember_me = false ): bool {
     
     
     $user = User::get_instance();
@@ -150,14 +151,17 @@ class Auth {
     
     
 
-    
-    // Store the token in a cookie for 30 days
-    Cookie::set('remember_me', $token, $this->login_length);
-        
-    
-    // Store a hashed version of the token in the database
-    // @todo this function returns a bool, verify that it worked
-    $user->set_remember_me( $user_to_login['id'], $token );
+    if ( $remember_me ):
+
+      // Store the token in a cookie for 30 days
+      Cookie::set('remember_me', $token, $this->login_length);
+          
+      
+      // Store a hashed version of the token in the database
+      // @todo this function returns a bool, verify that it worked
+      $user->set_remember_me( $user_to_login['id'], $token );
+
+    endif;
       
     
   

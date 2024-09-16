@@ -34,6 +34,9 @@
         <label for="Password">Password:</label>
         <input type="password" id="Password" name="password" required>
         <br>
+        <label for="RememberMe">Remember me:</label>
+        <input type="checkbox" id="RememberMe" name="remember_me" value="1">
+        <br>
         <button type="submit">Sign in</button>
 
         <p>Don't have an account? <a href ="<?php echo $page->url_for('signup'); ?>">Sign up</a>.</p>

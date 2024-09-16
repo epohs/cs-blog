@@ -45,6 +45,23 @@ class Admin {
    *
    */
   public function serve_route( $path ) {
+
+    // @todo figure out a way to redirect all admin-ish actions
+    //        to the verify page
+    //
+    // if ( 
+    //     $this->auth->is_logged_in() &&
+    //     !Routes::is_route('verify', $path) $$
+    //     Session::get_key('user_role') == 'notverified'
+    //     ):
+
+    //     Routes::redirect_to( $this->page->url_for('verify') );
+
+    // endif;
+
+
+
+
     
     if ( Routes::is_route('admin/dash', $path) ):
       
@@ -210,8 +227,15 @@ class Admin {
         if ( $user_to_login ):
           
           if ( password_verify($post_vars['password'], $user_to_login['password']) ):
-            
-            $is_logged_in = $this->auth->login( $user_to_login['id'] );
+
+            // If the user isn't verified then we don't want to update 
+            // the last_login timestamp.
+            $update_last_login = ( intval($user_to_login['is_verified']) == 1 ) ? true : false;
+
+            // Optionally set a cookie to remember user across sessions
+            $remember_me = ( intval($post_vars['remember_me']) == 1 ) ? true : false;
+
+            $is_logged_in = $this->auth->login( $user_to_login['id'], $update_last_login, $remember_me );
             
           else:
             
