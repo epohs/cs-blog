@@ -162,13 +162,15 @@ class Auth {
       $user->set_remember_me( $user_to_login['id'], $token );
 
     endif;
-      
     
+
+    $user_role = ( intval($user_to_login['is_verified']) == 1 ) ? $user_to_login['role'] : 'null';
+
   
     // Store critical data in the session for the user
     Session::set_key('user_id', $user_to_login['id']);
     Session::set_key('user_selector', $user_to_login['selector']);
-    Session::set_key('user_role', $user_to_login['role']);
+    Session::set_key('user_role', $user_role);
   
     
     

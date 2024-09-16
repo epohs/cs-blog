@@ -46,18 +46,17 @@ class Admin {
    */
   public function serve_route( $path ) {
 
-    // @todo figure out a way to redirect all admin-ish actions
-    //        to the verify page
-    //
-    // if ( 
-    //     $this->auth->is_logged_in() &&
-    //     !Routes::is_route('verify', $path) $$
-    //     Session::get_key('user_role') == 'notverified'
-    //     ):
 
-    //     Routes::redirect_to( $this->page->url_for('verify') );
+    
+    if ( 
+        $this->auth->is_logged_in() &&
+        !Routes::is_route('verify', $path) &&
+        Session::get_key('user_role') == 'null'
+        ):
 
-    // endif;
+        Routes::redirect_to( $this->page->url_for('verify') );
+
+    endif;
 
 
 
@@ -110,14 +109,22 @@ class Admin {
     elseif ( Routes::is_route('signup', $path) ):
 
       
-      // @todo Add a message to indicate it if the reason
-      // you were redirected to this page is because no users
-      // existed yet.
-      
-      $nonce = $this->page->set_nonce('signup');
-      
-      
-      $this->get_template( 'signup', null, ['nonce' => $nonce] );
+      // If the user is already logged in redirect to their profile
+      if ( Session::get_key('user_id') ):
+
+        Routes::redirect_to( $this->page->url_for('profile') );
+
+      else:
+          
+        // @todo Add a message to indicate it if the reason
+        // you were redirected to this page is because no users
+        // existed yet.
+        
+        $nonce = $this->page->set_nonce('signup');
+        
+        $this->get_template( 'signup', null, ['nonce' => $nonce] );
+
+      endif;
 
     
 
@@ -132,11 +139,20 @@ class Admin {
         
         $cur_user = $this->user->get_by($user_id);
         
-        $verify_key = $cur_user['verify_key'];
+        // If user is already logged in redirect to their profile
+        if ( intval($cur_user['is_verified']) == 1 ):
+
+          Routes::redirect_to( $this->page->url_for('profile') );
+
+        else:
+
+          $verify_key = $cur_user['verify_key'];
+
+        endif;
       
       else:
-        
-        $verify_key = null;
+
+        Routes::redirect_to( $this->page->url_for('login') );
         
       endif;
           
@@ -311,6 +327,11 @@ class Admin {
           $this->auth->login( $user_id );
           
           $this->user->verify( $user_id );
+
+          // We override the session of a non-verified user to 
+          // always be null, so after we verify a user we need to 
+          // set this back to what it should be.
+          Session::set_key('user_role') == $user_to_verify['role'];
           
           
           // If the user is an admin user use that profile page
