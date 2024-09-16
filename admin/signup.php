@@ -23,9 +23,6 @@
     
       <h1>Signup</h1>
 
-      Nonce: <?= var_export($nonce, true); ?><br>
-      Session raw: <?= var_export($_SESSION, true); ?><br>
-
       
       <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
       
