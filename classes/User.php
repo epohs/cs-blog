@@ -184,22 +184,10 @@ class User {
   /**
    * Private function to set any single column
    */
-  private function get_column(int $user_id, string $column) {
+  private function get_column(string $column, int $user_id) {
     
     
-    $db_conn = $this->db->get_conn();
-    
-    
-    $query = "SELECT `{$column}` FROM Users WHERE id = :id";
-    
-    
-    $stmt = $db_conn->prepare($query);
-    
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
-
-    $stmt->execute();
-    
-    return $stmt->fetchColumn();
+    return $this->db->get_column('Users', $column, $user_id);
     
     
   } // get_column()
@@ -213,26 +201,15 @@ class User {
   
   
   /**
-   * Private function to set any single column
+   * 
    */
-  private function set_column(int $user_id, string $column, $value): bool {
+  private function set_column(string $column, $value, int $user_id): bool {
     
     
-    $db_conn = $this->db->get_conn();
+    return $this->db->get_column('Users', $column, $user_id);
     
     
-    $query = "UPDATE Users SET `{$column}` = :value WHERE id = :id";
-    
-    
-    $stmt = $db_conn->prepare($query);
-    
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
-    $stmt->bindValue(':value', $value);
-    
-    return ( $stmt->execute() ) ? true : false;
-    
-    
-  } // set_key()
+  } // set_column()
   
   
   
@@ -250,9 +227,9 @@ class User {
   public function verify(int $user_id ): bool {
     
     
-    $remove_verifiy_key = $this->set_column($user_id, 'verify_key', null);
+    $remove_verifiy_key = $this->set_column('verify_key', null, $user_id);
     
-    $set_verified = $this->set_column($user_id, 'is_verified', 1);
+    $set_verified = $this->set_column('is_verified', 1, $user_id);
     
     // @internal Probably should reset failed login attempts,
     // updated_at, and locked_until.
@@ -395,7 +372,7 @@ class User {
 
     $new_token = ['token' => $hashed_token, 'created_at' => $created_at];
 
-    $existing_tokens = $this->get_column($user_id, 'remember_me');
+    $existing_tokens = $this->get_column('remember_me', $user_id);
 
 
     $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
@@ -405,7 +382,7 @@ class User {
 
     $clean_tokens = json_encode($clean_tokens);
 
-    $new_col = $this->set_column($user_id, 'remember_me', $clean_tokens);
+    $new_col = $this->set_column('remember_me', $clean_tokens, $user_id);
 
 
     return $new_col;
@@ -429,7 +406,7 @@ class User {
     $last_active = ( $time_str ) ? $time_str : date('Y-m-d H:i:s');
     
     
-    return $this->set_column($user_id, 'last_active', $last_active);
+    return $this->set_column('last_active', $last_active, $user_id);
     
     
   } // update_last_active()
@@ -445,7 +422,7 @@ class User {
   public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
 
 
-    $existing_tokens = $this->get_column($user_id, 'remember_me');
+    $existing_tokens = $this->get_column('remember_me', $user_id);
 
     $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
 
@@ -462,7 +439,7 @@ class User {
 
     $updated_tokens = json_encode(array_values($filtered_tokens));
     
-    return $this->set_column($user_id, 'remember_me', $updated_tokens);
+    return $this->set_column('remember_me', $updated_tokens, $user_id);
 
 
   } // delete_remember_me_token()
