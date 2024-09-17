@@ -42,7 +42,7 @@ endif;
       <input id="testContent" value="<?php echo $pc; ?>" type="hidden" name="content">
       <trix-editor input="testContent"></trix-editor>
       
-      <button type="submit">Submit</button
+      <button type="submit">Submit</button>
     </form>
     
     
