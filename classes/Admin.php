@@ -50,7 +50,10 @@ class Admin {
     
     if ( 
         $this->auth->is_logged_in() &&
-        !Routes::is_route('verify', $path) &&
+        !( 
+          Routes::is_route('verify', $path) || 
+          Routes::is_route('admin/form-handler', $path) 
+        ) &&
         Session::get_key('user_role') == 'null'
         ):
 
@@ -299,14 +302,10 @@ class Admin {
       // Verify new user email
       elseif ( $form_name == 'verify' ):
         
-        
         // If there is not a user_id in the session
         // Redirect back to the login screen.
         if ( !$user_id = Session::get_key('user_id') ):
           
-          // @todo logging in a non-verified user should
-          // not set last login timestame and redirect to
-          // verify page.
           Routes::redirect_to( $this->page->url_for('login') );
           
         endif;
@@ -331,7 +330,7 @@ class Admin {
           // We override the session of a non-verified user to 
           // always be null, so after we verify a user we need to 
           // set this back to what it should be.
-          Session::set_key('user_role') == $user_to_verify['role'];
+          Session::set_key('user_role', $user_to_verify['role']);
           
           
           // If the user is an admin user use that profile page
