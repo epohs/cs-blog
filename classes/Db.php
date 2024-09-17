@@ -68,6 +68,67 @@ class Db {
   } // row_exists()
 
   
+
+
+
+
+
+
+
+
+  /**
+   * 
+   */
+  public function get_column(string $table, string $column, int $id ) {
+    
+    
+    $query = "SELECT `{$column}` FROM `{$table}` WHERE id = :id";
+    
+    
+    $stmt = $this->db_conn->prepare($query);
+    
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+
+    $stmt->execute();
+    
+    return $stmt->fetchColumn();
+    
+    
+  } // get_column()
+
+
+
+
+
+
+
+
+
+
+  /**
+   * 
+   */
+  public function set_column(string $table, string $column, $value, int $id): bool {
+    
+    
+    $db_conn = $this->db->get_conn();
+    
+    
+    $query = "UPDATE `{$table}` SET `{$column}` = :value WHERE id = :id";
+    
+    
+    $stmt = $db_conn->prepare($query);
+    
+    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':value', $value);
+    
+    return ( $stmt->execute() ) ? true : false;
+    
+    
+  } // set_column()
+
+
+
   
   
   
