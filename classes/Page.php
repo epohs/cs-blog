@@ -55,6 +55,8 @@ class Page {
       
       // @todo Think of a better way to handle this initial
       // logged in check.
+      // @internal Maybe this could be a user_init() function
+      // instead of an explicit login check?
       $this->is_logged_in();
     
       Routes::get_instance( $this, $request_uri );
