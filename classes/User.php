@@ -103,7 +103,7 @@ class User {
 
   public function get( int $user_id ) {
 
-
+    return $this->db->get_row_by_id('Users', $user_id);
 
   } // get()
 
