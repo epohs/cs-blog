@@ -239,7 +239,7 @@ class Admin {
         
         Routes::nonce_redirect($nonce, 'login', 'login');
                
-        $user_to_login = $this->user->get_by($post_vars['email'], 'email');
+        $user_to_login = $this->user->get_by('email', $post_vars['email']);
         
         
         
@@ -313,7 +313,7 @@ class Admin {
         
         $passed_verify_code = ( isset($post_vars['verify_key']) ) ? $post_vars['verify_key'] : false;
         
-        $user_to_verify = $this->user->get_by($passed_verify_code, 'verify_key');
+        $user_to_verify = $this->user->get_by('verify_key', $passed_verify_code);
         
         // If there is a user with a key entered
         // and that user_id matches the user_id in the session

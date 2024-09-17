@@ -53,7 +53,7 @@ class Auth {
       
       $user = User::get_instance();
       
-      $user_to_check = $user->get_by($hashed_token, 'remember_me');
+      $user_to_check = $user->get_by('remember_me', $hashed_token);
       
       
       // We found a user with a matching remember_me token.
@@ -125,7 +125,7 @@ class Auth {
     $user_identifier_key = ( is_numeric($identifier) ) ? 'id' : 'selector';
     
     // Fetch user based on identifier (user ID or selector)
-    $user_to_login = $user->get_by($identifier, $user_identifier_key);
+    $user_to_login = $user->get_by($user_identifier_key, $identifier);
     
   
     if ( !$user_to_login ):
@@ -209,7 +209,7 @@ class Auth {
       
       $user = User::get_instance();
       
-      $user_to_logout = $user->get_by($hashed_token, 'remember_me');
+      $user_to_logout = $user->get_by('remember_me', $hashed_token);
 
       
       if ( isset($user_to_logout['id']) ):

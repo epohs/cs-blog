@@ -118,9 +118,9 @@ class User {
   
   
   /**
-   * @internal I think renaming this to get() would be nicer
+   * 
    */
-  public function get_by($value, string $key = 'id') {
+  public function get_by(string $key, $value) {
 
     
     $db_conn = $this->db->get_conn();
