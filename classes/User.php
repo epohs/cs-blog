@@ -5,14 +5,16 @@ class User {
     
   private static $instance = null;
   
-  
+  private $db = null;
   
   
   
   
   private function __construct() {
     
-    
+
+    $this->db = Db::get_instance();
+
     
   } // __construct()
   
@@ -28,13 +30,13 @@ class User {
     
     $result = false;
     
-    $db = Db::get_instance();
     
-    $db_conn = $db->get_conn();
+    
+    $db_conn = $this->db->get_conn();
     
     
     // If th
-    $user_role = ( !$db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';
+    $user_role = ( !$this->db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';
     
     
     // @todo this needs to be unique
@@ -92,6 +94,24 @@ class User {
   } // new()
   
  
+
+
+
+
+
+
+
+  public function get( int $user_id ) {
+
+
+
+  } // get()
+
+
+
+
+
+
   
   
   
@@ -103,9 +123,7 @@ class User {
   public function get_by($value, string $key = 'id') {
 
     
-    $db = Db::get_instance();
-    
-    $db_conn = $db->get_conn();
+    $db_conn = $this->db->get_conn();
     
     
     $valid_keys = [
@@ -168,9 +186,8 @@ class User {
    */
   private function get_column(int $user_id, string $column) {
     
-    $db = Db::get_instance();
     
-    $db_conn = $db->get_conn();
+    $db_conn = $this->db->get_conn();
     
     
     $query = "SELECT `{$column}` FROM Users WHERE id = :id";
@@ -185,7 +202,7 @@ class User {
     return $stmt->fetchColumn();
     
     
-  } // get_key()
+  } // get_column()
 
 
 
@@ -200,9 +217,8 @@ class User {
    */
   private function set_column(int $user_id, string $column, $value): bool {
     
-    $db = Db::get_instance();
     
-    $db_conn = $db->get_conn();
+    $db_conn = $this->db->get_conn();
     
     
     $query = "UPDATE Users SET `{$column}` = :value WHERE id = :id";
@@ -266,9 +282,7 @@ class User {
   public function update_last_login(int $value, string $key = 'id'): void {
     
     
-    $db = Db::get_instance();
-    
-    $db_conn = $db->get_conn();
+    $db_conn = $this->db->get_conn();
     
     
     $valid_keys = [
@@ -333,11 +347,9 @@ class User {
       
     else:
       
-      $db = Db::get_instance();
-      
       $user_key_type = ( is_int($user_key) ) ? 'id' : 'email';
       
-      return $db->row_exists('Users', $user_key_type, $user_key);
+      return $this->db->row_exists('Users', $user_key_type, $user_key);
       
     endif;
     
@@ -548,7 +560,7 @@ class User {
     try {
       
       // Optionally, create tables or perform other setup tasks here
-      $result = $db->exec(
+      $result = $this->db->exec(
         "CREATE TABLE IF NOT EXISTS Users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           selector VARCHAR(16) UNIQUE,
