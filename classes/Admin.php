@@ -140,7 +140,7 @@ class Admin {
       
       if ( $user_id ):
         
-        $cur_user = $this->user->get_by($user_id);
+        $cur_user = $this->user->get($user_id);
         
         // If user is already logged in redirect to their profile
         if ( intval($cur_user['is_verified']) == 1 ):

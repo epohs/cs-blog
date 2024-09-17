@@ -131,7 +131,7 @@ class Routes {
 
         $user = User::get_instance();
 
-        $cur_user = $user->get_by( Session::get_key('user_id') );
+        $cur_user = $user->get( Session::get_key('user_id') );
       
         $this->page->get_template( 'profile', null, ['cur_user' => $cur_user] );
 
