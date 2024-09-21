@@ -159,6 +159,14 @@ class Session {
   
   public static function delete_key($keys): void {
 
+
+    if ( !isset($_SESSION) ):
+      
+      // Session is not initialized, do nothing
+      return;
+    
+    endif;
+
     
     if ( is_string($keys) ):
     
@@ -177,17 +185,26 @@ class Session {
 
         if ( isset($cur_array[$key]) ):
         
-          // If it's the last key, unset it
+
+          // If it's the last key in the array of keys that we are 
+          // looking for then we are as deep as we're going to go
+          // so just unset it.
           if ( $i === array_key_last($keys) ):
           
             unset($cur_array[$key]);
           
-          else:
+          elseif ( is_array($cur_array[$key]) ):
           
             // Move deeper into the array
-            $cur_array = $cur_array[$key];
+            $cur_array = &$cur_array[$key];
+
+          else:
+
+            // Key is not an array, stop here
+            return;
           
           endif;
+
         
         else:
         
