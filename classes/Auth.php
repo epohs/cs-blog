@@ -147,7 +147,7 @@ class Auth {
     
     
     // Generate a random string for remember me cookie
-    $token = Utils::generate_random_string(26);
+    $token = Utils::generate_random_string(64);
     
     
 
