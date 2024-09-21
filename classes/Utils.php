@@ -73,9 +73,31 @@ class Utils {
   } // delete()
   
   
+
+
+
+
+
+
   
   
-  
+  public static function generate_random_string(int $length): string {
+
+    $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
+    $characters_length = strlen($characters);
+    $random_bytes = random_bytes($length);
+    
+    $random_string = '';
+
+    for ($i = 0; $i < $length; $i++):
+    
+      $random_string .= $characters[ord($random_bytes[$i]) % $characters_length];
+    
+    endfor;
+    
+    return $random_string;
+}
+ // generate_random_string()
   
   
   
