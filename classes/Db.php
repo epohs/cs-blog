@@ -111,13 +111,10 @@ class Db {
   public function set_column(string $table, string $column, $value, int $id): bool {
     
     
-    $db_conn = $this->db->get_conn();
-    
-    
     $query = "UPDATE `{$table}` SET `{$column}` = :value WHERE id = :id";
     
     
-    $stmt = $db_conn->prepare($query);
+    $stmt = $this->db_conn->prepare($query);
     
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
     $stmt->bindValue(':value', $value);
@@ -135,15 +132,84 @@ class Db {
 
 
 
-  private function get_unique_column_val(string $table, string $column, array $args): string|false {
+  public function get_unique_column_val(string $table, string $column, array $args = []): string|false {
 
     $defaults = [
       'min_len' => 6,
-      'max_len' => 16
+      'max_len' => 16,
+      'str_per_batch' => 10
     ];
 
     // Merge passed arguments with defaults
     $args = array_merge($defaults, $args);
+
+
+
+
+
+    // Ensure max_len is greater than or equal to min_len
+    if ( !is_int($args['min_len']) || 
+          !is_int($args['max_len']) || 
+          !is_int($args['str_per_batch']) || 
+          ($args['max_len'] < $args['min_len'])
+        ):
+      
+      return false;
+
+    endif;
+
+
+
+
+
+    // Calculate the median length
+    $median_len = (int) floor( ($args['min_len'] + $args['max_len']) / 2 );
+
+    // Generate 3 batches of random strings with longer
+    // lenghts in each successive batch.
+    $lengths = [$args['min_len'], $median_len, $args['max_len']];
+
+
+    foreach ($lengths as $length):
+
+      $batch = [];
+      
+      for ($i = 0; $i < $args['str_per_batch']; $i++):
+
+        $batch[] = Utils::generate_random_string($length);
+
+      endfor;
+
+
+      // Check the database for existing values in this batch
+      $placeholders = implode(',', array_fill(0, count($batch), '?'));
+
+      $query = "SELECT `{$column}` FROM `{$table}` WHERE `{$column}` IN ($placeholders)";
+      
+      $stmt = $this->db_conn->prepare($query);
+
+      $stmt->execute($batch);
+      
+      $existing_values = $stmt->fetchAll(PDO::FETCH_COLUMN);
+
+
+      // Find the first unique string
+      foreach ($batch as $string):
+
+        if ( !in_array($string, $existing_values) ):
+
+          return $string;
+
+        endif;
+
+      endforeach;
+
+
+    endforeach;
+
+    // Return false if no unique value is found
+    return false;
+
 
 
 
