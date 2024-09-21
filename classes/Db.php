@@ -130,6 +130,26 @@ class Db {
 
 
   
+
+
+
+
+
+  private function get_unique_column_val(string $table, string $column, array $args): string|false {
+
+    $defaults = [
+      'min_len' => 6,
+      'max_len' => 16
+    ];
+
+    // Merge passed arguments with defaults
+    $args = array_merge($defaults, $args);
+
+
+
+  } // get_unique_column_val()
+
+
   
   
   
