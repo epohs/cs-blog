@@ -252,7 +252,7 @@ class Admin {
             $update_last_login = ( intval($user_to_login['is_verified']) == 1 ) ? true : false;
 
             // Optionally set a cookie to remember user across sessions
-            $remember_me = ( intval($post_vars['remember_me']) == 1 ) ? true : false;
+            $remember_me = ( isset($post_vars['remember_me']) && (intval($post_vars['remember_me']) == 1) ) ? true : false;
 
             $is_logged_in = $this->auth->login( $user_to_login['id'], $update_last_login, $remember_me );
             
