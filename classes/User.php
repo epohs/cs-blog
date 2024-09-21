@@ -40,10 +40,10 @@ class User {
     
     
     // @todo this needs to be unique
-    $verify_key = substr(bin2hex(random_bytes(4)), 0, 8);
+    $verify_key = Utils::generate_random_string(8);
     
     // @todo this needs to be unique
-    $selector = substr(bin2hex(random_bytes(4)), 0, 6);
+    $selector = Utils::generate_random_string(6);
     
     
     
@@ -518,6 +518,18 @@ class User {
 
 
   } // clean_remember_me_tokens()
+
+
+
+
+
+
+
+  private function get_unique_column_val(string $column, array $args): string|false {
+
+    return $this->db->get_unique_column_val('Users', $column, $args);
+
+  } // get_unique_column_val()
 
 
 
