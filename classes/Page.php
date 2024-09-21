@@ -277,8 +277,7 @@ class Page {
     
     $nonce_data = [
         'nonce' => $nonce,
-        'expires' => $expires,
-        'action' => $action
+        'expires' => $expires
     ];
     
     // This origionally had $nonce as the key
@@ -297,6 +296,8 @@ class Page {
   
   public static function validate_nonce(string $nonce, string $action): bool {
 
+    $_ret = false;
+    
 
     if ( Session::key_isset(['nonces', $action]) ):
       
@@ -304,19 +305,21 @@ class Page {
       $nonceData = Session::get_key(['nonces', $action]);
       
       
-      if ( $nonceData['action'] === $action && $nonceData['expires'] >= time() ):
+      if ( $nonceData['expires'] >= time() ):
         
-        // Remove the nonce after validation
-        Session::delete_key(['nonces', $action]);
-        
-        return true;
+        $_ret = true;
         
       endif;
+
+
+      // Remove the nonce after validation
+      Session::delete_key(['nonces', $action]);
+
   
     endif;
 
     
-    return false;
+    return $_ret;
 
   } // validate_nonce()
 
