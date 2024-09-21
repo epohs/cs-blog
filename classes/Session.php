@@ -158,7 +158,7 @@ class Session {
   
   
   public static function delete_key($keys): void {
-  
+
     
     if ( is_string($keys) ):
     
@@ -169,13 +169,12 @@ class Session {
       
     elseif ( is_array($keys) ):
       
-      
       // Copy the session array to a variable
-      $cur_array = $_SESSION;
+      $cur_array = &$_SESSION;
       
       // Traverse all but the last key
       foreach ( $keys as $i => $key ):
-        
+
         if ( isset($cur_array[$key]) ):
         
           // If it's the last key, unset it
@@ -198,9 +197,6 @@ class Session {
         endif;
         
       endforeach;
-
-      // Rebuild the session array without the deleted key
-      $_SESSION = array_replace_recursive($_SESSION, $cur_array);
       
       
     endif;
