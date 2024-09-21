@@ -54,7 +54,7 @@ class Admin {
           Routes::is_route('verify', $path) || 
           Routes::is_route('admin/form-handler', $path) 
         ) &&
-        Session::get_key('user_role') == 'null'
+        Session::get_key(['user', 'role']) == 'null'
         ):
 
         Routes::redirect_to( $this->page->url_for('verify') );
@@ -70,7 +70,7 @@ class Admin {
       
       // If the current user is an admin load the 
       // admin dashboard, otherwise redirect home.
-      if ( $this->auth->is_logged_in() && Session::get_key('user_role') == 'admin' ):
+      if ( $this->auth->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
         
 
         $this->get_template( 'dashboard' );
@@ -113,7 +113,7 @@ class Admin {
 
       
       // If the user is already logged in redirect to their profile
-      if ( Session::get_key('user_id') ):
+      if ( Session::get_key(['user', 'id']) ):
 
         Routes::redirect_to( $this->page->url_for('profile') );
 
@@ -136,7 +136,7 @@ class Admin {
       
       $nonce = $this->page->set_nonce('signup');
       
-      $user_id = Session::get_key('user_id');
+      $user_id = Session::get_key(['user', 'id']);
       
       if ( $user_id ):
         
@@ -276,7 +276,7 @@ class Admin {
           // If the user who just logged in is an admin
           // go to the admin panel. Otherwise, go to the
           // homepage.
-          if ( Session::get_key('user_role') == 'admin' ):
+          if ( Session::get_key(['user', 'role']) == 'admin' ):
             
             Routes::redirect_to( $this->page->url_for('admin/dash') );
             
@@ -304,7 +304,7 @@ class Admin {
         
         // If there is not a user_id in the session
         // Redirect back to the login screen.
-        if ( !$user_id = Session::get_key('user_id') ):
+        if ( !$user_id = Session::get_key(['user', 'id']) ):
           
           Routes::redirect_to( $this->page->url_for('login') );
           
@@ -330,12 +330,12 @@ class Admin {
           // We override the session of a non-verified user to 
           // always be null, so after we verify a user we need to 
           // set this back to what it should be.
-          Session::set_key('user_role', $user_to_verify['role']);
+          Session::set_key(['user', 'role'], $user_to_verify['role']);
           
           
           // If the user is an admin user use that profile page
           // otherwise, use the non-admin profile page.
-          if ( Session::get_key('user_role') == 'admin' ):
+          if ( Session::get_key(['user', 'role']) == 'admin' ):
             
             Routes::redirect_to( $this->page->url_for('admin/profile') );
             

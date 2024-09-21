@@ -401,7 +401,7 @@ class User {
   public function update_last_active( ?int $user_id = 0, ?string $time_str = null ): bool {
     
     
-    $user_id = ( $user_id ) ? $user_id : Session::get_key('user_id');
+    $user_id = ( $user_id ) ? $user_id : Session::get_key(['user', 'id']);
       
     $last_active = ( $time_str ) ? $time_str : date('Y-m-d H:i:s');
     

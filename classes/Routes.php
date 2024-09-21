@@ -131,7 +131,7 @@ class Routes {
 
         $user = User::get_instance();
 
-        $cur_user = $user->get( Session::get_key('user_id') );
+        $cur_user = $user->get( Session::get_key(['user', 'id']) );
       
         $this->page->get_template( 'profile', null, ['cur_user' => $cur_user] );
 
@@ -148,7 +148,7 @@ class Routes {
 
       $auth = Auth::get_instance();
     
-      $auth->logout( Session::get_key('user_id') );
+      $auth->logout( Session::get_key(['user', 'id']) );
       
       self::redirect_to( $this->page->url_for('/') );
     

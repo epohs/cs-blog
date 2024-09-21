@@ -38,7 +38,7 @@ class Auth {
     $_ret = false;
     
     
-    if ( Session::get_key('user_id') ):
+    if ( Session::get_key(['user', 'id']) ):
       
       $user = User::get_instance();
       
@@ -61,9 +61,9 @@ class Auth {
       // load and update the last_active db column.
       if ( $user_to_check ):
         
-        Session::set_key('user_id', $user_to_check['id']);
-        Session::set_key('user_selector', $user_to_check['selector']);
-        Session::set_key('user_role', $user_to_check['role']);
+        Session::set_key(['user', 'id'], $user_to_check['id']);
+        Session::set_key(['user', 'selector'], $user_to_check['selector']);
+        Session::set_key(['user', 'role'], $user_to_check['role']);
         
         $user->update_last_active();
         
@@ -94,7 +94,7 @@ class Auth {
    */
   public function is_admin(): bool {
 
-    return ( $this->is_logged_in() && (Session::get_key('user_role') == 'admin') );
+    return ( $this->is_logged_in() && (Session::get_key(['user', 'role']) == 'admin') );
 
   } // is_admin
 
@@ -136,7 +136,7 @@ class Auth {
   
     
     // Check if user is already logged in
-    if ( Session::get_key('user_id') === $user_to_login['id'] ):
+    if ( Session::get_key(['user', 'id']) === $user_to_login['id'] ):
       
       return true; // User already logged in
     
@@ -168,9 +168,9 @@ class Auth {
 
   
     // Store critical data in the session for the user
-    Session::set_key('user_id', $user_to_login['id']);
-    Session::set_key('user_selector', $user_to_login['selector']);
-    Session::set_key('user_role', $user_role);
+    Session::set_key(['user', 'id'], $user_to_login['id']);
+    Session::set_key(['user', 'selector'], $user_to_login['selector']);
+    Session::set_key(['user', 'role'], $user_role);
   
     
     

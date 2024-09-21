@@ -3,7 +3,7 @@
   
   <?php if ( $page->is_logged_in() ): ?>
 
-    <a href="<?php echo $page->url_for('logout') ?>">logout</a> (<?php echo Session::get_key('user_selector'); ?>)<br>
+    <a href="<?php echo $page->url_for('logout') ?>">logout</a> (<?php echo Session::get_key(['user', 'selector']); ?>)<br>
 
   <?php else: ?>
 
