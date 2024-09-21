@@ -272,7 +272,7 @@ class Page {
   
   public static function set_nonce(string $action, int $ttl = 3600): string {
     
-    $nonce = Utils::generate_random_string(16);
+    $nonce = Utils::generate_random_string(32);
     $expires = time() + $ttl;
     
     $nonce_data = [
