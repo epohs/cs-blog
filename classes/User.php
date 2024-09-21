@@ -40,10 +40,11 @@ class User {
     
     
     // @todo this needs to be unique
-    $verify_key = Utils::generate_random_string(8);
+    $verify_key = $this->get_unique_column_val('verify_key', ['min_len' => 8]);
+    
     
     // @todo this needs to be unique
-    $selector = Utils::generate_random_string(6);
+    $selector = $this->get_unique_column_val('selector');
     
     
     
@@ -206,7 +207,7 @@ class User {
   private function set_column(string $column, $value, int $user_id): bool {
     
     
-    return $this->db->get_column('Users', $column, $user_id);
+    return $this->db->set_column('Users', $column, $value, $user_id);
     
     
   } // set_column()
@@ -525,7 +526,7 @@ class User {
 
 
 
-  private function get_unique_column_val(string $column, array $args): string|false {
+  private function get_unique_column_val(string $column, array $args = []): string|false {
 
     return $this->db->get_unique_column_val('Users', $column, $args);
 
