@@ -135,7 +135,7 @@ class Db {
   public function get_unique_column_val(string $table, string $column, array $args = []): string|false {
 
     $defaults = [
-      'min_len' => 6,
+      'min_len' => 5,
       'max_len' => 16,
       'str_per_batch' => 10
     ];
