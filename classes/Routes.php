@@ -313,12 +313,14 @@ class Routes {
   
   
   
-  public static function nonce_redirect(string $nonce, string $action, string $redir_path, ?string $err = '001'): void {
+  public static function nonce_redirect(string $nonce, string $action, ?string $redir_path = '', ?string $err = '001'): void {
     
     
     if ( !Page::validate_nonce($nonce, $action) ):
       
       $page = Page::get_instance();
+      
+      $redir_path = ( $redir_path !== '' ) ? $redir_path : $action;
       
       $redir_path = $page->site_root() . '/' . $redir_path;
       
