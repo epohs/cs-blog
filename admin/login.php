@@ -41,6 +41,8 @@
         <br>
         <button type="submit">Sign in</button>
 
+        <p><a href ="<?php echo $page->url_for('forgot'); ?>">I forgot my password</a>.</p>
+
         <p>Don't have an account? <a href ="<?php echo $page->url_for('signup'); ?>">Sign up</a>.</p>
       
       </form>
