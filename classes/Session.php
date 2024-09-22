@@ -157,7 +157,7 @@ class Session {
   
   
   
-  public static function delete_key($keys): void {
+  public static function delete_key( $keys ): void {
 
 
     if ( !isset($_SESSION) ):
@@ -180,7 +180,7 @@ class Session {
       // Copy the session array to a variable
       $ref_array = &$_SESSION;
       
-      // Traverse all but the last key
+      // Traverse array following the keys parameter
       foreach ( $keys as $i => $key ):
 
         if ( isset($ref_array[$key]) ):
