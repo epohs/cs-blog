@@ -46,5 +46,26 @@ endif;
 
 
 
+
+
+function debug_log(string $message): void {
+
+  $config = Config::get_instance();
+
+  if ( $config->get('debug') ):
+
+    $file = ROOT_PATH. 'debug.log';
+
+    file_put_contents($file, $message . PHP_EOL, FILE_APPEND | LOCK_EX);
+
+  endif;
+
+} // debug_log()
+
+
+
+
+
+
 // Include functions.php from the active theme
 // require_once();
