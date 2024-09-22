@@ -178,12 +178,12 @@ class Session {
     elseif ( is_array($keys) ):
       
       // Copy the session array to a variable
-      $cur_array = &$_SESSION;
+      $ref_array = &$_SESSION;
       
       // Traverse all but the last key
       foreach ( $keys as $i => $key ):
 
-        if ( isset($cur_array[$key]) ):
+        if ( isset($ref_array[$key]) ):
         
 
           // If it's the last key in the array of keys that we are 
@@ -191,12 +191,12 @@ class Session {
           // so just unset it.
           if ( $i === array_key_last($keys) ):
           
-            unset($cur_array[$key]);
+            unset($ref_array[$key]);
           
-          elseif ( is_array($cur_array[$key]) ):
+          elseif ( is_array($ref_array[$key]) ):
           
             // Move deeper into the array
-            $cur_array = &$cur_array[$key];
+            $ref_array = &$ref_array[$key];
 
           else:
 
