@@ -43,6 +43,8 @@ class Auth {
       $user = User::get_instance();
       
       $user->update_last_active();
+
+      Page::remove_expired_nonces();
       
       $_ret = true;
       

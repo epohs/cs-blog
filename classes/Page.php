@@ -270,7 +270,7 @@ class Page {
   
   
   /**
-   * @internal Should nonce related functions be in the Auth class?
+   * @todo Move nonce related functions to the Auth class.
    */
   public static function set_nonce(string $action, int $ttl = 3600): string {
     
@@ -339,7 +339,12 @@ class Page {
 
     $nonces = Session::get_key('nonces');
 
+    $nonces_changed = false;
 
+
+    // First, check to see if we have any nonces.
+    // If we do, loop through them removing any
+    // where the expires timestamp has passed.
     if ( is_array($nonces) && !empty($nonces) ):
       
       
@@ -347,7 +352,9 @@ class Page {
 
         if ( isset($nonce_data['expires']) && ( $nonce_data['expires'] <= time() ) ):
         
-          unset( $nonces[$key] );
+          unset( $nonces[$action] );
+
+          $nonces_changed = true;
         
         endif;
       
@@ -357,9 +364,13 @@ class Page {
     endif;
 
 
-    $new_nonces = ( is_array($nonces) ) ? $nonces : [];
+    // If the nonce array changed, save over our nonces
+    // stored in the session.
+    if ( $nonces_changed ):
 
-    Session::set_key('nonces', $new_nonces);
+      Session::set_key('nonces', $nonces);
+
+    endif;
 
 
   } // remove_expired_nonces()
