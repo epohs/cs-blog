@@ -85,12 +85,22 @@ class Admin {
     elseif ( Routes::is_route('admin/profile', $path) ):
 
 
-      $user = User::get_instance();
 
-      $cur_user = $user->get( Session::get_key(['user', 'id']) );
-      
-      $this->get_template( 'profile', null, ['cur_user' => $cur_user] );
+      // If the current user is an admin load the 
+      // admin dashboard, otherwise redirect home.
+      if ( $this->auth->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+        
+        $user = User::get_instance();
 
+        $cur_user = ( ( Session::get_key(['user', 'id']) ) ) ? $user->get( Session::get_key(['user', 'id']) ) : null;
+        
+        $this->get_template( 'profile', null, ['cur_user' => $cur_user] );
+        
+      else:
+        
+        Routes::redirect_to( $this->page->url_for('/') );
+        
+      endif;
 
     // Login page
     elseif ( Routes::is_route('login', $path) ):
