@@ -90,9 +90,6 @@ class Admin {
 
     // Login page
     elseif ( Routes::is_route('login', $path) ):
-      
-      
-      $nonce = $this->page->set_nonce('login');
 
       
       if ( $this->auth->is_logged_in() ):
@@ -102,7 +99,9 @@ class Admin {
         Routes::redirect_to( $this->page->url_for($redirect_path) );
 
       else:
-
+        
+        $nonce = $this->page->set_nonce('login');
+        
         $this->get_template( 'login', null, ['nonce' => $nonce] );
 
       endif;
@@ -134,8 +133,6 @@ class Admin {
     elseif ( Routes::is_route('verify', $path) ):
       
       
-      $nonce = $this->page->set_nonce('signup');
-      
       $user_id = Session::get_key(['user', 'id']);
       
       if ( $user_id ):
@@ -147,10 +144,6 @@ class Admin {
 
           Routes::redirect_to( $this->page->url_for('profile') );
 
-        else:
-
-          $verify_key = $cur_user['verify_key'];
-
         endif;
       
       else:
@@ -158,7 +151,11 @@ class Admin {
         Routes::redirect_to( $this->page->url_for('login') );
         
       endif;
-          
+      
+      
+      $nonce = $this->page->set_nonce('verify');
+      
+      $verify_key = $cur_user['verify_key'];
         
       $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
       
@@ -237,7 +234,7 @@ class Admin {
       if ( $form_name == 'login' ):
 
         
-        Routes::nonce_redirect($nonce, 'login', 'login');
+        Routes::nonce_redirect($nonce, 'login');
                
         $user_to_login = $this->user->get_by('email', $post_vars['email']);
         
@@ -302,6 +299,9 @@ class Admin {
       // Verify new user email
       elseif ( $form_name == 'verify' ):
         
+        
+        Routes::nonce_redirect($nonce, 'verify');
+        
         // If there is not a user_id in the session
         // Redirect back to the login screen.
         if ( !$user_id = Session::get_key(['user', 'id']) ):
@@ -359,7 +359,7 @@ class Admin {
       elseif ( $form_name == 'signup' ):
         
       
-        Routes::nonce_redirect($nonce, 'signup', 'signup');
+        Routes::nonce_redirect($nonce, 'signup');
         
         
         $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
