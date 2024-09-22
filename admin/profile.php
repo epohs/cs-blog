@@ -22,6 +22,10 @@
       <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
     
       <h1>Admin Profile</h1>
+
+      <p>Logged in as <strong><?php echo $cur_user['email']; ?></strong> (<?php echo $cur_user['selector']; ?>)</p>
+
+      <details><summary>Session:</summary> <?php echo var_export($_SESSION, true); ?></details>
       
     </main> <!-- .content -->
 

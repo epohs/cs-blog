@@ -84,8 +84,12 @@ class Admin {
       
     elseif ( Routes::is_route('admin/profile', $path) ):
 
+
+      $user = User::get_instance();
+
+      $cur_user = $user->get( Session::get_key(['user', 'id']) );
       
-      $this->get_template( 'profile' );
+      $this->get_template( 'profile', null, ['cur_user' => $cur_user] );
 
 
     // Login page
