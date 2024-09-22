@@ -546,6 +546,12 @@ class Page {
           $this->add_error( 'Incorrect login info.' );
           
           break;
+
+        case '006':
+
+          $is_error = true;
+
+          $this->add_error( 'Invalid email address' );
       
         case '070':
           
