@@ -269,7 +269,9 @@ class Page {
   
   
   
-  
+  /**
+   * @internal Should nonce related functions be in the Auth class?
+   */
   public static function set_nonce(string $action, int $ttl = 3600): string {
     
     $nonce = Utils::generate_random_string(32);
@@ -280,8 +282,8 @@ class Page {
         'expires' => $expires
     ];
     
-    // This origionally had $nonce as the key
-    // test to see which method works out better
+    // Store nonce data in the session overriding any
+    // existing nonce with this action.
     Session::set_key(['nonces', $action], $nonce_data);
     
     return $nonce;
@@ -322,6 +324,45 @@ class Page {
     return $_ret;
 
   } // validate_nonce()
+
+
+
+
+
+
+
+
+
+
+  public static function remove_expired_nonces() {
+
+
+    $nonces = Session::get_key('nonces');
+
+
+    if ( is_array($nonces) && !empty($nonces) ):
+      
+      
+      foreach ($nonces as $action => $nonce_data):
+
+        if ( isset($nonce_data['expires']) && ( $nonce_data['expires'] <= time() ) ):
+        
+          unset( $nonces[$key] );
+        
+        endif;
+      
+      endforeach;
+
+
+    endif;
+
+
+    $new_nonces = ( is_array($nonces) ) ? $nonces : [];
+
+    Session::set_key('nonces', $new_nonces);
+
+
+  } // remove_expired_nonces()
 
   
   
