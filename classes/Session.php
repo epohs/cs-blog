@@ -186,9 +186,9 @@ class Session {
         if ( isset($ref_array[$key]) ):
         
 
-          // If it's the last key in the array of keys that we are 
-          // looking for then we are as deep as we're going to go
-          // so just unset it.
+          // If this is the last key in the array of keys 
+          // that we are looking for then we are as deep 
+          // as we're going to go so unset it.
           if ( $i === array_key_last($keys) ):
           
             unset($ref_array[$key]);
