@@ -98,6 +98,8 @@ class Routes {
             $this->is_route('signup', $path) ||
             $this->is_route('verify', $path) ||
             $this->is_route('login', $path) ||
+            $this->is_route('forgot', $path) ||
+            $this->is_route('password-reset', $path) ||
             $this->is_route('admin/dash', $path) ||
             $this->is_route('admin/profile', $path) ||
             $this->is_route('admin/form-handler', $path)

@@ -142,7 +142,6 @@ class Admin {
 
       endif;
 
-    
 
     elseif ( Routes::is_route('verify', $path) ):
       
@@ -172,7 +171,43 @@ class Admin {
       $verify_key = $cur_user['verify_key'];
         
       $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
+
+    // Forgot password
+    elseif ( Routes::is_route('forgot', $path) ):
+
       
+      // If the user is already logged in redirect to their profile
+      if ( Session::get_key(['user', 'id']) ):
+
+        Routes::redirect_to( $this->page->url_for('profile') );
+
+      else:
+        
+        $nonce = $this->page->set_nonce('forgot');
+        
+        $this->get_template( 'forgot', null, ['nonce' => $nonce] );
+
+      endif;
+
+
+    // Password reset
+    elseif ( Routes::is_route('password-reset', $path) ):
+
+      
+      // If the user is already logged in redirect to their profile
+      if ( Session::get_key(['user', 'id']) ):
+
+        Routes::redirect_to( $this->page->url_for('profile') );
+
+      else:
+          
+        
+        $nonce = $this->page->set_nonce('password-reset');
+        
+        $this->get_template( 'password-reset', null, ['nonce' => $nonce] );
+
+      endif;
+
       
     elseif ( Routes::is_route('admin/form-handler', $path) ):
       
@@ -420,6 +455,41 @@ class Admin {
           
           Routes::redirect_to( $this->page->url_for('signup') . '?err=070' );
           
+        endif;
+
+
+
+      // Forgot password form
+      elseif ( $form_name == 'forgot' ):
+
+
+        Routes::nonce_redirect($nonce, 'forgot');
+        
+        
+        $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
+
+
+        // If the email address entered is a valid looking email
+        // address then we move forward, otherwise we redirect back
+        // to the forgot password page with an error.
+        if ( filter_var($user_email, FILTER_VALIDATE_EMAIL) ):
+
+          $user_to_reset = $this->user->get_by('email', $user_email);
+
+          if ( is_array($user_to_reset) && isset($user_to_reset['id']) ):
+
+            // A user with this email adress was found. Set the reset password token.
+            // @todo this returns a bool. Check if false and redirect with err if so.
+            $this->user->set_password_reset_token( $user_to_reset['id'] );
+
+            Routes::redirect_to( $this->page->url_for('password-reset') );
+
+          endif;
+
+        else:
+
+          Routes::redirect_to( $this->page->url_for('forgot') . '?err=006' );
+
         endif;
         
         

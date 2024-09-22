@@ -526,6 +526,71 @@ class User {
 
 
 
+  public function set_password_reset_token( int $user_id ): string|false {
+
+
+    $user_to_reset = $this->get( $user_id );
+
+    // Is this a valid existing User ID?
+    if ( is_array($user_to_reset) && isset($user_to_reset['id']) ):
+
+
+      // Check whether we have an ongoing password reset request
+      $reset_started = isset($user_to_reset['password_reset_started']) ?? null;
+
+      if ( Utils::is_valid_datetime($reset_started) ):
+
+        $reset_started_datetime = new DateTime($reset_started);
+        $now = new DateTime();
+        
+        // Create a DateInterval of 30 minutes
+        // @todo This should be a setting in config
+        $interval = new DateInterval('PT30M');
+        
+        // Subtract 30 minutes from the current time
+        $threshold_time = $now->sub($interval);
+        
+        // Compare the two DateTime objects
+        if ( $created_at_datetime >= $threshold_time ):
+
+          // There has already been a password reset requested
+          // too recently, just bail
+          return false;
+
+        endif;
+
+      endif;
+
+
+      // If we made it here we have a valid User, and that user is
+      // eligible for a new password reset.
+
+      $new_reset_token = $this->get_unique_column_val('password_reset_token', ['min_len' => 16]);
+
+      $new_reset_started = date('Y-m-d H:i:s');
+
+      // @todo We should use a transaction 
+      $is_good_token = $this->set_column('password_reset_token', $new_reset_token, $user_id);
+    
+      $is_good_date = $this->set_column('password_reset_started', $new_reset_started, $user_id);
+
+      return ( $is_good_token && $is_good_date );
+
+    else:
+
+      return false;
+
+    endif;
+
+
+  } // set_password_reset_token()
+
+
+
+
+
+
+
   private function get_unique_column_val(string $column, array $args = []): string|false {
 
     return $this->db->get_unique_column_val('Users', $column, $args);
@@ -550,13 +615,13 @@ class User {
     try {
       
       // Optionally, create tables or perform other setup tasks here
-      $result = $this->db->exec(
+      $result = $db->exec(
         "CREATE TABLE IF NOT EXISTS Users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           selector VARCHAR(16) UNIQUE,
           email VARCHAR(255) NOT NULL UNIQUE,
           password VARCHAR(255) NOT NULL,
-          display_name VARCHAR(255),
+          display_name VARCHAR(128),
           remember_me JSON DEFAULT NULL,
           created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
           updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
@@ -565,6 +630,8 @@ class User {
           is_active BOOLEAN DEFAULT 1,
           is_verified BOOLEAN DEFAULT 0,
           verify_key VARCHAR(16) UNIQUE,
+          password_reset_started DATETIME,
+          password_reset_token VARCHAR(64),
           failed_login_attempts INTEGER DEFAULT 0,
           locked_until DATETIME,
           role TEXT DEFAULT 'user',
