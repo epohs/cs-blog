@@ -39,6 +39,22 @@ class Utils {
 
 
 
+
+
+
+
+
+
+  public static function is_valid_datetime(string $datetime, string $format = 'Y-m-d H:i:s'): bool {
+
+    $dt = DateTime::createFromFormat($format, $datetime);
+
+    // Check if the DateTime object was successfully created and if the input fully matches the format
+    return $dt && $dt->format($format) === $datetime;
+
+  } // is_valid_datetime()
+
+
   
   
   
