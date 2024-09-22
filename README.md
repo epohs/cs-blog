@@ -10,4 +10,3 @@ Super basic blog, built for my dad.
 - Failed login lockout
 - Check all User db flags and datetimes are updated correctly
 - Forgot password reset
-- Create error logging function
