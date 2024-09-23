@@ -191,7 +191,7 @@ class Admin {
 
 
     // Password reset
-    elseif ( Routes::is_route('password-reset', $path) ):
+    elseif ( Routes::is_route('password-reset/{key?}', $path) ):
 
       
       // If the user is already logged in redirect to their profile
