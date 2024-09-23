@@ -8,5 +8,6 @@ Super basic blog, built for my dad.
 - html & css base
 - Profile page to update display name
 - Failed login lockout
+- Delete expired nonces
 - Check all User db flags and datetimes are updated correctly
 - Forgot password reset
