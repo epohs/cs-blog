@@ -281,13 +281,7 @@ class Routes {
       // Loop through each URL segment and path segment.
       foreach ($url_segments as $i => $url_segment):
         
-        // If there's no matching path segment, return false (extra segments in $path).
-        if (!isset($path_segments[$i])):
-          
-          return false;
-          
-        endif;
-        
+    
         $path_segment = $path_segments[$i];
         
         // Check if the current URL segment contains a named parameter (e.g., {param} or {param?}).
@@ -301,7 +295,7 @@ class Routes {
             
             self::$route_vars[$param_name] = $path_segment;
               
-          elseif (!$is_optional):
+          elseif ( !$is_optional ):
             
             // If the parameter is required but not provided, return false.
             return false;
@@ -318,6 +312,7 @@ class Routes {
           endif;
           
         endif;
+        
       
       endforeach;
 
