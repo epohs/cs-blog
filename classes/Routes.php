@@ -11,6 +11,8 @@ class Routes {
   private $page = null;
   
   private $path = null;
+  
+  private static $route_vars = null;
 
 
 
@@ -99,7 +101,7 @@ class Routes {
             $this->is_route('verify', $path) ||
             $this->is_route('login', $path) ||
             $this->is_route('forgot', $path) ||
-            $this->is_route('password-reset', $path) ||
+            $this->is_route('password-reset/{key?}', $path) ||
             $this->is_route('admin/dash', $path) ||
             $this->is_route('admin/profile', $path) ||
             $this->is_route('admin/form-handler', $path)
@@ -247,38 +249,104 @@ class Routes {
   
   public static function is_route(string $url, array $path): bool {
     
-    $return = false;
+    debug_log('in is_route() for url: ' . var_export($url, true));
     
-    
-    // If eithier the string $url, or the array $path
-    // are empty, or if If the 'segments' key doesn't 
-    // exist in $path something is wrong so we return
+    // If eithier of our parameters are empty, or if
+    // the 'segments' key doesn't exist in $path then
+    // our comparissons will fail so we can return
     // false without the need to look further.
-    if ( 
-        ( !empty($url) && !empty($path) ) &&
-        array_key_exists('segments', $path) 
-      ):
+    if ( empty($url) || empty($path) || !isset($path['segments']) ):
+      
+      return false;
+      
+    else:
       
       
-      $url_arr = explode('/', trim($url, '/'));
-      
-      // We're not concerned with the query string when
-      // figuring out the route to serve.
-      $path = $path['segments'];
+      // Explode the URL into segments.
+      $url_segments = explode('/', trim($url, '/'));
+      $path_segments = $path['segments'];
       
 
-      return ( $url_arr === $path );
+      // If the number of URL segments doesn't match, return false.
+      if (count($url_segments) !== count($path_segments)):
+        
+        return false;
+          
+      endif;
       
+
+      self::$route_vars = []; // Initialize route variables
+      
+
+      // Loop through each URL segment and path segment.
+      foreach ($url_segments as $i => $url_segment):
+        
+        // If there's no matching path segment, return false (extra segments in $path).
+        if (!isset($path_segments[$i])):
+          
+          return false;
+          
+        endif;
+        
+        $path_segment = $path_segments[$i];
+        
+        // Check if the current URL segment contains a named parameter (e.g., {param} or {param?}).
+        if ( preg_match('/\{(\w+)\??\}/', $url_segment, $matches) ):
+          
+          $param_name = $matches[1]; // Extract the parameter name
+          $is_optional = substr($url_segment, -1) === '?'; // Check if the parameter is optional
+        
+          // If the path segment exists, store it as a named parameter.
+          if ( !empty($path_segment) ):
+            
+            self::$route_vars[$param_name] = $path_segment;
+              
+          elseif (!$is_optional):
+            
+            // If the parameter is required but not provided, return false.
+            return false;
+          
+          endif;
+          
+        else:
+          
+          // Non-parameter URL segments must match exactly with the corresponding path segment.
+          if ($url_segment !== $path_segment):
+            
+              return false;
+              
+          endif;
+          
+        endif;
+      
+      endforeach;
+
+      
+
+      // If all segments matched, return true.
+      return true;
+        
       
     endif;
-    
-    
-    return $return;
     
     
   } // is_route()
   
   
+  
+  
+  
+  
+  
+  
+  public static function get_route_vars( ?string $key = '' ) {
+    
+    
+    // @todo Add ability to get specific key
+    return self::$route_vars;
+    
+    
+  } // get_route_vars()
   
   
   
