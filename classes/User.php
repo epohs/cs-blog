@@ -564,7 +564,7 @@ class User {
 
       // If we made it here we have a valid User, and that user is
       // eligible for a new password reset.
-
+      // @todo make length a config setting
       $new_reset_token = $this->get_unique_column_val('password_reset_token', ['min_len' => 16]);
 
       $new_reset_started = date('Y-m-d H:i:s');
