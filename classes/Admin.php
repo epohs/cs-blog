@@ -200,11 +200,18 @@ class Admin {
         Routes::redirect_to( $this->page->url_for('profile') );
 
       else:
+        
+        // @todo Do some validation on the reset key
+        // - does it exist
+        // - is it the valid length, and does it contain only approved characters
+        // - check the database. does it exist, is it expired?
+        // > if key doesn't exist display key entry form
+        // > if it does exist and is invalid, redirect to error
+        // > if it does exist and is valid, display reset form
+        $route_vars = Routes::get_route_vars();
           
         
         $nonce = $this->page->set_nonce('password-reset');
-        
-        $route_vars = Routes::get_route_vars();
         
         $this->get_template( 'password-reset', null, ['nonce' => $nonce, 'route_vars' => $route_vars] );
 
