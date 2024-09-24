@@ -208,12 +208,33 @@ class Admin {
         // > if key doesn't exist display key entry form
         // > if it does exist and is invalid, redirect to error
         // > if it does exist and is valid, display reset form
-        $route_vars = Routes::get_route_vars();
+        $reset_key = Routes::get_route_vars('key');
           
+        $key_exists = ( !empty($reset_key) );
+
+
+        if ( $key_exists ):
+
+          // Is key the valid length, and does it contain only approved characters?
+          $key_valid = ( (strlen($reset_key) >= 16) && Utils::is_alphanumeric($reset_key) );
+
+        else:
+
+          $key_valid = false;
+
+        endif;
+
         
         $nonce = $this->page->set_nonce('password-reset');
         
-        $this->get_template( 'password-reset', null, ['nonce' => $nonce, 'route_vars' => $route_vars] );
+        $tmpl_args = [
+                      'nonce' => $nonce,
+                      'key_exists' => $key_exists,
+                      'key_valid' => $key_valid,
+                      'reset_key' => $reset_key
+                    ];
+        
+        $this->get_template( 'password-reset', null, $tmpl_args );
 
       endif;
 
