@@ -204,7 +204,9 @@ class Admin {
         
         $nonce = $this->page->set_nonce('password-reset');
         
-        $this->get_template( 'password-reset', null, ['nonce' => $nonce] );
+        $route_vars = Routes::get_route_vars();
+        
+        $this->get_template( 'password-reset', null, ['nonce' => $nonce, 'route_vars' => $route_vars] );
 
       endif;
 
