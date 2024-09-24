@@ -249,8 +249,6 @@ class Routes {
   
   public static function is_route(string $url, array $path): bool {
     
-    debug_log('in is_route() for url: ' . var_export($url, true));
-    
     // If eithier of our parameters are empty, or if
     // the 'segments' key doesn't exist in $path then
     // our comparissons will fail so we can return
@@ -266,9 +264,10 @@ class Routes {
       $url_segments = explode('/', trim($url, '/'));
       $path_segments = $path['segments'];
       
-
-      // If the number of URL segments doesn't match, return false.
-      if (count($url_segments) !== count($path_segments)):
+      
+      // If the number of URL segments passed is less than the
+      // requested path segments it is an automatic fail.
+      if ( count($url_segments) < count($path_segments) ):
         
         return false;
           
@@ -282,13 +281,17 @@ class Routes {
       foreach ($url_segments as $i => $url_segment):
         
     
-        $path_segment = $path_segments[$i];
+        $path_segment = isset($path_segments[$i]) ? $path_segments[$i] : null;
         
         // Check if the current URL segment contains a named parameter (e.g., {param} or {param?}).
         if ( preg_match('/\{(\w+)\??\}/', $url_segment, $matches) ):
           
-          $param_name = $matches[1]; // Extract the parameter name
-          $is_optional = substr($url_segment, -1) === '?'; // Check if the parameter is optional
+          // Extract the parameter name
+          $param_name = $matches[1];
+          
+          // Check if the parameter is optional
+          $is_optional = substr(trim($url_segment, '{}'), -1) === '?'; 
+          
         
           // If the path segment exists, store it as a named parameter.
           if ( !empty($path_segment) ):
@@ -307,7 +310,7 @@ class Routes {
           // Non-parameter URL segments must match exactly with the corresponding path segment.
           if ($url_segment !== $path_segment):
             
-              return false;
+            return false;
               
           endif;
           
