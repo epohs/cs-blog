@@ -22,6 +22,8 @@
       <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
     
       <h1>Reset password</h1>
+      
+      <p>Route vars: <?php echo var_export($route_vars, true); ?></p>
 
       <?php /*
   
