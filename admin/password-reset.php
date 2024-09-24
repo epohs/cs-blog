@@ -23,7 +23,19 @@
     
       <h1>Reset password</h1>
       
-      <p>Route vars: <?php echo var_export($route_vars, true); ?></p>
+      
+      
+      <?php if ( $key_exists ): ?>
+        
+        <p>Reset key: <?php echo var_export($reset_key, true); ?></p>
+        
+        <p>Key valid: <?php echo var_export($key_valid, true); ?></p>
+        
+      <?php else: ?>
+        
+        <p>[Enter reset key form]</p>
+        
+      <?php endif; ?>
 
       <?php /*
   
