@@ -340,8 +340,19 @@ class Routes {
   public static function get_route_vars( ?string $key = '' ) {
     
     
-    // @todo Add ability to get specific key
-    return self::$route_vars;
+    if ( empty($key) || !array_key_exists($key, self::$route_vars) ):
+      
+      return false;
+      
+    elseif ( array_key_exists($key, self::$route_vars) ):
+      
+      return self::$route_vars[$key];
+      
+    else:
+      
+      return self::$route_vars;
+      
+    endif;
     
     
   } // get_route_vars()
