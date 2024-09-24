@@ -112,8 +112,24 @@ class Utils {
     endfor;
     
     return $random_string;
-}
- // generate_random_string()
+  
+  } // generate_random_string()
+
+
+
+
+
+
+
+
+
+
+
+  public static function is_alphanumeric(string $str): bool {
+
+    return preg_match('/^[a-zA-Z0-9]+$/', $str) === 1;
+
+  } // is_alphanumeric()
   
   
   
