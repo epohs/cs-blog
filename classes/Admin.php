@@ -527,9 +527,14 @@ class Admin {
             // @todo this returns a bool. Check if false and redirect with err if so.
             $this->user->set_password_reset_token( $user_to_reset['id'] );
 
-            Routes::redirect_to( $this->page->url_for('password-reset') );
-
           endif;
+
+          // Redirect to the password reset page regardless.
+          // @todo Make sure there's a message to check your email for the reset key
+          //        and make sure the email is correct.
+          // @todo Make it clear during signup that it's important to remember your email
+          Routes::redirect_to( $this->page->url_for('password-reset') );
+
 
         else:
 
