@@ -27,13 +27,15 @@
       
       
       
-      <?php if ( $key_exists ): ?>
+      <?php if ( $active_key_found ): ?>
         
         <p>Reset key: <?php echo var_export($reset_key, true); ?></p>
         
         <p>Key valid: <?php echo var_export($key_valid, true); ?></p>
         
         <p>active_key_found: <?php echo var_export($active_key_found, true); ?></p>
+
+        <p>[[ Display password reset form here ]]</p>
         
       <?php else: ?>
         
