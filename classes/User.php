@@ -567,12 +567,22 @@ class User {
       // @todo make length a config setting
       $new_reset_token = $this->get_unique_column_val('password_reset_token', ['min_len' => 16]);
 
-      $new_reset_started = date('Y-m-d H:i:s');
+
+      $now = date('Y-m-d H:i:s');
+
+      // Create a DateTime object from the current time
+      $date = new DateTime($now);
+      
+      // Add 30 minutes
+      $date->modify('+30 minutes');
+      
+      // Get the updated datetime as a string
+      $new_reset_expires = $date->format('Y-m-d H:i:s');
 
       // @todo We should use a transaction 
       $is_good_token = $this->set_column('password_reset_token', $new_reset_token, $user_id);
     
-      $is_good_date = $this->set_column('password_reset_started', $new_reset_started, $user_id);
+      $is_good_date = $this->set_column('password_reset_expires', $new_reset_expires, $user_id);
 
       return ( $is_good_token && $is_good_date );
 
@@ -584,6 +594,39 @@ class User {
 
 
   } // set_password_reset_token()
+
+
+
+
+
+
+
+
+  public function check_password_reset_token( string $token ): int|false {
+
+    
+    $db_conn = $this->db->get_conn();
+
+    $stmt = $db_conn->prepare("SELECT id
+                                FROM Users 
+                                WHERE password_reset_token = :token
+                                AND password_reset_expires >= :now
+                                LIMIT 1");
+                                      
+
+    $stmt->execute([
+      ':token' => $token,
+      ':now' => date('Y-m-d H:i:s')
+    ]);
+
+
+    // Fetch the result (just the 'id')
+    return $stmt->fetchColumn();
+
+  } // check_password_reset_token()
+
+
+
 
 
 
@@ -630,8 +673,8 @@ class User {
           is_active BOOLEAN DEFAULT 1,
           is_verified BOOLEAN DEFAULT 0,
           verify_key VARCHAR(16) UNIQUE,
-          password_reset_started DATETIME,
           password_reset_token VARCHAR(64),
+          password_reset_expires DATETIME,
           failed_login_attempts INTEGER DEFAULT 0,
           locked_until DATETIME,
           role TEXT DEFAULT 'user',
