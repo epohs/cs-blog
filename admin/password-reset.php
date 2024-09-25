@@ -21,7 +21,9 @@
       
       <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
     
-      <h1>Reset password</h1>
+      <h1>Enter reset key</h1>
+
+      <p>Check your email.</p>
       
       
       
@@ -31,27 +33,26 @@
         
         <p>Key valid: <?php echo var_export($key_valid, true); ?></p>
         
+        <p>active_key_found: <?php echo var_export($active_key_found, true); ?></p>
+        
       <?php else: ?>
         
-        <p>[Enter reset key form]</p>
+        <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+      
+          <input type="hidden" name="form_name" value="password-reset">
+          <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+          
+          <label for="ResetKey">Reset Key:</label>
+          <input type="text" id="ResetKey" name="reset_key" autocapitalize="off" required>
+          <br>
+          
+          <button type="submit">Submit</button>
+        
+        </form>
         
       <?php endif; ?>
 
-      <?php /*
-  
-      <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
-      
-        <input type="hidden" name="form_name" value="forgot">
-        <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
-        
-        <label for="Email">Email:</label>
-        <input type="text" id="Email" name="email" autocapitalize="off" required>
-        <br>
-        
-        <button type="submit">Reset password</button>
-      
-      </form>
-      */ ?>
+
       
     </main> <!-- .content -->
 
