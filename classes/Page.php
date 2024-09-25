@@ -552,6 +552,16 @@ class Page {
           $is_error = true;
 
           $this->add_error( 'Invalid email address' );
+
+          break;
+
+        case '007':
+
+          $is_error = true;
+
+          $this->add_error( 'Invalid password reset key' );
+
+          break;
       
         case '070':
           
