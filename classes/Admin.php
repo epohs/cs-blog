@@ -202,9 +202,9 @@ class Admin {
       else:
         
         // @todo Do some validation on the reset key
-        // - does it exist
-        // - is it the valid length, and does it contain only approved characters
-        // - check the database. does it exist, is it expired?
+        // ✓ does it exist
+        // ✓ is it the valid length, and does it contain only approved characters
+        // ✓ check the database. does it exist, is it expired?
         // > if key doesn't exist display key entry form
         // > if it does exist and is invalid, redirect to error
         // > if it does exist and is valid, display reset form
@@ -216,13 +216,27 @@ class Admin {
         if ( $key_exists ):
 
           // Is key the valid length, and does it contain only approved characters?
-          $key_valid = ( (strlen($reset_key) >= 16) && Utils::is_alphanumeric($reset_key) );
+          $key_valid = ( (strlen($reset_key) == 16) && Utils::is_alphanumeric($reset_key) );
 
         else:
 
+          // We will use this variable to decide to show the
+          // key entry field
           $key_valid = false;
 
         endif;
+
+
+        // @todo We will delete the key either when it expires or when it is used to reset the pass
+        $active_key_found = $this->user->check_password_reset_token($reset_key);
+
+
+        if ( $key_exists && !$active_key_found ):
+
+          Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+
+        endif;
+
 
         
         $nonce = $this->page->set_nonce('password-reset');
@@ -231,6 +245,7 @@ class Admin {
                       'nonce' => $nonce,
                       'key_exists' => $key_exists,
                       'key_valid' => $key_valid,
+                      'active_key_found' => $active_key_found,
                       'reset_key' => $reset_key
                     ];
         
@@ -522,6 +537,53 @@ class Admin {
 
         endif;
         
+
+      // Forgot password form
+      elseif ( $form_name == 'password-reset' ):
+
+
+        Routes::nonce_redirect($nonce, 'password-reset');
+
+
+        $reset_key = ( isset($post_vars['reset_key']) ) ? $post_vars['reset_key'] : false;
+        $new_pass = ( isset($post_vars['new_pass']) ) ? $post_vars['new_pass'] : false;
+
+
+        // If we have both a key and a new password
+        // then validate both and reset the password for this user
+        // @todo
+        if ( $reset_key && $new_pass ):
+
+          die('Admin.php line ' . __LINE__ );
+        
+        // Else if all we have is a reset key then validate it
+        // and redirect appropriately
+        elseif ( $reset_key ):
+
+          // Is key the valid length, and does it contain only approved characters?
+          $key_valid = ( (strlen($reset_key) == 16) && Utils::is_alphanumeric($reset_key) );
+
+          // @todo We will delete the key either when it expires or when it is used to reset the pass
+          $active_key_found = $this->user->check_password_reset_token($reset_key);
+
+          if ( $key_valid && $active_key_found ):
+
+            // Key was valid so redirect back to the reset page with the key in the URL
+            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}" );
+
+          else:
+
+            // Redirect back with an error
+            Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+
+          endif;
+
+        else:
+
+          Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+
+        endif;
+
         
       else:
         
