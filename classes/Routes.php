@@ -76,7 +76,7 @@ class Routes {
         // so we clear it out.
         $auth->logout();
         
-        self::redirect_to('signup');
+        self::redirect_to( $this->page->url_for('signup') );
         
         
       endif;
