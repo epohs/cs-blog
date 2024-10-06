@@ -10,4 +10,4 @@ Super basic blog, built for my dad.
 - Failed login lockout
 - Delete expired nonces
 - Check all User db flags and datetimes are updated correctly
-- Forgot password reset
+- Forgot password reset.
