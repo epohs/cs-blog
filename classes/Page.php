@@ -17,14 +17,10 @@ class Page {
   
   
   
-  private function __construct( $process_route ) {
+  private function __construct( $first_run ) {
     
     
     $this->block_direct_access();
-
-    
-    // Setup our database
-    $this->db = Db::get_instance();
     
     
     
@@ -51,7 +47,12 @@ class Page {
     // The only time we want to automatically process
     // routes when we instantiate the Page object is
     // during the first page load process.
-    if ( $process_route ):
+    if ( $first_run ):
+      
+      
+      // Setup our database
+      $this->db = Db::get_instance();
+      
       
       // @todo Think of a better way to handle this initial
       // logged in check.
@@ -552,16 +553,6 @@ class Page {
           $is_error = true;
 
           $this->add_error( 'Invalid email address' );
-
-          break;
-
-        case '007':
-
-          $is_error = true;
-
-          $this->add_error( 'Invalid password reset key' );
-
-          break;
       
         case '070':
           
