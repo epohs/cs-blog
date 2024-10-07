@@ -235,18 +235,18 @@ class Db {
     if ( !file_exists($db_file) ) {
       
       try {
+      
+        // Create the database by connecting to it
+        $pdo = new PDO('sqlite:' . $db_file);
         
-          // Create the database by connecting to it
-          $pdo = new PDO('sqlite:' . $db_file);
-          
-          // Set the error mode to exception
-          $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-          
-          // Save database connection
-          $this->db_conn = $pdo;
-          
-          
-          $this->make_tables();
+        // Set the error mode to exception
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
+        // Save database connection
+        $this->db_conn = $pdo;
+        
+        
+        $this->make_tables();
 
           
       } catch (PDOException $e) {
