@@ -29,13 +29,19 @@
       
       <?php if ( $active_key_found ): ?>
         
-        <p>Reset key: <?php echo var_export($reset_key, true); ?></p>
-        
-        <p>Key valid: <?php echo var_export($key_valid, true); ?></p>
-        
-        <p>active_key_found: <?php echo var_export($active_key_found, true); ?></p>
+        <p>Enter new password</p>
 
-        <p>[[ Display password reset form here ]]</p>
+        <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+
+          <input type="hidden" name="form_name" value="password-reset">
+          <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+
+          <label for="Password">New Password:</label>
+          <input type="password" id="Password" name="new_pass" required>
+
+          <button type="submit">Submit</button>
+
+        </form>
         
       <?php else: ?>
         
