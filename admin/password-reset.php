@@ -20,20 +20,17 @@
     <main class="content">
       
       <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
-    
-      <h1>Enter reset key</h1>
-
-      <p>Check your email.</p>
       
       
       
       <?php if ( $active_key_found ): ?>
         
-        <p>Enter new password</p>
+        <h1>Enter new password</h1>
 
         <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
 
           <input type="hidden" name="form_name" value="password-reset">
+          <input type="hidden" name="reset_key" value="<?php echo $reset_key; ?>">
           <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
 
           <label for="Password">New Password:</label>
@@ -45,6 +42,11 @@
         
       <?php else: ?>
         
+    
+        <h1>Enter reset key</h1>
+
+        <p>Check your email.</p>
+
         <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
       
           <input type="hidden" name="form_name" value="password-reset">
