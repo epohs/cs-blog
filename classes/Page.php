@@ -553,6 +553,8 @@ class Page {
           $is_error = true;
 
           $this->add_error( 'Invalid email address' );
+
+          break;
       
         case '070':
           
