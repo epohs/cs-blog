@@ -220,6 +220,13 @@ class Admin {
 
         else:
 
+          // @internal We're deleting the session key here to avoid
+          //            false positives. We reset the session key when
+          //            there is a valid key in the URL, and then test
+          //            it against the key passed as a hidden input field
+          //            when the new password form is submitted.
+          Session::delete_key('reset_key');
+
           // We will use this variable to decide to show the
           // key entry field
           $key_valid = false;
@@ -551,15 +558,51 @@ class Admin {
 
 
         $reset_key = ( isset($post_vars['reset_key']) ) ? $post_vars['reset_key'] : false;
+        $session_key = Session::get_key('reset_key');
+        $keys_match = ( $reset_key === $session_key );
         $new_pass = ( isset($post_vars['new_pass']) ) ? $post_vars['new_pass'] : false;
 
 
         // If we have both a key and a new password
         // then validate both and reset the password for this user
         // @todo
-        if ( $reset_key && $new_pass ):
+        if ( $reset_key && $keys_match && $new_pass ):
 
-          die('Admin.php line ' . __LINE__ );
+          $user_to_reset = $this->user->check_password_reset_token($reset_key);
+
+          // This should never really happen because a user should never be able to get
+          // to the form that allows them to enter a new password if they don't have a reset key
+          // that matches a user, but to be safe 
+          if ( !$user_to_reset ):
+
+            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=070" );
+
+          endif;
+
+
+          if ( $this->user->validate_pass($new_pass) ):
+
+            Session::delete_key('reset_key');
+
+            // Reset the password for the user that matches and redirect to a confirmation page
+            $pass_updated = $this->user->update_password($user_to_reset, $new_pass);
+
+            if ( $pass_updated ):
+
+              Routes::redirect_to( $this->page->url_for('login') . "?msg=101" );
+
+            else:
+
+              Routes::redirect_to( $this->page->url_for('password-reset') . "?err=070" );
+
+            endif;
+
+          else:
+
+            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=003" );
+
+          endif;
+          
         
         // Else if all we have is a reset key then validate it
         // and redirect appropriately
@@ -573,10 +616,14 @@ class Admin {
 
           if ( $key_valid && $active_key_found ):
 
+            Session::set_key('reset_key', $reset_key);
+
             // Key was valid so redirect back to the reset page with the key in the URL
             Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}" );
 
           else:
+
+            Session::delete_key('reset_key');
 
             // Redirect back with an error
             Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
@@ -584,6 +631,8 @@ class Admin {
           endif;
 
         else:
+
+          Session::delete_key('reset_key');
 
           Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
 

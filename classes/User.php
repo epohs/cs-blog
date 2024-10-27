@@ -418,6 +418,24 @@ class User {
 
 
 
+  /**
+   * 
+   */
+  public function update_password( int $user_id, string $password ): bool {
+
+    $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
+
+    return $this->set_column('password', $hashed_pass, $user_id);
+
+  } // update_password()
+
+
+
+
+
+
+
+
 
 
   public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
