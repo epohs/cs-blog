@@ -18,7 +18,8 @@ Super basic blog, built for my dad.
   - Create Defaults class
   - Config::get() should check the config file first, then db settings table, 
     then Defaults class
-- Failed login lockout
+- Look into rate limiting with `symfony/rate-limiter`
+  - Failed login lockout
 - Document and clean everything
   - Cast all method parameters and define return values where possible
   - Add phpdoc for every class and method explaining *why* it exists
