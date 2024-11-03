@@ -60,7 +60,7 @@ class Page {
       // instead of an explicit login check?
       $this->is_logged_in();
     
-      Routes::get_instance( $this, $request_uri );
+      Routing::get_instance( $this, $request_uri );
       
     endif;
     
@@ -617,7 +617,7 @@ class Page {
   
     if (self::$instance === null):
       
-      self::$instance = new Page( $process_route );
+      self::$instance = new self( $process_route );
 
     endif;
   
