@@ -51,13 +51,13 @@ class Admin {
     if ( 
         $this->auth->is_logged_in() &&
         !( 
-          Routes::is_route('verify', $path) || 
-          Routes::is_route('admin/form-handler', $path) 
+          Routing::is_route('verify', $path) || 
+          Routing::is_route('admin/form-handler', $path) 
         ) &&
         Session::get_key(['user', 'role']) == 'null'
         ):
 
-        Routes::redirect_to( $this->page->url_for('verify') );
+        Routing::redirect_to( $this->page->url_for('verify') );
 
     endif;
 
@@ -65,7 +65,7 @@ class Admin {
 
 
     
-    if ( Routes::is_route('admin/dash', $path) ):
+    if ( Routing::is_route('admin/dash', $path) ):
       
       
       // If the current user is an admin load the 
@@ -77,12 +77,12 @@ class Admin {
       
       else:
         
-        Routes::redirect_to( $this->page->url_for('/') );
+        Routing::redirect_to( $this->page->url_for('/') );
         
       endif;
       
       
-    elseif ( Routes::is_route('admin/profile', $path) ):
+    elseif ( Routing::is_route('admin/profile', $path) ):
 
 
 
@@ -98,19 +98,19 @@ class Admin {
         
       else:
         
-        Routes::redirect_to( $this->page->url_for('/') );
+        Routing::redirect_to( $this->page->url_for('/') );
         
       endif;
 
     // Login page
-    elseif ( Routes::is_route('login', $path) ):
+    elseif ( Routing::is_route('login', $path) ):
 
       
       if ( $this->auth->is_logged_in() ):
     
         $redirect_path = ( $this->auth->is_admin() ) ? 'admin/dash' : '/';
 
-        Routes::redirect_to( $this->page->url_for($redirect_path) );
+        Routing::redirect_to( $this->page->url_for($redirect_path) );
 
       else:
         
@@ -122,13 +122,13 @@ class Admin {
       
     
     // Initial sign up page for creating new user
-    elseif ( Routes::is_route('signup', $path) ):
+    elseif ( Routing::is_route('signup', $path) ):
 
       
       // If the user is already logged in redirect to their profile
       if ( Session::get_key(['user', 'id']) ):
 
-        Routes::redirect_to( $this->page->url_for('profile') );
+        Routing::redirect_to( $this->page->url_for('profile') );
 
       else:
           
@@ -143,7 +143,7 @@ class Admin {
       endif;
 
 
-    elseif ( Routes::is_route('verify', $path) ):
+    elseif ( Routing::is_route('verify', $path) ):
       
       
       $user_id = Session::get_key(['user', 'id']);
@@ -155,13 +155,13 @@ class Admin {
         // If user is already logged in redirect to their profile
         if ( intval($cur_user['is_verified']) == 1 ):
 
-          Routes::redirect_to( $this->page->url_for('profile') );
+          Routing::redirect_to( $this->page->url_for('profile') );
 
         endif;
       
       else:
 
-        Routes::redirect_to( $this->page->url_for('login') );
+        Routing::redirect_to( $this->page->url_for('login') );
         
       endif;
       
@@ -173,13 +173,13 @@ class Admin {
       $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
 
     // Forgot password
-    elseif ( Routes::is_route('forgot', $path) ):
+    elseif ( Routing::is_route('forgot', $path) ):
 
       
       // If the user is already logged in redirect to their profile
       if ( Session::get_key(['user', 'id']) ):
 
-        Routes::redirect_to( $this->page->url_for('profile') );
+        Routing::redirect_to( $this->page->url_for('profile') );
 
       else:
         
@@ -191,13 +191,13 @@ class Admin {
 
 
     // Password reset
-    elseif ( Routes::is_route('password-reset/{key?}', $path) ):
+    elseif ( Routing::is_route('password-reset/{key?}', $path) ):
 
       
       // If the user is already logged in redirect to their profile
       if ( Session::get_key(['user', 'id']) ):
 
-        Routes::redirect_to( $this->page->url_for('profile') );
+        Routing::redirect_to( $this->page->url_for('profile') );
 
       else:
         
@@ -208,7 +208,7 @@ class Admin {
         // > if key doesn't exist display key entry form
         // > if it does exist and is invalid, redirect to error
         // > if it does exist and is valid, display reset form
-        $reset_key = Routes::get_route_vars('key');
+        $reset_key = Routing::get_route_vars('key');
           
         $key_exists = ( !empty($reset_key) );
 
@@ -240,7 +240,7 @@ class Admin {
 
         if ( $key_exists && !$active_key_found ):
 
-          Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+          Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
 
         endif;
 
@@ -261,7 +261,7 @@ class Admin {
       endif;
 
       
-    elseif ( Routes::is_route('admin/form-handler', $path) ):
+    elseif ( Routing::is_route('admin/form-handler', $path) ):
       
       
       $this->form_handler();
@@ -321,7 +321,7 @@ class Admin {
   private function form_handler(): void {
     
       
-    $post_vars = Routes::clean_post_vars( $_POST );
+    $post_vars = Routing::clean_post_vars( $_POST );
     
     
     if ( isset($post_vars['form_name']) && isset($post_vars['nonce']) ):
@@ -335,7 +335,7 @@ class Admin {
       if ( $form_name == 'login' ):
 
         
-        Routes::nonce_redirect($nonce, 'login');
+        Routing::nonce_redirect($nonce, 'login');
                
         $user_to_login = $this->user->get_by('email', $post_vars['email']);
         
@@ -376,11 +376,11 @@ class Admin {
           // homepage.
           if ( Session::get_key(['user', 'role']) == 'admin' ):
             
-            Routes::redirect_to( $this->page->url_for('admin/dash') );
+            Routing::redirect_to( $this->page->url_for('admin/dash') );
             
           else:
             
-            Routes::redirect_to( $this->page->url_for('/') );
+            Routing::redirect_to( $this->page->url_for('/') );
             
           endif;
           
@@ -392,7 +392,7 @@ class Admin {
           // the login page with an error.
           //
           // @toto add failed_login_attempts increment.
-          Routes::redirect_to( $this->page->url_for('login') . '?err=005' );
+          Routing::redirect_to( $this->page->url_for('login') . '?err=005' );
           
         endif;
         
@@ -401,13 +401,13 @@ class Admin {
       elseif ( $form_name == 'verify' ):
         
         
-        Routes::nonce_redirect($nonce, 'verify');
+        Routing::nonce_redirect($nonce, 'verify');
         
         // If there is not a user_id in the session
         // Redirect back to the login screen.
         if ( !$user_id = Session::get_key(['user', 'id']) ):
           
-          Routes::redirect_to( $this->page->url_for('login') );
+          Routing::redirect_to( $this->page->url_for('login') );
           
         endif;
         
@@ -438,11 +438,11 @@ class Admin {
           // otherwise, use the non-admin profile page.
           if ( Session::get_key(['user', 'role']) == 'admin' ):
             
-            Routes::redirect_to( $this->page->url_for('admin/profile') );
+            Routing::redirect_to( $this->page->url_for('admin/profile') );
             
           else:
             
-            Routes::redirect_to( $this->page->url_for('profile') );
+            Routing::redirect_to( $this->page->url_for('profile') );
             
           endif;
           
@@ -450,7 +450,7 @@ class Admin {
         // Otherwise, redirect back to verify page with an error
         else:
           
-          Routes::redirect_to( $this->page->url_for('verify') . '?err=004' );
+          Routing::redirect_to( $this->page->url_for('verify') . '?err=004' );
           
         endif;
         
@@ -460,7 +460,7 @@ class Admin {
       elseif ( $form_name == 'signup' ):
         
       
-        Routes::nonce_redirect($nonce, 'signup');
+        Routing::nonce_redirect($nonce, 'signup');
         
         
         $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
@@ -486,26 +486,26 @@ class Admin {
             $this->auth->login($new_user_id, false);
             
             
-            Routes::redirect_to( $this->page->url_for('verify') );
+            Routing::redirect_to( $this->page->url_for('verify') );
             
           else:
             
-            Routes::redirect_to( $this->page->url_for('signup') . '?err=070' );
+            Routing::redirect_to( $this->page->url_for('signup') . '?err=070' );
             
           endif;
           
           
         elseif ( $this->user->user_exists($user_email) ):
           
-          Routes::redirect_to( $this->page->url_for('signup') . '?err=002' );
+          Routing::redirect_to( $this->page->url_for('signup') . '?err=002' );
             
         elseif ( !$this->user->validate_pass($user_pass) ):
           
-          Routes::redirect_to( $this->page->url_for('signup') . '?err=003' );
+          Routing::redirect_to( $this->page->url_for('signup') . '?err=003' );
             
         else:
           
-          Routes::redirect_to( $this->page->url_for('signup') . '?err=070' );
+          Routing::redirect_to( $this->page->url_for('signup') . '?err=070' );
           
         endif;
 
@@ -515,7 +515,7 @@ class Admin {
       elseif ( $form_name == 'forgot' ):
 
 
-        Routes::nonce_redirect($nonce, 'forgot');
+        Routing::nonce_redirect($nonce, 'forgot');
         
         
         $user_email = isset($post_vars['email']) ? $post_vars['email'] : false;
@@ -540,12 +540,12 @@ class Admin {
           // @todo Make sure there's a message to check your email for the reset key
           //        and make sure the email is correct.
           // @todo Make it clear during signup that it's important to remember your email
-          Routes::redirect_to( $this->page->url_for('password-reset') );
+          Routing::redirect_to( $this->page->url_for('password-reset') );
 
 
         else:
 
-          Routes::redirect_to( $this->page->url_for('forgot') . '?err=006' );
+          Routing::redirect_to( $this->page->url_for('forgot') . '?err=006' );
 
         endif;
         
@@ -554,7 +554,7 @@ class Admin {
       elseif ( $form_name == 'password-reset' ):
 
 
-        Routes::nonce_redirect($nonce, 'password-reset');
+        Routing::nonce_redirect($nonce, 'password-reset');
 
 
         $reset_key = ( isset($post_vars['reset_key']) ) ? $post_vars['reset_key'] : false;
@@ -575,7 +575,7 @@ class Admin {
           // that matches a user, but to be safe 
           if ( !$user_to_reset ):
 
-            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=070" );
+            Routing::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=070" );
 
           endif;
 
@@ -589,17 +589,17 @@ class Admin {
 
             if ( $pass_updated ):
 
-              Routes::redirect_to( $this->page->url_for('login') . "?msg=101" );
+              Routing::redirect_to( $this->page->url_for('login') . "?msg=101" );
 
             else:
 
-              Routes::redirect_to( $this->page->url_for('password-reset') . "?err=070" );
+              Routing::redirect_to( $this->page->url_for('password-reset') . "?err=070" );
 
             endif;
 
           else:
 
-            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=003" );
+            Routing::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=003" );
 
           endif;
           
@@ -619,14 +619,14 @@ class Admin {
             Session::set_key('reset_key', $reset_key);
 
             // Key was valid so redirect back to the reset page with the key in the URL
-            Routes::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}" );
+            Routing::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}" );
 
           else:
 
             Session::delete_key('reset_key');
 
             // Redirect back with an error
-            Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+            Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
 
           endif;
 
@@ -634,7 +634,7 @@ class Admin {
 
           Session::delete_key('reset_key');
 
-          Routes::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+          Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
 
         endif;
 

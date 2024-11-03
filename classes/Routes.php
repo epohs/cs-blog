@@ -129,7 +129,7 @@ class Routes {
 
       if ( $auth->is_logged_in() && $auth->is_admin() ):
 
-        Routes::redirect_to( $this->page->url_for('admin/profile') );
+        Routing::redirect_to( $this->page->url_for('admin/profile') );
 
       elseif ( $auth->is_logged_in() ):
 
@@ -141,7 +141,7 @@ class Routes {
 
       else:
 
-        Routes::redirect_to( $this->page->url_for('/') );
+        Routing::redirect_to( $this->page->url_for('/') );
 
       endif;
       
@@ -487,7 +487,7 @@ class Routes {
   
     if (self::$instance === null):
       
-      self::$instance = new Routes( $page, $request_uri );
+      self::$instance = new self( $page, $request_uri );
     
     endif;
     
