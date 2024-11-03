@@ -11,6 +11,10 @@ class Routing {
   private $page = null;
   
   private $path = null;
+
+  private $Routes = null;
+
+  private $Admin_Routes = null;
   
   private static $route_vars = null;
 
@@ -33,6 +37,12 @@ class Routing {
 
     
     $this->path = $this->process_path( $request_uri );
+
+
+    $this->Routes = Routes::get_instance( $this->page, $this->path );
+
+
+    $this->Admin_Routes = Admin_Routes::get_instance( $this->path );
     
     
     $this->serve_route( $this->path );
@@ -55,10 +65,60 @@ class Routing {
    *
    * @todo clean up segment parsing
    */
-  private function serve_route( $path ) {
+  private function serve_route( array $path ) {
 
     
     
+    $this->first_run_check( $path );
+    
+    $all_routes = $this->Routes->get_routes();
+
+    $valid_route = false;
+    
+
+    // Homepage
+    //if ( $this->is_route('/', $path) ):
+    // @todo Think of a more efficient way to find the current route
+    //        rather than looping through each of them.
+    foreach( $all_routes as $route_key => $handler ):
+
+      if ( $this->is_route($route_key, $path) ):
+
+        $valid_route = true;
+
+         $this->Routes->serve($route_key);
+
+        break;
+
+      endif;
+
+    endforeach;
+    
+    
+    
+    // If all of the other route checks failed serve a 404.
+    if ( !$valid_route ):
+
+      $this->Routes->serve('404');
+
+    endif;
+    
+    
+    
+  } // serve_route()
+  
+  
+
+
+
+
+
+
+
+
+  private function first_run_check( array $path ) {
+
+
     if ( !$this->is_route('signup', $path) &&
          !$this->is_route('admin/form-handler', $path) ):
     
@@ -83,95 +143,9 @@ class Routing {
       
       
     endif;
-    
-    
-    
-
-    // Homepage
-    if ( $this->is_route('/', $path) ):
-    
-    
-      $this->page->get_template( "index" );
-    
-    
-    // If we're serving a andmin route we need to use
-    // the the route handling from the Admin class.
-    elseif (
-            $this->is_route('signup', $path) ||
-            $this->is_route('verify', $path) ||
-            $this->is_route('login', $path) ||
-            $this->is_route('forgot', $path) ||
-            $this->is_route('password-reset/{key?}', $path) ||
-            $this->is_route('admin/dash', $path) ||
-            $this->is_route('admin/profile', $path) ||
-            $this->is_route('admin/form-handler', $path)
-          ):
-    
-      
-      $admin = Admin::get_instance();
-    
-      $admin->serve_route( $path );
-      
-      
-    elseif ( $this->is_route('post', $path) ):
-      
-  
-      $converter = new HtmlConverter(array('strip_tags' => true));
-      
-      $this->page->get_template( 'post', null, ['converter' => $converter] );
-      
-      
-    elseif ( $this->is_route('profile', $path) ):
-      
-      
-      $auth = Auth::get_instance();
 
 
-      if ( $auth->is_logged_in() && $auth->is_admin() ):
-
-        Routing::redirect_to( $this->page->url_for('admin/profile') );
-
-      elseif ( $auth->is_logged_in() ):
-
-        $user = User::get_instance();
-
-        $cur_user = $user->get( Session::get_key(['user', 'id']) );
-      
-        $this->page->get_template( 'profile', null, ['cur_user' => $cur_user] );
-
-      else:
-
-        Routing::redirect_to( $this->page->url_for('/') );
-
-      endif;
-      
-      
-      
-    elseif ( $this->is_route('logout', $path) ):
-      
-
-      $auth = Auth::get_instance();
-    
-      $auth->logout( Session::get_key(['user', 'id']) );
-      
-      self::redirect_to( $this->page->url_for('/') );
-    
-    
-    // If all of the other route checks failed
-    // serve a 404.
-    else:
-      
-      
-      $this->page->get_template( '404' );
-      
-      
-    endif;
-    
-    
-    
-  } // serve_route()
-  
-  
+  } // first_run_check()
   
   
   

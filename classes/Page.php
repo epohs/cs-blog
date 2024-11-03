@@ -117,20 +117,6 @@ class Page {
   
   
   
-  
-  public function get_page_title(): string {
-    
-    return $this->config->get('site_name');
-    
-  } // get_page_title()
-  
-  
-  
-  
-  
-  
-  
-  
   public function url_for( $path ): string {
     
     $path = ( $path === '/' ) ? '' : $path;
@@ -140,6 +126,20 @@ class Page {
     return $site_root . '/' . $path;
     
   } // url_for()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public function get_page_title(): string {
+    
+    return $this->config->get('site_name');
+    
+  } // get_page_title()
   
   
   

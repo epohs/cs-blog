@@ -7,12 +7,12 @@ class Routes {
 
   
   private static $instance = null;
-  
-  private $page = null;
-  
-  private $path = null;
-  
-  private static $route_vars = null;
+
+  private $Page = null;
+
+  private $Admin_Routes = null;
+
+  public $map = null;
 
 
 
@@ -23,471 +23,198 @@ class Routes {
 
 
   
-  private function __construct( $page, $request_uri ) {
+  private function __construct( $Page, $path ) {
+
+
+    $this->Page = $Page;
+
+    $this->Admin_Routes = Admin_Routes::get_instance($path);
 
     
-    $this->block_direct_access();
-    
-    
-    $this->page = $page;
+    $this->add_route('/', $this, 'home');
+    $this->add_route('profile', $this, 'profile');
+    $this->add_route('post', $this, 'post');
+    $this->add_route('logout', $this, 'logout');
+    $this->add_route('404', $this, '_404');
 
-    
-    $this->path = $this->process_path( $request_uri );
-    
-    
-    $this->serve_route( $this->path );
+
+    // Admin Routes
+    $this->add_route('admin/dash', $this->Admin_Routes, 'dashboard');
+    $this->add_route('admin/profile', $this->Admin_Routes, 'profile');
+    $this->add_route('login', $this->Admin_Routes, 'login');
+    $this->add_route('signup', $this->Admin_Routes, 'signup');
+    $this->add_route('verify', $this->Admin_Routes, 'verify');
+    $this->add_route('forgot', $this->Admin_Routes, 'forgot_password');
+    $this->add_route('password-reset/{key?}', $this->Admin_Routes, 'password_reset');
+    $this->add_route('admin/form-handler', $this->Admin_Routes, 'placeholder');
+
+
+  
     
     
   } // __construct()
+
   
+
+
+
+
+
+
+
+  private function home() {
+
+    $this->Page->get_template( "index" );
+
+  } // home()
+
   
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * Determine which template will handle our
-   * request, and prepare the data for that 
-   * page.
-   *
-   * @todo clean up segment parsing
-   */
-  private function serve_route( $path ) {
-
-    
-    
-    if ( !$this->is_route('signup', $path) &&
-         !$this->is_route('admin/form-handler', $path) ):
-    
-      $db = Db::get_instance();
-    
-      // Ensure that we have at least one admin user
-      if ( !$db->row_exists('Users', 'role', 'admin') ):
-        
-        $auth = Auth::get_instance();
-        
-        // This really should never matter in real world
-        // scenerios, but if the database is deleted while
-        // a user is logged in they could retain cookie and
-        // session data and confuse the is_logged_in() function
-        // so we clear it out.
-        $auth->logout();
-        
-        self::redirect_to( $this->page->url_for('signup') );
-        
-        
-      endif;
-      
-      
-    endif;
-    
-    
-    
-
-    // Homepage
-    if ( $this->is_route('/', $path) ):
-    
-    
-      $this->page->get_template( "index" );
-    
-    
-    // If we're serving a andmin route we need to use
-    // the the route handling from the Admin class.
-    elseif (
-            $this->is_route('signup', $path) ||
-            $this->is_route('verify', $path) ||
-            $this->is_route('login', $path) ||
-            $this->is_route('forgot', $path) ||
-            $this->is_route('password-reset/{key?}', $path) ||
-            $this->is_route('admin/dash', $path) ||
-            $this->is_route('admin/profile', $path) ||
-            $this->is_route('admin/form-handler', $path)
-          ):
-    
-      
-      $admin = Admin::get_instance();
-    
-      $admin->serve_route( $path );
-      
-      
-    elseif ( $this->is_route('post', $path) ):
-      
-  
-      $converter = new HtmlConverter(array('strip_tags' => true));
-      
-      $this->page->get_template( 'post', null, ['converter' => $converter] );
-      
-      
-    elseif ( $this->is_route('profile', $path) ):
-      
-      
-      $auth = Auth::get_instance();
 
 
-      if ( $auth->is_logged_in() && $auth->is_admin() ):
 
-        Routing::redirect_to( $this->page->url_for('admin/profile') );
 
-      elseif ( $auth->is_logged_in() ):
 
-        $user = User::get_instance();
 
-        $cur_user = $user->get( Session::get_key(['user', 'id']) );
+
+  private function post() {
       
-        $this->page->get_template( 'profile', null, ['cur_user' => $cur_user] );
-
-      else:
-
-        Routing::redirect_to( $this->page->url_for('/') );
-
-      endif;
-      
-      
-      
-    elseif ( $this->is_route('logout', $path) ):
-      
-
-      $auth = Auth::get_instance();
+    $converter = new HtmlConverter(array('strip_tags' => true));
     
-      $auth->logout( Session::get_key(['user', 'id']) );
+    $this->Page->get_template( 'post', null, ['converter' => $converter] );
+
+  } // post()
+
+
+
+
+
+
+
+
+  private function profile() {
       
-      self::redirect_to( $this->page->url_for('/') );
+      
+    $auth = Auth::get_instance();
+
+
+    if ( $auth->is_logged_in() && $auth->is_admin() ):
+
+      Routing::redirect_to( $this->Page->url_for('admin/profile') );
+
+    elseif ( $auth->is_logged_in() ):
+
+      $user = User::get_instance();
+
+      $cur_user = $user->get( Session::get_key(['user', 'id']) );
     
-    
-    // If all of the other route checks failed
-    // serve a 404.
+      $this->Page->get_template( 'profile', null, ['cur_user' => $cur_user] );
+
     else:
-      
-      
-      $this->page->get_template( '404' );
-      
-      
-    endif;
-    
-    
-    
-  } // serve_route()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  private function process_path( $request_uri ) {
-    
-    $parsed_request = [
-      'segments' => [],
-      'query_str' => []
-    ];
-    
-    
-    // If request_uri is null we can't figure out what
-    // page we need to serve so log an error and bail.
-    if ( is_null($request_uri) ):
-      
-      $this->page->add_error('Bad REQUEST_URI.');
-      
-      return $parsed_request;
-      
-    endif;
-    
-    
-    // Remove all characters except letters, digits and 
-    // $-_.+!*'(),{}|\\^~[]`<>#%";/?:@&=.
-    $request_uri = filter_var($request_uri, FILTER_SANITIZE_URL);
 
-    
-    // Parse the URL to get the path and query string vars
-    $parsed_url = parse_url($request_uri);
-    
-    $path = ( isset($parsed_url['path']) ) ? $parsed_url['path'] : '';
-    
-    // Remove the trailing slash if present
-    $path = rtrim($path, '/');
-    
-    
-    
-    // Break the path into segments
-    $segments = explode('/', trim($path, '/'));
-    
-    
-    // Parse the query string into an associative array
-    $query_str_raw = $parsed_url['query'] ?? '';
-    
-    parse_str($query_str_raw, $query_str);
-    
-    
-    $parsed_request = [
-      'segments' => $segments,
-      'query_str' => $query_str
-    ];
-    
-    
-    return $parsed_request;
-    
-    
-  } // process_path()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  public static function is_route(string $url, array $path): bool {
-    
-    // If eithier of our parameters are empty, or if
-    // the 'segments' key doesn't exist in $path then
-    // our comparissons will fail so we can return
-    // false without the need to look further.
-    if ( empty($url) || empty($path) || !isset($path['segments']) ):
-      
-      return false;
-      
-    else:
-      
-      
-      // Explode the URL into segments.
-      $url_segments = explode('/', trim($url, '/'));
-      $path_segments = $path['segments'];
-      
-      
-      // If the number of URL segments passed is less than the
-      // requested path segments it is an automatic fail.
-      if ( count($url_segments) < count($path_segments) ):
-        
-        return false;
-          
-      endif;
+      Routing::redirect_to( $this->Page->url_for('/') );
+
+    endif;
+
+
+  } // profile()
+
+
+
+
+
+
+
+
+
+
+  private function logout() {
       
 
-      self::$route_vars = []; // Initialize route variables
-      
+    $auth = Auth::get_instance();
+  
+    $auth->logout( Session::get_key(['user', 'id']) );
+    
+    Routing::redirect_to( $this->Page->url_for('/') );
 
-      // Loop through each URL segment and path segment.
-      foreach ($url_segments as $i => $url_segment):
-        
-    
-        $path_segment = isset($path_segments[$i]) ? $path_segments[$i] : null;
-        
-        // Check if the current URL segment contains a named parameter (e.g., {param} or {param?}).
-        if ( preg_match('/\{(\w+)\??\}/', $url_segment, $matches) ):
-          
-          // Extract the parameter name
-          $param_name = $matches[1];
-          
-          // Check if the parameter is optional
-          $is_optional = substr(trim($url_segment, '{}'), -1) === '?'; 
-          
-        
-          // If the path segment exists, store it as a named parameter.
-          if ( !empty($path_segment) ):
-            
-            self::$route_vars[$param_name] = $path_segment;
-              
-          elseif ( !$is_optional ):
-            
-            // If the parameter is required but not provided, return false.
-            return false;
-          
-          endif;
-          
-        else:
-          
-          // Non-parameter URL segments must match exactly with the corresponding path segment.
-          if ($url_segment !== $path_segment):
-            
-            return false;
-              
-          endif;
-          
-        endif;
-        
-      
-      endforeach;
 
-      
+  } // logout()
 
-      // If all segments matched, return true.
-      return true;
-        
-      
-    endif;
+
+
+
+
+
+
+
+  private function _404() {
     
-    
-  } // is_route()
-  
-  
-  
-  
-  
-  
-  
-  
-  public static function get_route_vars( ?string $key = '' ) {
-    
-    
-    if ( empty($key) || !array_key_exists($key, self::$route_vars) ):
-      
-      return false;
-      
-    elseif ( array_key_exists($key, self::$route_vars) ):
-      
-      return self::$route_vars[$key];
-      
-    else:
-      
-      return self::$route_vars;
-      
-    endif;
-    
-    
-  } // get_route_vars()
-  
-  
-  
-  
-  
-  
-  
-  
-  public static function redirect_to(string $url, int $statusCode = 302): void {
-    
-    
-    if ( !headers_sent() ):
-      
-      http_response_code($statusCode);
-      header("Location: " . $url);
-      exit();
-    
-    else:
-      
-      // Handle the case where headers have already been sent
-      echo "<script type='text/javascript'>window.location.href='{$url}';</script>";
-      exit();
-    
-    endif;
-    
-    
-  } // redirect_to()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  public static function nonce_redirect(string $nonce, string $action, ?string $redir_path = '', ?string $err = '001'): void {
-    
-    
-    if ( !Page::validate_nonce($nonce, $action) ):
-      
-      $page = Page::get_instance();
-      
-      $redir_path = ( $redir_path !== '' ) ? $redir_path : $action;
-      
-      $redir_path = $page->site_root() . '/' . $redir_path;
-      
-      self::redirect_to( $redir_path . '?err=' . rawurlencode($err) );
-      
-    endif;
-    
-    
-    
-  } // nonce_redirect()
-  
+    $this->Page->get_template( '404' );
+
+  } // 404()
+
+
+
+
+
+
+
+
+  private function add_route(string $key, $class_instance, string $method_name) {
+
+    // Initialize $map if it's null
+    $this->map ??= [];
+
+    $this->map[$key] = [$class_instance, $method_name];
+
+  } // add_route()
+
+
+
+
+
+
+
+  public function get_routes(): array|null {
+
+
+    return $this->map;
+
+
+  } // get_routes()
+
+
+
+
+
+
+
+
+  public function serve(string $key) {
+
+    if (isset($this->map[$key]) && is_callable($this->map[$key])) {
+
+      call_user_func($this->map[$key]);
+
+    } else {
+
+      echo "Method for '$key' not callable or does not exist.";
+
+    }
+
+  } // serve()
+
+
+
+
+
+
 
   
-  
-  
-  
-  
-  
-  
-  public static function clean_post_vars(array $post): array {
-    
-    $sanitized = [];
-    
-    foreach ($post as $key => $value) :
-    
-      if (is_array($value)):
-        
-        // Recursively sanitize arrays
-        $sanitized[$key] = $this->clean_post_vars($value);
-        
-      else:
-        
-        // Trim whitespace
-        $value = trim($value);
-        
-        // Remove HTML tags and encode special characters
-        $value = htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
-        
-        // Add to the sanitized array
-        $sanitized[$key] = $value;
-        
-      endif;
-      
-    endforeach;
-    
-    return $sanitized;
-    
-  } // clean_post_vars()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * If this class is instantiated outside the proper
-   * scope prevent further instantiation.
-   */
-  private function block_direct_access() {
-    
-    if ( !defined('ROOT_PATH') ):
-      
-      die('Class called incorrectly.');
-    
-    endif;
-    
-    
-  } // block_direct_access()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  public static function get_instance( $page, $request_uri ) {
+  public static function get_instance( $Page, $path ) {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $page, $request_uri );
+      self::$instance = new self( $Page, $path );
     
     endif;
     
@@ -495,6 +222,7 @@ class Routes {
     return self::$instance;
   
   } // get_instance()
+
 
     
 } // ::Routes
