@@ -76,8 +76,7 @@ class Routing {
     $valid_route = false;
     
 
-    // Homepage
-    //if ( $this->is_route('/', $path) ):
+    
     // @todo Think of a more efficient way to find the current route
     //        rather than looping through each of them.
     foreach( $all_routes as $route_key => $handler ):
@@ -86,7 +85,7 @@ class Routing {
 
         $valid_route = true;
 
-         $this->Routes->serve($route_key);
+        $this->Routes->serve($route_key);
 
         break;
 
