@@ -79,6 +79,9 @@ class Routing {
     
     // @todo Think of a more efficient way to find the current route
     //        rather than looping through each of them.
+    // @internal I think I could parse the $path and then limit the $all_routes array
+    //              to only the keys that match the first segment, then loop through
+    //              those. I would need to handle the site root so that / matches.
     foreach( $all_routes as $route_key => $handler ):
 
       if ( $this->is_route($route_key, $path) ):
