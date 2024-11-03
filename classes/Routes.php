@@ -12,6 +12,8 @@ class Routes {
 
   private $Admin_Routes = null;
 
+  private $Form_Handler = null;
+
   public $map = null;
 
 
@@ -30,6 +32,8 @@ class Routes {
 
     $this->Admin_Routes = Admin_Routes::get_instance($path);
 
+    $this->Form_Handler = Form_Handler::get_instance();
+
     
     $this->add_route('/', $this, 'home');
     $this->add_route('profile', $this, 'profile');
@@ -46,7 +50,10 @@ class Routes {
     $this->add_route('verify', $this->Admin_Routes, 'verify');
     $this->add_route('forgot', $this->Admin_Routes, 'forgot_password');
     $this->add_route('password-reset/{key?}', $this->Admin_Routes, 'password_reset');
-    $this->add_route('admin/form-handler', $this->Admin_Routes, 'placeholder');
+
+
+    // Forms
+    $this->add_route('admin/form-handler', $this->Form_Handler, 'process');
 
 
   
