@@ -6,18 +6,37 @@
 // file directly. We don't want that so we end
 // the script immediately, without displaying 
 // any of our config values.
+//
 // For better security this file should be blocked
 // by nginx or htaccess.
+
 if ( !defined('ROOT_PATH') ):
 
   die();
   
 endif;
 
-?>
-{
-  "debug" : true,
-  "public" : false,
-  "site_name" : "Dad's Blog",
-  "site_url" : ""
-}
+
+
+
+
+// Look in the Defaults class for all available options
+// to override here.
+$config = [
+  
+  "debug" => true,
+  
+  "public" => false,
+  
+  // "site_name" => "Your site name",
+    
+  // "site_root" => "https://www.yoursite.com"
+
+];
+
+
+
+
+
+
+return $config;
