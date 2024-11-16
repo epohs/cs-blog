@@ -35,39 +35,46 @@ class Config {
   // Initialize the configuration by loading the config.json file
   public function init() {
 
+    $defaults = Defaults::get_instance();
+
+    // Start with defaults
+    $this->config_vars = $defaults->get();
+
+
     $config_path = ROOT_PATH . '/config.php';
-    
+
+
     if ( file_exists($config_path) ):
-      
-      // Use output buffering to strip PHP code from config file
-      ob_start();
-      
-      require_once($config_path);
-      
-      $file_content = ob_get_clean();
-      
-      
-      $json_content = json_decode($file_content, true);
-      
-      
-      // Test whether the json file is valie
-      if ( json_last_error() === JSON_ERROR_NONE ):
-      
-        $this->config_vars = $json_content;
+
+      // Include the config file and get its return value
+      $config_data = include($config_path);
+
+      // Validate that the included file returns an array
+      if (is_array($config_data)):
+        
+        // Merge defaults with config values (config values take precedence)
+        $this->config_vars = array_merge($this->config_vars, $config_data);
 
       else:
-        
-        $this->config_errors[] = ['level' => 'error', 'msg' => 'Invalid config file.'];
-        
+
+        $this->config_errors[] = [
+          'level' => 'error',
+          'msg' => 'Config file does not return a valid array.'
+        ];
+
       endif;
-      
+
     else:
-      
-      $this->config_errors[] = ['level' => 'error', 'msg' => 'No config file found.'];
-        
-    endif; 
-    
+
+      $this->config_errors[] = [
+        'level' => 'error',
+        'msg' => 'No config file found.'
+      ];
+
+    endif;
+
   } // init()
+  
  
  
  
