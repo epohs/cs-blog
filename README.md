@@ -8,11 +8,7 @@ Super basic blog, built for my dad.
 
 
 
-- Restructure config value handling
-  - Look into best practice for config file format
-  - Create Defaults class
-  - Config::get() should check the config file first, then db settings table, 
-    then Defaults class
+
 - Look into rate limiting with `symfony/rate-limiter`
   - Failed login lockout
 - Document and clean everything
