@@ -1,4 +1,10 @@
 <?php
+/**
+ * Setup crucial foundations for other classes to be able to do their thing.
+ * 
+ */
+
+
 
 define('ROOT_PATH', __DIR__ . DIRECTORY_SEPARATOR);
 
@@ -24,10 +30,7 @@ spl_autoload_register(function ($class) {
 
 
 
-// Include the config class
-// If errors happen in this class they probably
-// won't show in the browser even when in debug
-// mode because haven't set error reporting yet.
+// Include the config class.
 $config = Config::get_instance();
 
 
@@ -47,7 +50,34 @@ endif;
 
 
 
+$theme = $config->get('theme');
 
+$theme_functions_file = ROOT_PATH . "themes/{$theme}/functions.php";
+
+
+
+
+if ( file_exists($theme_functions_file) ):
+
+  // Include functions.php from the active theme
+  // early in the load process to give this file
+  // as much access as possible.
+  require_once( $theme_functions_file );
+
+endif;
+
+
+
+
+
+
+
+
+
+
+/**
+ * Basic file based logging.
+ */
 function debug_log(string $message): void {
 
   $config = Config::get_instance();
@@ -66,6 +96,3 @@ function debug_log(string $message): void {
 
 
 
-
-// Include functions.php from the active theme
-// require_once();
