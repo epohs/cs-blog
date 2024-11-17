@@ -1,7 +1,9 @@
 <?php
 
 
-
+/**
+ * 
+ */
 class Page {
 
   
@@ -95,7 +97,7 @@ class Page {
 
     return $auth->is_admin();
 
-  }
+  } // is_admin()
 
 
   
@@ -117,7 +119,7 @@ class Page {
   
   
   
-  public function url_for( $path ): string {
+  public function url_for( string $path ): string {
     
     $path = ( $path === '/' ) ? '' : $path;
     
@@ -157,7 +159,7 @@ class Page {
    * wrapper around the get_partial() function, but we
    * change the root directory.
    */
-  public function get_template(string $file, ?string $suffix = null, $args = false) {
+  public function get_template(string $file, ?string $suffix = null, $args = false): void {
     
     
     $this->get_partial($file, $suffix, $args, '');
@@ -174,7 +176,7 @@ class Page {
   
   
   
-  public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false) {
+  public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
     
     $config = Config::get_instance();
@@ -248,7 +250,9 @@ class Page {
       
       
       include( $partial_path );
-      
+
+
+      return true;
       
     else:
       
@@ -271,7 +275,7 @@ class Page {
   
   
   /**
-   * @todo Move nonce related functions to the Auth class.
+   * @todo Move nonce related functions to the Auth class?
    */
   public static function set_nonce(string $action, int $ttl = 3600): string {
     
@@ -335,7 +339,7 @@ class Page {
 
 
 
-  public static function remove_expired_nonces() {
+  public static function remove_expired_nonces(): bool {
 
 
     $nonces = Session::get_key('nonces');
@@ -374,6 +378,8 @@ class Page {
     endif;
 
 
+    return $nonces_changed;
+
   } // remove_expired_nonces()
 
   
@@ -384,7 +390,7 @@ class Page {
   
   
   
-  public function add_error($error_msg, $level = null) {
+  public function add_error(mixed $error_msg, ?string $level = null):void {
 
 
     $acceptable_levels = [
@@ -423,8 +429,10 @@ class Page {
   
   
   
-  
-  public function has_errors($level = false) {
+  /**
+   * 
+   */
+  public function has_errors($level = false): bool {
     
     // @todo add ability to only get errors of a certain level
 
@@ -442,7 +450,7 @@ class Page {
 
 
 
-  public function get_errors($level = false) {
+  public function get_errors($level = false): mixed {
     
 
     // Strip out info and warn level msgs when not in debug mode
@@ -613,7 +621,7 @@ class Page {
   
   
   
-  public static function get_instance( $process_route = false ) {
+  public static function get_instance( ?bool $process_route = false ) {
   
     if (self::$instance === null):
       
