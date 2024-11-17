@@ -1,6 +1,8 @@
 <?php
 
 
+
+
 use League\HTMLToMarkdown\HtmlConverter;
 
 class Routes {
@@ -12,7 +14,7 @@ class Routes {
 
   private $Admin_Routes = null;
 
-  private $Form_Handler = null;
+  private $FormHandler = null;
 
   public $map = null;
 
@@ -32,7 +34,7 @@ class Routes {
 
     $this->Admin_Routes = Admin_Routes::get_instance($path);
 
-    $this->Form_Handler = Form_Handler::get_instance();
+    $this->FormHandler = FormHandler::get_instance();
 
     
     $this->add_route('/', $this, 'home');
@@ -53,7 +55,7 @@ class Routes {
 
 
     // Forms
-    $this->add_route('admin/form-handler', $this->Form_Handler, 'process');
+    $this->add_route('admin/form-handler', $this->FormHandler, 'process');
 
 
   
