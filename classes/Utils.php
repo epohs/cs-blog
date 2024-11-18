@@ -24,6 +24,40 @@ class Utils {
   
   
 
+  
+  
+  
+  
+  
+  public static function convert_to_seconds(string $time_string): int|false {
+  
+    // Regular expression to match the pattern "number + unit"
+    if (preg_match('/^\s*(\d+)\s*(seconds?|minutes?|hours?|days?)\s*$/i', $time_string, $matches)) :
+  
+      $value = (int) $matches[1];
+      $unit = strtolower($matches[2]);
+      
+      // Convert the value based on the unit
+      return match ($unit) {
+        'second', 'seconds' => $value,
+        'minute', 'minutes' => $value * 60,
+        'hour',   'hours'   => $value * 3600,
+        'day',    'days'    => $value * 86400,
+        default             => false,
+      };
+
+    endif;
+
+    // Return false if the format doesn't match
+  
+    return false;
+    
+  } // convert_to_seconds()
+
+  
+  
+  
+  
 
 
 
@@ -130,6 +164,64 @@ class Utils {
     return preg_match('/^[a-zA-Z0-9]+$/', $str) === 1;
 
   } // is_alphanumeric()
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  public static function get_client_ip(): string|false {
+  
+  
+    // Check the most reliable headers in order
+    $headers_to_check = [
+      'HTTP_CLIENT_IP',
+      'HTTP_X_FORWARDED_FOR',
+      'HTTP_X_FORWARDED',
+      'HTTP_X_CLUSTER_CLIENT_IP',
+      'HTTP_FORWARDED_FOR',
+      'HTTP_FORWARDED',
+      'REMOTE_ADDR'
+    ];
+    
+    
+  
+    foreach ($headers_to_check as $header) :
+  
+      if (isset($_SERVER[$header]) && !empty($_SERVER[$header])) :
+  
+        $ip_list = explode(',', $_SERVER[$header]);
+  
+        foreach ($ip_list as $ip) :
+  
+          $ip = trim($ip);
+  
+          if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) :
+  
+            return $ip;
+  
+          endif;
+  
+        endforeach;
+  
+      endif;
+  
+    endforeach;
+    
+    
+  
+    // Return false if no valid IP is found
+    return false;
+    
+  } //get_client_ip()
+
+  
+  
+  
+  
   
   
   
