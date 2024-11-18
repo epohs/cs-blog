@@ -301,6 +301,8 @@ class Db {
     
       User::make_tables( $db );
       
+      RateLimits::make_tables( $db );
+      
     else:
 
       $page = Page::get_instance();
