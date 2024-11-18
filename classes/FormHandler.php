@@ -17,6 +17,8 @@ class FormHandler {
   private $post_vars = null;
 
   private $nonce = null;
+  
+  private $limits = null;
 
 
 
@@ -31,6 +33,8 @@ class FormHandler {
     $this->auth = Auth::get_instance();
 
     $this->user = User::get_instance();
+    
+    $this->limits = RateLimits::get_instance();
 
 
     $this->add_form('login', 'login');
@@ -38,6 +42,9 @@ class FormHandler {
     $this->add_form('signup', 'signup');
     $this->add_form('forgot', 'forgot_password');
     $this->add_form('password-reset', 'password_reset');
+    
+    
+    $this->limits->set('form_login', 5, '5 minutes');
 
     
   } // __construct()
@@ -115,31 +122,31 @@ class FormHandler {
 
 
 
-    $rateLimits = RateLimits::get_instance();
+    // $rateLimits = RateLimits::get_instance();
 
-    $rateLimits->configure_limiter('login_form', 5, '5 minutes');
+    // $rateLimits->configure_limiter('login_form', 5, '5 minutes');
 
 
 
-    if ( !$rateLimits->check('login_form') ):
+    // if ( !$rateLimits->check('login_form') ):
 
-      debug_log('rate limit failed');
+    //   debug_log('rate limit failed');
 
-      $retryAfter = $rateLimits->get_retry_after('login_form');
-      http_response_code(429); // Too Many Requests
+    //   $retryAfter = $rateLimits->get_retry_after('login_form');
+    //   http_response_code(429); // Too Many Requests
 
-      if ($retryAfter):
-        header('Retry-After: ' . $retryAfter);
-      endif;
+    //   if ($retryAfter):
+    //     header('Retry-After: ' . $retryAfter);
+    //   endif;
 
-      echo "Too many login attempts. Please try again after " . date('H:i:s', $retryAfter) . ".";
-      exit;
+    //   echo "Too many login attempts. Please try again after " . date('H:i:s', $retryAfter) . ".";
+    //   exit;
 
-    else:
+    // else:
 
-      debug_log('rate limit good');
+    //   debug_log('rate limit good');
 
-    endif;
+    // endif;
 
 
 

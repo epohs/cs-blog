@@ -1,10 +1,6 @@
 <?php
 
 
-use RedisStorage as CSBlog_Redis;
-
-use Symfony\Component\RateLimiter\RateLimiterFactory;
-use Symfony\Component\RateLimiter\Storage\RedisStorage;
 
 
 class RateLimits {
@@ -12,9 +8,8 @@ class RateLimits {
   
   private static $instance = null;
   
-  private $storage;
-  
   private $limiters = [];
+  
   
   
   
@@ -23,16 +18,14 @@ class RateLimits {
   public function __construct() {
     
     // Set up Redis storage
-    $redis = new Redis();
-    $redis->connect('127.0.0.1', 6379);
+    // $redis = new Redis();
+    // $redis->connect('127.0.0.1', 6379);
 
-    if ( !$redis->ping() ):
+    // if ( !$redis->ping() ):
 
-      die("Redis connection failed");
+    //   die("Redis connection failed");
 
-    endif;
-    
-    $this->storage = new CSBlog_Redis($redis);
+    // endif;
     
   } // _construct()
   
@@ -49,16 +42,31 @@ class RateLimits {
   * @param int $limit Maximum number of actions allowed.
   * @param string $interval Time window for the rate limit (e.g., '5 minutes').
   */
-  public function configure_limiter(string $id, int $limit, string $interval): void {
+  public function set(string $id, int $limit, string $interval): bool {
     
-    $this->limiters[$id] = new RateLimiterFactory([
-      'id' => $id,
-      'policy' => 'sliding_window',
-      'limit' => $limit,
-      'interval' => $interval,
-    ], $this->storage);
     
-  } // configure_limiter()
+    $interval_in_seconds = Utils::convert_to_seconds($interval);
+    
+    
+    if ( $interval_in_seconds ):
+    
+      $this->limiters[$id] = [
+        'id' => $id,
+        'limit' => $limit,
+        'interval' => $interval_in_seconds
+      ];
+      
+      return true;
+      
+    else:
+      
+      return false;
+      
+    endif;
+    
+    
+    
+  } // set()
   
   
   
@@ -80,16 +88,31 @@ class RateLimits {
       
       debug_log("Rate limit {$id} is not configured");
       
-      throw new InvalidArgumentException("Rate limiter '{$id}' is not configured.");
+      return false;
 
     endif;
     
     debug_log("Rate limit {$id} IS configured");
     
     
+    // END HERE BECAUSE I'M NOT FINISHED
+    return true;
+    
+    
+    
     $limiter = $this->limiters[$id]->create();
     
     $limit = $limiter->consume(1);
+    
+    
+    // you can also use the ensureAccepted() method - which throws a
+    // RateLimitExceededException if the limit has been reached
+    // $limiter->consume(1)->ensureAccepted();
+
+    // to reset the counter
+    // $limiter->reset();
+
+    
     
     
     
@@ -162,16 +185,69 @@ class RateLimits {
 
     $limiter = $this->limiters[$id]->create();
     
-    $limitState = $limiter->consume(0);
+    $limit = $limiter->consume(0);
 
-    if ( !$limitState->isAccepted() ) {
-        // Return the time when the user can retry
-        return $limit->getRetryAfter()->getTimestamp();
-    }
+    if ( !$limit->isAccepted() ):
+      
+      // Return the time when the user can retry
+      return $limit->getRetryAfter()->getTimestamp();
+    
+    endif;
+    
 
     return null; // No rate limit, user can proceed
 
   } // get_retry_after()
+  
+  
+  
+  
+  
+  
+  
+  
+
+  public static function make_tables( $db ): bool {
+
+
+    $result = null;
+    
+  
+    try {
+      
+      // Optionally, create tables or perform other setup tasks here
+      $result = $db->exec(
+        "CREATE TABLE IF NOT EXISTS RateLimits (
+          id INTEGER PRIMARY KEY AUTOINCREMENT,
+          selector VARCHAR(64) NOT NULL,
+          client_ip VARCHAR(255) NOT NULL,
+          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+        );"
+      );
+      
+      
+      $result = ( $result === false ) ? false : true;
+      
+    } catch (PDOException $e) {
+    
+      echo "Error: " . $e->getMessage();
+      
+      $result = false;
+      
+    }
+    
+    
+    return $result;
+    
+  
+
+  } // make_tables()
+  
+  
+  
+  
+  
+  
   
   
   
