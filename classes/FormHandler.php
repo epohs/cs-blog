@@ -122,33 +122,16 @@ class FormHandler {
 
 
 
-    $rateLimits = RateLimits::get_instance();
+    
 
-    $rateLimits->check('form_login');
+    if ( !$this->limits->check('form_login') ):
 
-    // $rateLimits->configure_limiter('login_form', 5, '5 minutes');
+      echo "Too many login attempts. Please try again after " . $this->limits->get_retry_after('form_login') . ".";
+      exit;
+
+    endif;
 
 
-
-    // if ( !$rateLimits->check('login_form') ):
-
-    //   debug_log('rate limit failed');
-
-    //   $retryAfter = $rateLimits->get_retry_after('login_form');
-    //   http_response_code(429); // Too Many Requests
-
-    //   if ($retryAfter):
-    //     header('Retry-After: ' . $retryAfter);
-    //   endif;
-
-    //   echo "Too many login attempts. Please try again after " . date('H:i:s', $retryAfter) . ".";
-    //   exit;
-
-    // else:
-
-    //   debug_log('rate limit good');
-
-    // endif;
 
 
 
