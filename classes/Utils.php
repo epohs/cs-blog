@@ -120,7 +120,7 @@ class Utils {
     // Format the date for display
     return $date->format( $format );
     
-  } // delete()
+  } // format_date()
   
   
 
@@ -198,12 +198,26 @@ class Utils {
         foreach ($ip_list as $ip) :
   
           $ip = trim($ip);
+
+          $config = Config::get_instance();
+
+          if ( $config->get('debug') ):
+
+            $is_ip_valid = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE);
+
+          else:
+
+            $is_ip_valid = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
+
+          endif;
   
-          if (filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE)) :
+          if ( $is_ip_valid ) :
   
             return $ip;
   
           endif;
+
+
   
         endforeach;
   
@@ -216,7 +230,7 @@ class Utils {
     // Return false if no valid IP is found
     return false;
     
-  } //get_client_ip()
+  } // get_client_ip()
 
   
   
