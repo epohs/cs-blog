@@ -93,7 +93,6 @@ class RateLimits {
     */
     public function check(string $key, ?bool $increment = true ): bool {
       
-      debug_log("checking rate limit {$key}");
       
       if ( !isset($this->limiters[$key]) ):
         
@@ -102,43 +101,22 @@ class RateLimits {
       endif;
       
       
-      
-      // END HERE BECAUSE I'M NOT FINISHED
-      // return true;
-      
-      
-      
       // Calculate the number of tries used
       $tries_used = $this->get_tries_used($key);
-      
-      //debug_log('Tries used: ' . var_export($tries_used, true));
 
 
       if ( is_countable($tries_used) && (count($tries_used) >= $this->limiters[$key]['limit']) ):
-        
-        debug_log('Too many tries.');
-        debug_log('countable? ' . var_export(is_countable($tries_used), true));
-        if ( is_countable($tries_used) ):
-          debug_log('count: ' . var_export(count($tries_used), true));
-        endif;
 
         $del = $this->delete_expired($key);
-
-        debug_log("Number of keys deleted: {$del}");
         
         return false;
         
       else:
-        
-        
-        debug_log('Num tries in window: ' . var_export(count($tries_used), true));
 
 
         if ( $increment ):
           
           $new_id = $this->add_hit( $key );
-          
-          debug_log('Hit added ID: ' . var_export($new_id, true));
           
         endif;
         
@@ -179,14 +157,28 @@ class RateLimits {
       
       
       
+
+      $now = date('Y-m-d H:i:s');
+
+      $seconds = $this->limiters[$key]['interval'];
+
+      $date = new DateTime($now);
+
+      $date->modify("+{$seconds} seconds");
+
+
+      $expires_at_str = $date->format('Y-m-d H:i:s');
+      
+
       try {
         
-        $sql = "INSERT INTO RateLimits (`key`, `client_ip`) VALUES (:key, :client_ip)";
+        $sql = "INSERT INTO RateLimits (`key`, `client_ip`, `expires_at`) VALUES (:key, :client_ip, :expires_at)";
         $stmt = $this->db->prepare($sql);
         
         // Bind parameters
         $stmt->bindParam(':key', $key, PDO::PARAM_STR);
         $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
+        $stmt->bindParam(':expires_at', $expires_at_str, PDO::PARAM_STR);
         
         // Execute the query
         if ( $stmt->execute() ):
@@ -194,8 +186,6 @@ class RateLimits {
           return $this->db->lastInsertId();
           
         else:
-          
-          debug_log('STATEMENT DIDNT EXECUTE');
           
           return false;
           
@@ -236,17 +226,15 @@ class RateLimits {
       
       $limit = ( $limit ) ? $limit : $this->limiters[$key]['limit'];
       
-      $seconds = $this->limiters[$key]['interval'] ?? null;
+      $current_time = date('Y-m-d H:i:s');
 
       $client_ip = Utils::get_client_ip();
       
-      debug_log('get_tries_used() limit: ' . var_export($limit, true));
       
       
-      if ( is_numeric($limit) && is_numeric($seconds) ):
+      if ( is_numeric($limit) ):
         
         $limit = intval($limit);
-        $seconds = intval($seconds);
         
       else:
         
@@ -260,8 +248,8 @@ class RateLimits {
               FROM RateLimits
               WHERE `key` = :key
                 AND `client_ip` = :client_ip
-                AND `created_at` > date('now', '-' || :seconds || ' seconds')
-              ORDER BY `created_at` ASC
+                AND `expires_at` > :current_time
+              ORDER BY `expires_at` ASC
               LIMIT :limit";
       
       
@@ -271,15 +259,22 @@ class RateLimits {
       
       // Bind the parameters
       $stmt->bindParam(':key', $key, PDO::PARAM_STR);
-      $stmt->bindParam(':seconds', $seconds, PDO::PARAM_INT);
+      $stmt->bindParam(':current_time', $current_time, PDO::PARAM_STR);
       $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
       $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
       
       
       $stmt->execute();
       
-      
-      return $stmt->fetchAll(PDO::FETCH_ASSOC);
+      if ( $limit === 1 ):
+
+        return $stmt->fetch(PDO::FETCH_ASSOC);
+
+      else:
+
+        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+      endif;
       
     } // get_tries_used()
     
@@ -315,15 +310,13 @@ class RateLimits {
       
       $first_try_in_window = $this->get_tries_used($key, 1);
 
-      $created_at = $first_try_in_window['created_at'];
+      $expires_at = $first_try_in_window['expires_at'];
 
-      $created_at_date = new DateTime($created_at);
+      $expires_at_date = new DateTime($expires_at);
 
-      $created_at_date->modify("+{$seconds} seconds");
-
-      $created_at_str = $created_at_date->format('Y-m-d H:i:s');
+      $expires_at_str = $expires_at_date->format('Y-m-d H:i:s');
       
-      $retry_after = Utils::format_date($created_at_str);
+      $retry_after = Utils::format_date($expires_at_str);
       
       
       return $retry_after;
@@ -352,12 +345,12 @@ class RateLimits {
     endif;
 
     
-    $seconds = $this->limiters[$key]['interval'] ?? null;  
+    $current_time = date('Y-m-d H:i:s');
 
 
     $query = "DELETE FROM RateLimits
               WHERE `key` = :key
-                AND `created_at` > date('now', '-' || :seconds || ' seconds')";
+                AND `expires_at` < :current_time";
 
     
     try {
@@ -367,7 +360,7 @@ class RateLimits {
       
       // Bind parameters
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-      $stmt->bindValue(':seconds', $seconds, PDO::PARAM_INT);
+      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       
       // Execute the statement
       $stmt->execute();
@@ -410,7 +403,7 @@ class RateLimits {
         id INTEGER PRIMARY KEY AUTOINCREMENT,
         key VARCHAR(64) NOT NULL,
         client_ip VARCHAR(255) NOT NULL,
-        created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        expires_at DATETIME DEFAULT CURRENT_TIMESTAMP
       );"
       );
       
