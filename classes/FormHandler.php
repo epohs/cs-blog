@@ -122,7 +122,9 @@ class FormHandler {
 
 
 
-    // $rateLimits = RateLimits::get_instance();
+    $rateLimits = RateLimits::get_instance();
+
+    $rateLimits->check('form_login');
 
     // $rateLimits->configure_limiter('login_form', 5, '5 minutes');
 
