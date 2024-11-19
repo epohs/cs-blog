@@ -9,8 +9,7 @@ Super basic blog, built for my dad.
 
 
 
-- Look into rate limiting with `symfony/rate-limiter`
-  - Failed login lockout
+- Failed login lockout
 - Document and clean everything
   - Cast all method parameters and define return values where possible
   - Class properties that are references to other classes should be uppercase
