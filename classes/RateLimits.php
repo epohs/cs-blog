@@ -66,7 +66,6 @@ class RateLimits {
     endif;
     
     
-    
   } // set()
     
     
@@ -227,7 +226,6 @@ class RateLimits {
     $client_ip = Utils::get_client_ip();
     
     
-    
     if ( is_numeric($limit) ):
       
       $limit = intval($limit);
@@ -239,7 +237,6 @@ class RateLimits {
     endif;
     
     
-    
     $query = "SELECT *
             FROM `RateLimits`
             WHERE `key` = :key
@@ -249,12 +246,10 @@ class RateLimits {
             LIMIT :limit";
     
     
-    
-    $stmt = $this->db->prepare($query);
-    
-    
     try {
 
+      $stmt = $this->db->prepare($query);
+    
       // Bind the parameters
       $stmt->bindParam(':key', $key, PDO::PARAM_STR);
       $stmt->bindParam(':current_time', $current_time, PDO::PARAM_STR);
@@ -280,6 +275,7 @@ class RateLimits {
       
     }
     
+
   } // get_tries_used()
     
     
@@ -374,6 +370,7 @@ class RateLimits {
       return 0;
 
     }
+    
 
   } // delete_expired()
     
