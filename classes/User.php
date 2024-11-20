@@ -232,8 +232,8 @@ class User {
     
     $set_verified = $this->set_column('is_verified', 1, $user_id);
     
-    // @internal Probably should reset failed login attempts,
-    // updated_at, and locked_until.
+    // @todo Reset failed login attempts
+    // and locked_until, and set updated_at.
     
     
     return ($remove_verifiy_key && $set_verified);
