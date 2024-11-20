@@ -1,9 +1,8 @@
 <?php
 
 
-
 /**
-* Very basic rate limiting.
+* Very basic IP address based rate limiting.
 * 
 * @todo this needs to check for Redis and use that if available
 */
