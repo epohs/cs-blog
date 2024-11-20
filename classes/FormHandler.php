@@ -137,10 +137,11 @@ class FormHandler {
     
     if ( $user_to_login ):
 
-      // Check whether the locked_until column is set to a 
+      // Check whether the `locked_until` column is set to a 
       // date in the future for this user. If it is, this
       // user is locked out.
-      // Do not proceed with any verification and redirect with an error.
+      // Do not proceed with any verification.
+      // Extend the lockout and redirect with an error.
       if ( isset($user_to_login['locked_until']) &&
             Utils::is_valid_datetime($user_to_login['locked_until']) &&  
             Utils::is_future_datetime($user_to_login['locked_until'])
@@ -200,8 +201,7 @@ class FormHandler {
       
       
       // If the user who just logged in is an admin
-      // go to the admin panel. Otherwise, go to the
-      // homepage.
+      // go to the admin panel. Otherwise, go to the homepage.
       if ( Session::get_key(['user', 'role']) == 'admin' ):
         
         Routing::redirect_to( $this->page->url_for('admin/dash') );
@@ -214,7 +214,7 @@ class FormHandler {
       
     else:
       
-
+      // Login attempt failed. Redirect back with an error.
       Routing::redirect_to( $this->page->url_for('login') . '?err=005' );
 
       
