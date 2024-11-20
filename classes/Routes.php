@@ -12,7 +12,7 @@ class Routes {
 
   private $Page = null;
 
-  private $Admin_Routes = null;
+  private $AdminRoutes = null;
 
   private $FormHandler = null;
 
@@ -32,7 +32,7 @@ class Routes {
 
     $this->Page = $Page;
 
-    $this->Admin_Routes = Admin_Routes::get_instance($path);
+    $this->AdminRoutes = AdminRoutes::get_instance($path);
 
     $this->FormHandler = FormHandler::get_instance();
 
@@ -45,13 +45,13 @@ class Routes {
 
 
     // Admin Routes
-    $this->add_route('admin/dash', $this->Admin_Routes, 'dashboard');
-    $this->add_route('admin/profile', $this->Admin_Routes, 'profile');
-    $this->add_route('login', $this->Admin_Routes, 'login');
-    $this->add_route('signup', $this->Admin_Routes, 'signup');
-    $this->add_route('verify', $this->Admin_Routes, 'verify');
-    $this->add_route('forgot', $this->Admin_Routes, 'forgot_password');
-    $this->add_route('password-reset/{key?}', $this->Admin_Routes, 'password_reset');
+    $this->add_route('admin/dash', $this->AdminRoutes, 'dashboard');
+    $this->add_route('admin/profile', $this->AdminRoutes, 'profile');
+    $this->add_route('login', $this->AdminRoutes, 'login');
+    $this->add_route('signup', $this->AdminRoutes, 'signup');
+    $this->add_route('verify', $this->AdminRoutes, 'verify');
+    $this->add_route('forgot', $this->AdminRoutes, 'forgot_password');
+    $this->add_route('password-reset/{key?}', $this->AdminRoutes, 'password_reset');
 
 
     // Forms

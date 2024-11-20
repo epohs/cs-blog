@@ -15,7 +15,7 @@ class Routing {
 
   private $Routes = null;
 
-  private $Admin_Routes = null;
+  private $AdminRoutes = null;
   
   private static $route_vars = null;
 
@@ -43,7 +43,7 @@ class Routing {
     $this->Routes = Routes::get_instance( $this->page, $this->path );
 
 
-    $this->Admin_Routes = Admin_Routes::get_instance( $this->path );
+    $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
     
     
     $this->serve_route( $this->path );
