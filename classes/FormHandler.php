@@ -119,22 +119,16 @@ class FormHandler {
 
   private function login() {
 
-
-
-
     
-
     if ( !$this->limits->check('form_login') ):
 
-      echo "Too many login attempts. Please try again after " . $this->limits->get_retry_after('form_login') . ".";
+      echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
       exit;
 
     endif;
 
 
-
-
-
+    
     Routing::nonce_redirect($this->nonce, 'login');
                
     $user_to_login = $this->user->get_by('email', $this->post_vars['email']);
@@ -142,6 +136,32 @@ class FormHandler {
     
     
     if ( $user_to_login ):
+
+      // Check whether the locked_until column is set to a 
+      // date in the future for this user. If it is, this
+      // user is locked out.
+      // Do not proceed with any verification and redirect with an error.
+      if ( isset($user_to_login['locked_until']) &&
+            Utils::is_valid_datetime($user_to_login['locked_until']) &&  
+            Utils::is_future_datetime($user_to_login['locked_until'])
+          ):
+
+          // @todo Add a function to extend the lockout.
+          // I'm thinking of something like, if the number of failed attempts is
+          // 5 then do not extend, but do increment the failed attempts column. 
+          // After that, extend the lockout period to 10 minutes into the 
+          // future, then by 5 minutes for every subsequent failure until the 
+          // locked_until time is 30 minutes from the current time. From that point
+          // on each additional fail bumps the locked_until time to one hour from now.
+
+          // @todo Add an ELSEIF to this IF that checks whether locked_until is in the
+          // past. If it is, we should set locked_until to null, but leave failed_attempts as it is.
+
+          echo "Too many failed login attempts. Try again after " . Utils::format_date($user_to_login['locked_until']) . ".";
+          exit;
+
+      endif;
+
       
       if ( password_verify($this->post_vars['password'], $user_to_login['password']) ):
 
@@ -155,6 +175,11 @@ class FormHandler {
         $is_logged_in = $this->auth->login( $user_to_login['id'], $update_last_login, $remember_me );
         
       else:
+
+        // @todo Here is where we want to increment the failed login attempts
+        // column for this user.
+        // Create a method in the User class to handle this and setting
+        // the locked_until column if we're at our limit.
         
         $is_logged_in = false;
         
@@ -169,6 +194,9 @@ class FormHandler {
     
     
     if ( $is_logged_in ):
+
+
+      $this->limits->delete_expired('form_login');
       
       
       // If the user who just logged in is an admin
@@ -186,13 +214,9 @@ class FormHandler {
       
     else:
       
-      
-      // If the login was bad, increment the failed_login_attempts
-      // column in the User table and redirect back to 
-      // the login page with an error.
-      //
-      // @toto add failed_login_attempts increment.
+
       Routing::redirect_to( $this->page->url_for('login') . '?err=005' );
+
       
     endif;
 
@@ -227,11 +251,10 @@ class FormHandler {
     
     $user_to_verify = $this->user->get_by('verify_key', $passed_verify_code);
     
-    // If there is a user with a key entered
+    // If there is a user with this verification key
     // and that user_id matches the user_id in the session
-    // then log the user in setting the last login
-    // timestamp, verify the user, and
-    // redirect to their profile page.
+    // then log the user in setting the last_login timestamp.
+    // Verify the user, and redirect to their profile page.
     if ( isset($user_to_verify['id']) && ($user_to_verify['id'] === $user_id) ):
       
       
