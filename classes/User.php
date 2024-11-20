@@ -667,10 +667,6 @@ class User {
   
   
   public static function make_tables( $db ): bool {
-
-
-    
-    $result = null;
     
   
     try {
@@ -701,20 +697,16 @@ class User {
       );
       
       
-      $result = ( $result === false ) ? false : true;
+      return $result;
       
     } catch (PDOException $e) {
     
       echo "Error: " . $e->getMessage();
       
-      $result = false;
+      return false;
       
     }
     
-    
-    return $result;
-    
-  
 
   } // make_tables()
     
@@ -730,7 +722,6 @@ class User {
   
   
   
-  // Get the singleton instance of the class
   public static function get_instance() {
     
     if ( is_null(self::$instance) ):
