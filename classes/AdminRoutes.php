@@ -3,7 +3,7 @@
 
 
 
-class Admin_Routes {
+class AdminRoutes {
 
   
   private static $instance = null;
@@ -419,4 +419,4 @@ class Admin_Routes {
   
 
     
-} // ::Admin_Routes
+} // ::AdminRoutes
