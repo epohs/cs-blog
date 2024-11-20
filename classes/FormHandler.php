@@ -155,6 +155,8 @@ class FormHandler {
           // locked_until time is 30 minutes from the current time. From that point
           // on each additional fail bumps the locked_until time to one hour from now.
 
+          // $this->user->increment_failed_login($user_to_login);
+
           // @todo Add an ELSEIF to this IF that checks whether locked_until is in the
           // past. If it is, we should set locked_until to null, but leave failed_attempts as it is.
 

@@ -651,6 +651,60 @@ class User {
 
 
 
+  function increment_failed_login(array $user): void {
+
+    $user_id               = $user['id'];
+    $failed_login_attempts = (int)$user['failed_login_attempts'];
+    $locked_until          = $user['locked_until'] ? new DateTime($user['locked_until']) : null;
+    $now                   = new DateTime();
+  
+    
+    $failed_login_attempts++;
+
+  
+    if ( $failed_login_attempts <= 5 ):
+
+      $new_locked_until = $locked_until ?: $now;
+  
+    elseif ( $failed_login_attempts <= 10 ):
+
+      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT10M'));
+  
+    elseif ( $failed_login_attempts <= 15 ):
+
+      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT5M'));
+  
+    else:
+
+      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT1H'));
+  
+    endif;
+
+  
+    $query = $this->db->prepare('
+      UPDATE `Users` 
+      SET `failed_login_attempts` = :failed_login_attempts, 
+          `locked_until` = :locked_until 
+      WHERE `id` = :id
+    ');
+  
+    $query->execute([
+      'failed_login_attempts' => $failed_login_attempts,
+      'locked_until'          => $new_locked_until->format('Y-m-d H:i:s'),
+      'id'                    => $user_id,
+    ]);
+
+  } // increment_failed_login()
+  
+
+
+
+
+
+
+
+
+
 
   private function get_unique_column_val(string $column, array $args = []): string|false {
 
