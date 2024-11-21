@@ -648,55 +648,122 @@ class User {
 
 
 
+  function increment_failed_login(array $user): bool {
+
+    $user_id = $user['id'];
+    $failed_login_attempts = (int) $user['failed_login_attempts'];
+
+    debug_log('Incrementing failed login count. (' . var_export($failed_login_attempts, true) . ')');
+
+    if ( $failed_login_attempts <= 50 ):
+
+      $failed_login_attempts++;
+
+      $db_conn = $this->db->get_conn();
+
+      // @todo Build a method to set initial lockout.
+
+      $query = $db_conn->prepare('
+        UPDATE `Users` 
+        SET `failed_login_attempts` = :failed_login_attempts
+        WHERE `id` = :id
+      ');
+
+
+      $query->bindParam(':failed_login_attempts', $failed_login_attempts, PDO::PARAM_INT);
+      $query->bindParam(':id', $user_id, PDO::PARAM_INT);
+
+      
+
+      return $query->execute();
+
+    else:
+
+      return false;
+
+    endif;
+
+  } // increment_failed_login()
 
 
 
-  function increment_failed_login(array $user): void {
 
-    $user_id               = $user['id'];
-    $failed_login_attempts = (int)$user['failed_login_attempts'];
-    $locked_until          = $user['locked_until'] ? new DateTime($user['locked_until']) : null;
-    $now                   = new DateTime();
+
+
+
+
+
+  function extend_lockout(array $user): void {
+
+    debut_log('Extending lockout');
+
+    $user_id = $user['id'];
+    $failed_login_attempts = (int) $user['failed_login_attempts'];
+    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until']) : null;
+    $now = new DateTime();
+
+    $db_conn = $this->db->get_conn();
   
     
-    $failed_login_attempts++;
+    $this->increment_failed_login($failed_login_attempts++);
 
   
-    if ( $failed_login_attempts <= 5 ):
-
-      $new_locked_until = $locked_until ?: $now;
-  
-    elseif ( $failed_login_attempts <= 10 ):
-
-      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT10M'));
-  
-    elseif ( $failed_login_attempts <= 15 ):
+    if ( ($failed_login_attempts > 5) && ($failed_login_attempts <= 10) ):
 
       $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT5M'));
   
-    else:
+    elseif ( $failed_login_attempts <= 15 ):
 
-      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT1H'));
+      $new_locked_until = $now->add(new DateInterval('PT30M'));
+  
+    elseif ( $failed_login_attempts > 15 ):
+
+      $new_locked_until = $now->add(new DateInterval('PT1H'));
   
     endif;
 
   
-    $query = $this->db->prepare('
+    $query = $db_conn->prepare('
       UPDATE `Users` 
-      SET `failed_login_attempts` = :failed_login_attempts, 
-          `locked_until` = :locked_until 
+      SET `locked_until` = :locked_until 
       WHERE `id` = :id
     ');
-  
-    $query->execute([
-      'failed_login_attempts' => $failed_login_attempts,
-      'locked_until'          => $new_locked_until->format('Y-m-d H:i:s'),
-      'id'                    => $user_id,
-    ]);
 
-  } // increment_failed_login()
+
+    $stmt->bindParam(':locked_until', $new_locked_until->format('Y-m-d H:i:s'));
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+  
+    $query->execute();
+
+  } // extend_lockout()
   
 
+
+
+
+
+
+
+
+  function remove_lockout(array $user): void {
+
+    $user_id = $user['id'];
+
+    $db_conn = $this->db->get_conn();
+
+  
+    $query = $db_conn->prepare('
+      UPDATE `Users` 
+      SET `locked_until` = NULL 
+      WHERE `id` = :id
+    ');
+
+
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+  
+    $query->execute();
+
+  } // extend_lockout()  
 
 
 

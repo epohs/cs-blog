@@ -120,12 +120,12 @@ class FormHandler {
   private function login() {
 
     
-    if ( !$this->limits->check('form_login') ):
+    // if ( !$this->limits->check('form_login') ):
 
-      echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
-      exit;
+    //   echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
+    //   exit;
 
-    endif;
+    // endif;
 
 
     
@@ -147,21 +147,24 @@ class FormHandler {
             Utils::is_future_datetime($user_to_login['locked_until'])
           ):
 
-          // @todo Add a function to extend the lockout.
-          // I'm thinking of something like, if the number of failed attempts is
-          // 5 then do not extend, but do increment the failed attempts column. 
-          // After that, extend the lockout period to 10 minutes into the 
-          // future, then by 5 minutes for every subsequent failure until the 
-          // locked_until time is 30 minutes from the current time. From that point
-          // on each additional fail bumps the locked_until time to one hour from now.
+        debug_log('locked until is set to a future date');
 
-          // $this->user->increment_failed_login($user_to_login);
+        $this->user->extend_lockout($user_to_login);
 
-          // @todo Add an ELSEIF to this IF that checks whether locked_until is in the
-          // past. If it is, we should set locked_until to null, but leave failed_attempts as it is.
+        echo "Too many failed login attempts. Try again after " . Utils::format_date($user_to_login['locked_until']) . ".";
+        exit;
 
-          echo "Too many failed login attempts. Try again after " . Utils::format_date($user_to_login['locked_until']) . ".";
-          exit;
+
+      elseif ( isset($user_to_login['locked_until']) &&
+          Utils::is_valid_datetime($user_to_login['locked_until']) &&  
+          Utils::is_past_datetime($user_to_login['locked_until'])
+        ):
+
+
+        // @todo Add an ELSEIF to this IF that checks whether locked_until is in the
+        // past. If it is, we should set locked_until to null, but leave failed_attempts as it is.
+
+        $this->user->remove_lockout($user_to_login);
 
       endif;
 
@@ -178,13 +181,13 @@ class FormHandler {
         $is_logged_in = $this->auth->login( $user_to_login['id'], $update_last_login, $remember_me );
         
       else:
-
-        // @todo Here is where we want to increment the failed login attempts
-        // column for this user.
-        // Create a method in the User class to handle this and setting
-        // the locked_until column if we're at our limit.
+        
+        debug_log('Password was incorrect.');
+        
+        $this->user->increment_failed_login($user_to_login);
         
         $is_logged_in = false;
+
         
       endif;
       
@@ -201,6 +204,7 @@ class FormHandler {
 
       $this->limits->delete_expired('form_login');
       
+      // @todo Reset login_failed and lockout.
       
       // If the user who just logged in is an admin
       // go to the admin panel. Otherwise, go to the homepage.
