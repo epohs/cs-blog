@@ -661,7 +661,10 @@ class User {
 
       $db_conn = $this->db->get_conn();
 
-      // @todo Build a method to set initial lockout.
+      // @todo Build a method to set initial lockout, or
+      // add a parameter to extend_lockout() to block incrementing
+      // login_attempts and add logic that if locked_until is null
+      // set it to the default 5 min in future.
 
       $query = $db_conn->prepare('
         UPDATE `Users` 
