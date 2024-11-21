@@ -115,6 +115,31 @@ class Utils {
   
   
   
+
+
+
+
+
+  function is_past_datetime(string $datetime): bool {
+    
+    try {
+      
+      $date = new DateTime($datetime);
+      $now = new DateTime();
+      
+      return $date < $now; // Returns true if $datetime is in the future
+      
+    } catch (Exception $e) {
+      
+      // Handle invalid datetime formats
+      return false;
+      
+    }
+    
+  } // is_past_datetime()
+  
+
+  
   
   
   
