@@ -95,7 +95,7 @@ class Utils {
   
   
   
-  function is_future_datetime(string $datetime): bool {
+  public static function is_future_datetime(string $datetime): bool {
     
     try {
       
@@ -120,7 +120,7 @@ class Utils {
 
 
 
-  function is_past_datetime(string $datetime): bool {
+  public static function is_past_datetime(string $datetime): bool {
     
     try {
       
