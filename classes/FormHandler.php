@@ -120,12 +120,12 @@ class FormHandler {
   private function login() {
 
     
-    // if ( !$this->limits->check('form_login') ):
+    if ( !$this->limits->check('form_login') ):
 
-    //   echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
-    //   exit;
+      echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
+      exit;
 
-    // endif;
+    endif;
 
 
     
@@ -146,8 +146,7 @@ class FormHandler {
             Utils::is_valid_datetime($user_to_login['locked_until']) &&  
             Utils::is_future_datetime($user_to_login['locked_until'])
           ):
-
-        debug_log('locked until is set to a future date');
+          
 
         $this->user->extend_lockout($user_to_login);
 
@@ -159,12 +158,10 @@ class FormHandler {
           Utils::is_valid_datetime($user_to_login['locked_until']) &&  
           Utils::is_past_datetime($user_to_login['locked_until'])
         ):
-
-
-        // @todo Add an ELSEIF to this IF that checks whether locked_until is in the
-        // past. If it is, we should set locked_until to null, but leave failed_attempts as it is.
+        
 
         $this->user->remove_lockout($user_to_login);
+        
 
       endif;
 
@@ -182,7 +179,6 @@ class FormHandler {
         
       else:
         
-        debug_log('Password was incorrect.');
         
         $this->user->increment_failed_login($user_to_login);
         

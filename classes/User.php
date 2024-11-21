@@ -646,14 +646,16 @@ class User {
 
 
 
+  
+  
+  
 
 
   function increment_failed_login(array $user): bool {
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
-
-    debug_log('Incrementing failed login count. (' . var_export($failed_login_attempts, true) . ')');
+    
 
     if ( $failed_login_attempts <= 50 ):
 
@@ -661,10 +663,17 @@ class User {
 
       $db_conn = $this->db->get_conn();
 
-      // @todo Build a method to set initial lockout, or
-      // add a parameter to extend_lockout() to block incrementing
-      // login_attempts and add logic that if locked_until is null
-      // set it to the default 5 min in future.
+      // Extend the lockout period but do not increment
+      // the failed lockout count.
+      //
+      // @todo Calls to extend lockout run twice. Fix this.
+      //
+      // @internal I don't like how cyclical this entire lockout
+      // process feels. Revisit this to think of a more unified
+      // way to handle the process with less fragmentation and 
+      // fewer database calls.
+      $this->extend_lockout($user, false);
+      
 
       $query = $db_conn->prepare('
         UPDATE `Users` 
@@ -696,9 +705,8 @@ class User {
 
 
 
-  function extend_lockout(array $user): void {
-
-    debut_log('Extending lockout');
+  function extend_lockout(array $user, ?bool $increment = true): void {
+    
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
@@ -708,10 +716,18 @@ class User {
     $db_conn = $this->db->get_conn();
   
     
-    $this->increment_failed_login($failed_login_attempts++);
+    if ( $increment ):
+      
+      $this->increment_failed_login($user);
+      
+    endif;
 
   
-    if ( ($failed_login_attempts > 5) && ($failed_login_attempts <= 10) ):
+    if ( is_null($locked_until) ):
+
+      $new_locked_until = $now->add(new DateInterval('PT5M'));
+      
+    elseif ($failed_login_attempts <= 10 ):
 
       $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT5M'));
   
@@ -719,12 +735,15 @@ class User {
 
       $new_locked_until = $now->add(new DateInterval('PT30M'));
   
-    elseif ( $failed_login_attempts > 15 ):
+    else:
 
       $new_locked_until = $now->add(new DateInterval('PT1H'));
   
     endif;
-
+    
+    
+    $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
+    
   
     $query = $db_conn->prepare('
       UPDATE `Users` 
@@ -733,8 +752,8 @@ class User {
     ');
 
 
-    $stmt->bindParam(':locked_until', $new_locked_until->format('Y-m-d H:i:s'));
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $query->bindParam(':locked_until', $new_locked_until, PDO::PARAM_STR);
+    $query->bindParam(':id', $user_id, PDO::PARAM_INT);
   
     $query->execute();
 
@@ -762,7 +781,7 @@ class User {
     ');
 
 
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $query->bindParam(':id', $user_id, PDO::PARAM_INT);
   
     $query->execute();
 
