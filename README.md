@@ -19,6 +19,7 @@ Super basic blog, built for my dad.
 - Profile page to update display name
 - Delete expired nonces
 - Check all User db flags and datetimes are updated correctly
+- Revisit failed login process to remove cyclical functions and multiple db calls
 
 
 
