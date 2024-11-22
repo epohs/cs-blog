@@ -767,23 +767,42 @@ class User {
 
 
 
-  function remove_lockout(array $user): void {
+  function remove_lockout(array $user, ?string $mode = 'all'): void {
 
-    $user_id = $user['id'];
+    $user_id = (int) $user['id'];
 
     $db_conn = $this->db->get_conn();
 
   
-    $query = $db_conn->prepare('
-      UPDATE `Users` 
-      SET `locked_until` = NULL 
-      WHERE `id` = :id
-    ');
-
-
-    $query->bindParam(':id', $user_id, PDO::PARAM_INT);
+    if ( $mode == 'lockout-only' ):
+      
+      $query = 'UPDATE `Users` SET `locked_until` = NULL WHERE `id` = :id';
+      
+    elseif ( $mode == 'attempts-only' ):
+      
+      $query = 'UPDATE `Users` SET `failed_login_attempts` = 0 WHERE `id` = :id';
+      
+    elseif ( $mode == 'all' ):
+      
+      $query = 'UPDATE `Users`
+                SET `failed_login_attempts` = 0,
+                    `locked_until` = NULL
+                      WHERE `id` = :id';
+      
+    else:
+      
+      return;
+      
+    endif;
+    
+    
+    
+    $stmt = $db_conn->prepare($query);
+    
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    
   
-    $query->execute();
+    $stmt->execute();
 
   } // extend_lockout()  
 

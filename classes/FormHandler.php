@@ -160,7 +160,7 @@ class FormHandler {
         ):
         
 
-        $this->user->remove_lockout($user_to_login);
+        $this->user->remove_lockout($user_to_login, 'lockout-only');
         
 
       endif;
@@ -179,7 +179,8 @@ class FormHandler {
         
       else:
         
-        
+        // @todo This is causing a lockout to occur even with 
+        // one failed attempt. Fix.
         $this->user->increment_failed_login($user_to_login);
         
         $is_logged_in = false;
@@ -200,7 +201,8 @@ class FormHandler {
 
       $this->limits->delete_expired('form_login');
       
-      // @todo Reset login_failed and lockout.
+      $this->user->remove_lockout($user_to_login);
+      
       
       // If the user who just logged in is an admin
       // go to the admin panel. Otherwise, go to the homepage.
