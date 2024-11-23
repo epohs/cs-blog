@@ -18,7 +18,7 @@ Super basic blog, built for my dad.
 - Create get_role() method in User.
     - Add ID param to force db check. Check session user role by default.
 - Remove get_unique_column_val() in User. Use Db instead.
-- Move Auth::is_logged_in() to User.
+- Move Auth::is_logged_in() and is_admin() to User.
 - Move form-handler out of admin.
 - Merge profile pages and move out of admin.
 - Document and clean everything
