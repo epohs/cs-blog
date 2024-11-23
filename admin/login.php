@@ -16,7 +16,6 @@
 
     <?php $page->get_partial('primary', null, false, 'admin/partials/sidebar'); ?>
     
-
     <main class="content">
       
       <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
