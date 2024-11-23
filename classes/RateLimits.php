@@ -258,6 +258,7 @@ class RateLimits {
       
       $stmt->execute();
       
+      
       if ( $limit === 1 ):
 
         return $stmt->fetch(PDO::FETCH_ASSOC);
@@ -267,6 +268,7 @@ class RateLimits {
         return $stmt->fetchAll(PDO::FETCH_ASSOC);
 
       endif;
+      
 
     } catch (PDOException $e) {
         
