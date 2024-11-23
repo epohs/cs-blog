@@ -10,9 +10,15 @@ Super basic blog, built for my dad.
 
 
 - If User is not verified we need to handle them differently.
+  - Create is_verified() method in User.
+    - Add ID param to force db check. Check session user role by default.
   - Add a link to /verify/ in the user menu.
   - Block all forms other than verify with link to /verify/.
   - Any form submission other than verify should redirect to /verify/.
+- Create get_role() method in User.
+    - Add ID param to force db check. Check session user role by default.
+- Remove get_unique_column_val() in User. Use Db instead.
+- Move Auth::is_logged_in() to User.
 - Move form-handler out of admin.
 - Merge profile pages and move out of admin.
 - Document and clean everything
