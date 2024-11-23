@@ -9,7 +9,12 @@ Super basic blog, built for my dad.
 
 
 
-- Failed login lockout
+- If User is not verified we need to handle them differently.
+  - Add a link to /verify/ in the user menu.
+  - Block all forms other than verify with link to /verify/.
+  - Any form submission other than verify should redirect to /verify/.
+- Move form-handler out of admin.
+- Merge profile pages and move out of admin.
 - Document and clean everything
   - Cast all method parameters and define return values where possible
   - Class properties that are references to other classes should be uppercase
@@ -26,4 +31,3 @@ Super basic blog, built for my dad.
 ## Requirements
 
 - PHP 8
-- Redis
