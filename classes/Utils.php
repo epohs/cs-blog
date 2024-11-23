@@ -228,6 +228,7 @@ class Utils {
     
     // Check the most reliable headers in order
     $headers_to_check = [
+      'HTTP_CF_CONNECTING_IP',
       'HTTP_CLIENT_IP',
       'HTTP_X_FORWARDED_FOR',
       'HTTP_X_FORWARDED',
