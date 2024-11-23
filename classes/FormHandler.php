@@ -123,6 +123,7 @@ class FormHandler {
     if ( !$this->limits->check('form_login') ):
 
       echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
+      
       exit;
 
     endif;
@@ -148,9 +149,10 @@ class FormHandler {
           ):
           
 
-        $this->user->extend_lockout($user_to_login);
+        $new_locked_until = $this->user->extend_lockout($user_to_login);
 
-        echo "Too many failed login attempts. Try again after " . Utils::format_date($user_to_login['locked_until']) . ".";
+        echo "Too many failed login attempts. Try again after " . Utils::format_date($new_locked_until) . ".";
+        
         exit;
 
 
@@ -179,8 +181,6 @@ class FormHandler {
         
       else:
         
-        // @todo This is causing a lockout to occur even with 
-        // one failed attempt. Fix.
         $this->user->increment_failed_login($user_to_login);
         
         $is_logged_in = false;
