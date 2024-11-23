@@ -651,7 +651,8 @@ class User {
   
 
 
-  function increment_failed_login(array $user): bool {
+  function increment_failed_login(array $user, ?bool $extend_lockout = true): bool {
+    
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
@@ -665,14 +666,11 @@ class User {
 
       // Extend the lockout period but do not increment
       // the failed lockout count.
-      //
-      // @todo Calls to extend lockout run twice. Fix this.
-      //
-      // @internal I don't like how cyclical this entire lockout
-      // process feels. Revisit this to think of a more unified
-      // way to handle the process with less fragmentation and 
-      // fewer database calls.
-      $this->extend_lockout($user, false);
+      if ( $extend_lockout ):
+        
+        $this->extend_lockout($user, false);
+        
+      endif;
       
 
       $query = $db_conn->prepare('
@@ -705,22 +703,30 @@ class User {
 
 
 
-  function extend_lockout(array $user, ?bool $increment = true): void {
+  function extend_lockout(array $user, ?bool $increment = true): string|false {
     
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
     $locked_until = $user['locked_until'] ? new DateTime($user['locked_until']) : null;
     $now = new DateTime();
-
-    $db_conn = $this->db->get_conn();
   
     
     if ( $increment ):
       
-      $this->increment_failed_login($user);
+      $this->increment_failed_login($user, false);
       
     endif;
+    
+    
+    if ( $failed_login_attempts < 5 ):
+      
+      return false;
+      
+    endif;
+    
+
+    $db_conn = $this->db->get_conn();
 
   
     if ( is_null($locked_until) ):
@@ -745,17 +751,19 @@ class User {
     $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
     
   
-    $query = $db_conn->prepare('
+    $stmt = $db_conn->prepare('
       UPDATE `Users` 
       SET `locked_until` = :locked_until 
       WHERE `id` = :id
     ');
 
 
-    $query->bindParam(':locked_until', $new_locked_until, PDO::PARAM_STR);
-    $query->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->bindParam(':locked_until', $new_locked_until, PDO::PARAM_STR);
+    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
   
-    $query->execute();
+    $stmt->execute();
+    
+    return $new_locked_until;
 
   } // extend_lockout()
   
