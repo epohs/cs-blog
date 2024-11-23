@@ -30,20 +30,13 @@ class User {
     
     $result = false;
     
-    
-    
     $db_conn = $this->db->get_conn();
     
     
-    // If th
-    $user_role = ( !$this->db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';
+    $user_role = ( !$this->db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
     
-    
-    // @todo this needs to be unique
     $verify_key = $this->get_unique_column_val('verify_key', ['min_len' => 8]);
     
-    
-    // @todo this needs to be unique
     $selector = $this->get_unique_column_val('selector');
     
     
@@ -232,11 +225,13 @@ class User {
     
     $set_verified = $this->set_column('is_verified', 1, $user_id);
     
-    // @todo Reset failed login attempts
-    // and locked_until, and set updated_at.
+    $set_updated_at = $this->set_column('updated_at', date('Y-m-d H:i:s'), $user_id);
     
     
-    return ($remove_verifiy_key && $set_verified);
+    $this->remove_lockout($user_id);
+    
+    
+    return ($remove_verifiy_key && $set_verified && $set_updated_at);
     
     
   } // $remove_verify_key()
@@ -775,9 +770,9 @@ class User {
 
 
 
-  function remove_lockout(array $user, ?string $mode = 'all'): void {
+  function remove_lockout(array|int $user, ?string $mode = 'all'): void {
 
-    $user_id = (int) $user['id'];
+    $user_id = is_array($user) ? (int) $user['id'] : $user;
 
     $db_conn = $this->db->get_conn();
 
