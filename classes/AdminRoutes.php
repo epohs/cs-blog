@@ -50,7 +50,7 @@ class AdminRoutes {
   public function dashboard() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect( $this->path );
 
 
     // If the current user is an admin load the 
@@ -79,7 +79,7 @@ class AdminRoutes {
   public function profile() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect();
 
 
     // If the current user is an admin load the 
@@ -113,7 +113,7 @@ class AdminRoutes {
   public function login() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect( $this->path );
 
       
     if ( $this->auth->is_logged_in() ):
@@ -145,7 +145,7 @@ class AdminRoutes {
   public function signup() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect( $this->path );
 
       
     // If the user is already logged in redirect to their profile
@@ -221,7 +221,7 @@ class AdminRoutes {
   public function forgot_password() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect( $this->path );
 
       
     // If the user is already logged in redirect to their profile
@@ -252,7 +252,7 @@ class AdminRoutes {
   public function password_reset() {
 
 
-    $this->verified_user_check( $this->path );
+    $this->verified_user_redirect( $this->path );
 
       
     // If the user is already logged in redirect to their profile
@@ -325,21 +325,6 @@ class AdminRoutes {
 
   } // password_reset()
   
-  
-
-
-
-
-  
-
-
-  public function placeholder() {
-      
-      
-    $this->form_handler();
-
-
-  } // ()
 
 
 
@@ -354,22 +339,20 @@ class AdminRoutes {
 
 
 
-  private function verified_user_check( array $path ): void {
+  private function verified_user_redirect(): void {
 
-    if ( 
-      $this->auth->is_logged_in() &&
-      !( 
-        Routing::is_route('verify', $path) || 
-        Routing::is_route('admin/form-handler', $path) 
-      ) &&
-      Session::get_key(['user', 'role']) == 'null'
+    if (
+        $this->auth->is_logged_in() &&
+        !( Routing::is_route('verify', $this->path) || 
+           Routing::is_route('admin/form-handler', $this->path) ) &&  
+        !$this->user->is_verified()
       ):
 
       Routing::redirect_to( $this->page->url_for('verify') );
 
     endif;
 
-  } // verified_user_check()
+  } // verified_user_redirect()
   
   
   
