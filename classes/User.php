@@ -238,6 +238,63 @@ class User {
   
   
   
+
+
+
+
+
+  public function is_verified( $user_id = false ): bool {
+
+
+    $return = false;
+
+
+    if ( is_int($user_id) ):
+
+      $return = (bool) $this->get_column('is_verified', $user_id);
+
+    else:
+
+      $return = ( $this->get_role($user_id) !== 'null' );
+
+    endif;
+    
+
+    return $return;
+
+  } // is_verified()
+
+
+
+
+
+
+
+
+
+
+  public function get_role( $user_id = false ): string|false {
+
+    
+    $return = false;
+
+
+    if ( is_int($user_id) ):
+
+      $return = $this->get_column('role', $user_id);
+
+    else:
+
+      $return = ( Session::key_isset(['user', 'role']) ) ? Session::get_key(['user', 'role']) : false;
+
+    endif;
+
+
+    return $return;
+
+  } // get_role()
+
+
   
   
   
