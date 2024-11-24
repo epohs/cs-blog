@@ -204,9 +204,11 @@ class FormHandler {
       $this->user->remove_lockout($user_to_login);
       
       
-      // If the user who just logged in is an admin
-      // go to the admin panel. Otherwise, go to the homepage.
-      if ( Session::get_key(['user', 'role']) == 'admin' ):
+      if ( !$this->user->is_verified() ):
+
+        Routing::redirect_to( $this->page->url_for('verify') );
+
+      elseif ( $this->user->get_role() == 'admin' ):
         
         Routing::redirect_to( $this->page->url_for('admin/dash') );
         
