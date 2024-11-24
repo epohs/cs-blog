@@ -23,7 +23,7 @@
     
       <h1>I forgot my password</h1>
   
-      <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+      <form method="POST" action="<?php echo $page->url_for('form-handler'); ?>">
       
         <input type="hidden" name="form_name" value="forgot">
         <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">

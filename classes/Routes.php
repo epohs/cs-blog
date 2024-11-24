@@ -12,6 +12,8 @@ class Routes {
 
   private $Page = null;
 
+  private $User = null;
+
   private $AdminRoutes = null;
 
   private $FormHandler = null;
@@ -31,6 +33,8 @@ class Routes {
 
 
     $this->Page = $Page;
+
+    $this->User = User::get_instance();
 
     $this->AdminRoutes = AdminRoutes::get_instance($path);
 
@@ -55,7 +59,7 @@ class Routes {
 
 
     // Forms
-    $this->add_route('admin/form-handler', $this->FormHandler, 'process');
+    $this->add_route('form-handler', $this->FormHandler, 'process');
 
 
   
@@ -101,20 +105,15 @@ class Routes {
 
 
   private function profile() {
-      
-      
-    $auth = Auth::get_instance();
 
 
-    if ( $auth->is_logged_in() && $auth->is_admin() ):
+    if ( $this->User->is_logged_in() && $this->User->is_admin() ):
 
       Routing::redirect_to( $this->Page->url_for('admin/profile') );
 
-    elseif ( $auth->is_logged_in() ):
+    elseif ( $this->User->is_logged_in() ):
 
-      $user = User::get_instance();
-
-      $cur_user = $user->get( Session::get_key(['user', 'id']) );
+      $cur_user = $this->User->get( Session::get_key(['user', 'id']) );
     
       $this->Page->get_template( 'profile', null, ['cur_user' => $cur_user] );
 

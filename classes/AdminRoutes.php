@@ -55,7 +55,7 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->auth->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+    if ( $this->user->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
       
 
       $this->get_template( 'dashboard' );
@@ -84,7 +84,7 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->auth->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+    if ( $this->user->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
       
       $user = User::get_instance();
 
@@ -116,7 +116,7 @@ class AdminRoutes {
     $this->verified_user_redirect( $this->path );
 
       
-    if ( $this->auth->is_logged_in() ):
+    if ( $this->user->is_logged_in() ):
   
       $redirect_path = ( $this->auth->is_admin() ) ? 'admin/dash' : '/';
 
@@ -342,7 +342,7 @@ class AdminRoutes {
   private function verified_user_redirect(): void {
 
     if (
-        $this->auth->is_logged_in() &&
+        $this->user->is_logged_in() &&
         !( Routing::is_route('verify', $this->path) || 
            Routing::is_route('admin/form-handler', $this->path) ) &&  
         !$this->user->is_verified()

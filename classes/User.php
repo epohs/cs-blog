@@ -35,9 +35,9 @@ class User {
     
     $user_role = ( !$this->db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
     
-    $verify_key = $this->get_unique_column_val('verify_key', ['min_len' => 8]);
+    $verify_key = $this->db->get_unique_column_val('Users', 'verify_key', ['min_len' => 8]);
     
-    $selector = $this->get_unique_column_val('selector');
+    $selector = $this->db->get_unique_column_val('Users', 'selector');
     
     
     
@@ -387,6 +387,83 @@ class User {
     
   } // user_exists()
   
+
+
+
+
+
+
+
+
+
+  
+  /**
+   *
+   */
+  public function is_logged_in(): bool {
+    
+    
+    $return = false;
+    
+    
+    if ( Session::get_key(['user', 'id']) ):
+      
+      $this->update_last_active();
+
+      Page::remove_expired_nonces();
+      
+      $return = true;
+      
+    elseif ( $token = Cookie::get('remember_me') ):
+      
+      
+      $hashed_token = hash('sha256', $token);
+      
+      $user_to_check = $this->get_by('remember_me', $hashed_token);
+      
+      
+      // We found a user with a matching remember_me token.
+      // Set session variables for use throughout the page
+      // load and update the last_active db column.
+      if ( $user_to_check ):
+        
+        Session::set_key(['user', 'id'], $user_to_check['id']);
+        Session::set_key(['user', 'selector'], $user_to_check['selector']);
+        Session::set_key(['user', 'role'], $user_to_check['role']);
+        
+        $this->update_last_active();
+        
+        $return = true;
+        
+      endif;
+      
+      
+    endif;
+
+    
+    
+    return $return;
+    
+    
+  } // is_logged_in()
+  
+  
+  
+  
+
+
+
+
+
+
+  /**
+   * @internal Is this thorough enough?
+   */
+  public function is_admin(): bool {
+
+    return ( $this->is_logged_in() && ($this->get_role() == 'admin') );
+
+  } // is_admin
   
   
   
@@ -635,7 +712,7 @@ class User {
       // If we made it here we have a valid User, and that user is
       // eligible for a new password reset.
       // @todo make length a config setting
-      $new_reset_token = $this->get_unique_column_val('password_reset_token', ['min_len' => 16]);
+      $new_reset_token = $this->db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
 
 
       $now = date('Y-m-d H:i:s');
@@ -868,17 +945,6 @@ class User {
 
 
 
-
-
-
-
-
-
-  private function get_unique_column_val(string $column, array $args = []): string|false {
-
-    return $this->db->get_unique_column_val('Users', $column, $args);
-
-  } // get_unique_column_val()
 
 
 

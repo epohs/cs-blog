@@ -27,7 +27,7 @@
         
         <h1>Enter new password</h1>
 
-        <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+        <form method="POST" action="<?php echo $page->url_for('form-handler'); ?>">
 
           <input type="hidden" name="form_name" value="password-reset">
           <input type="hidden" name="reset_key" value="<?php echo $reset_key; ?>">
@@ -47,7 +47,7 @@
 
         <p>Check your email.</p>
 
-        <form method="POST" action="<?php echo $page->url_for('admin/form-handler'); ?>">
+        <form method="POST" action="<?php echo $page->url_for('form-handler'); ?>">
       
           <input type="hidden" name="form_name" value="password-reset">
           <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">

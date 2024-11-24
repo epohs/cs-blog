@@ -64,7 +64,7 @@ class Page {
       // logged in check.
       // @internal Maybe this could be a user_init() function
       // instead of an explicit login check?
-      $this->is_logged_in();
+      $this->User->is_logged_in();
     
       Routing::get_instance( $this, $request_uri );
       
@@ -78,23 +78,16 @@ class Page {
 
   
   
-  
-  
-
-  public function is_logged_in(): bool {
-
-    $auth = Auth::get_instance();
-
-    return $auth->is_logged_in();
-
-  } // is_logged_in()
 
 
 
 
 
 
-
+  /**
+   * @todo this needs to be rewritten to check whether the page is an
+   *        admin route.
+   */
   public function is_admin(): bool {
 
     $auth = Auth::get_instance();

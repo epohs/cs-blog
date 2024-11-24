@@ -1,7 +1,7 @@
 <header class="page-header">
 
   
-  <?php if ( $page->is_logged_in() ): ?>
+  <?php if ( $User->is_logged_in() ): ?>
 
     <?php if ( !$User->is_verified() ): ?>
       <a href="<?php echo $page->url_for('verify') ?>">Verify</a><br>

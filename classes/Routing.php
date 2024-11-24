@@ -123,7 +123,7 @@ class Routing {
 
 
     if ( !$this->is_route('signup', $path) &&
-         !$this->is_route('admin/form-handler', $path) ):
+         !$this->is_route('form-handler', $path) ):
     
       $db = Db::get_instance();
     
