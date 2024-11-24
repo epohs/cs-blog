@@ -5,17 +5,12 @@ Super basic blog, built for my dad.
 ## To-Do
 
 
-- Ensure client passes an IP and supports persistant sessions.
-  - Create a new method that will return a bool.
-  - Rate limited routes should check this before checking rate limits and
-  redirect with an error or deny a form if false.
-- Remove get_unique_column_val() in User. Use Db instead.
-- Move Auth::is_logged_in() and is_admin() to User.
-- Move form-handler out of admin.
-- Merge profile pages and move out of admin.
-- All templates need User passed as an arg.
 - Templates with forms need a `show_form` arg.
   - When `show_form` is false we need a `form_denied_msg` arg.
+    - Ensure client passes an IP and supports persistant sessions.
+    - Create a new method that will return a bool.
+    - Rate limited routes should check this before checking rate limits and
+    redirect with an error or deny a form if false.
 - Rework on-page error display to handle non-error messages.
   - Create a new Routing::redirect_with_err() method. This method will take a url_for
   string, and a level string, and a code string, and optional data array. It will set 
