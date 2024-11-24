@@ -140,6 +140,8 @@ class RateLimits {
     
     $client_ip = Utils::get_client_ip();
     
+    $session_id = Session::get_key('id');
+    
     
     if ( !isset($this->limiters[$key]) || ($client_ip === false) ):
       
@@ -159,8 +161,8 @@ class RateLimits {
     $expires_at_str = $date->format('Y-m-d H:i:s');
     
 
-    $query = "INSERT INTO `RateLimits` (`key`, `client_ip`, `expires_at`) 
-              VALUES (:key, :client_ip, :expires_at)";
+    $query = "INSERT INTO `RateLimits` (`key`, `client_ip`, `session_id`, `expires_at`) 
+              VALUES (:key, :client_ip, :session_id, :expires_at)";
 
 
     try {
@@ -170,6 +172,7 @@ class RateLimits {
       // Bind parameters
       $stmt->bindParam(':key', $key, PDO::PARAM_STR);
       $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
+      $stmt->bindParam(':session_id', $session_id, PDO::PARAM_STR);
       $stmt->bindParam(':expires_at', $expires_at_str, PDO::PARAM_STR);
       
       
@@ -224,6 +227,8 @@ class RateLimits {
 
     $client_ip = Utils::get_client_ip();
     
+    $session_id = Session::get_key('id');
+    
     
     if ( is_numeric($limit) ):
       
@@ -239,7 +244,7 @@ class RateLimits {
     $query = "SELECT *
             FROM `RateLimits`
             WHERE `key` = :key
-              AND `client_ip` = :client_ip
+              AND (`client_ip` = :client_ip OR `session_id` = :session_id)
               AND `expires_at` > :current_time
             ORDER BY `expires_at` ASC
             LIMIT :limit";
@@ -253,6 +258,7 @@ class RateLimits {
       $stmt->bindParam(':key', $key, PDO::PARAM_STR);
       $stmt->bindParam(':current_time', $current_time, PDO::PARAM_STR);
       $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
+      $stmt->bindParam(':session_id', $session_id, PDO::PARAM_STR);
       $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
       
       
@@ -395,11 +401,12 @@ class RateLimits {
       
       
       $result = $db->exec(
-        "CREATE TABLE IF NOT EXISTS RateLimits (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          key VARCHAR(64) NOT NULL,
-          client_ip VARCHAR(255) NOT NULL,
-          expires_at DATETIME DEFAULT CURRENT_TIMESTAMP
+        "CREATE TABLE IF NOT EXISTS `RateLimits` (
+          `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+          `key` VARCHAR(64) NOT NULL,
+          `client_ip` VARCHAR(255) NOT NULL,
+          `session_id` VARCHAR(32) NOT NULL,
+          `expires_at` DATETIME DEFAULT CURRENT_TIMESTAMP
         );"
       );
       
