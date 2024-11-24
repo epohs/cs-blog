@@ -16,6 +16,10 @@ Super basic blog, built for my dad.
   - Any form submission other than verify should redirect to /verify/.
 - Create get_role() method in User.
     - Add ID param to force db check. Check session user role by default.
+- Ensure client passes an IP and supports persistant sessions.
+  - Create a new method that will return a bool.
+  - Rate limited routes should check this before checking rate limits and
+  redirect with an error or deny a form if false.
 - Remove get_unique_column_val() in User. Use Db instead.
 - Move Auth::is_logged_in() and is_admin() to User.
 - Move form-handler out of admin.
