@@ -5,12 +5,6 @@ Super basic blog, built for my dad.
 ## To-Do
 
 
-- Templates with forms need a `show_form` arg.
-  - When `show_form` is false we need a `form_denied_msg` arg.
-    - Ensure client passes an IP and supports persistant sessions.
-    - Create a new method that will return a bool.
-    - Rate limited routes should check this before checking rate limits and
-    redirect with an error or deny a form if false.
 - Rework on-page error display to handle non-error messages.
   - Create a new Routing::redirect_with_err() method. This method will take a url_for
   string, and a level string, and a code string, and optional data array. It will set 
@@ -24,16 +18,14 @@ Super basic blog, built for my dad.
     don't match, redirect.
     - It will also look for data in the session and build the output using this if
     it is there.
-- If User is not verified:
-  - Block all forms other than verify with link to /verify/.
-  - Any form submission other than verify should redirect to /verify/.
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
   - Add phpdoc for every class and method explaining *why* it exists.
   - Inline document only tricky lines.
 - Profile page to update display name.
-- Delete expired nonces.
+- Public templates with forms need a `show_form` arg.
+  - When `show_form` is false we need a `form_denied_msg` arg.
 - Check all User db flags and datetimes are updated correctly.
 - Revisit failed login process to remove cyclical functions and multiple db calls.
 
