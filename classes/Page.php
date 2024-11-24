@@ -90,9 +90,7 @@ class Page {
    */
   public function is_admin(): bool {
 
-    $auth = Auth::get_instance();
-
-    return $auth->is_admin();
+    return $this->User->is_admin();
 
   } // is_admin()
 

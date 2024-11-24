@@ -50,7 +50,6 @@ class Routes {
 
     // Admin Routes
     $this->add_route('admin/dash', $this->AdminRoutes, 'dashboard');
-    $this->add_route('admin/profile', $this->AdminRoutes, 'profile');
     $this->add_route('login', $this->AdminRoutes, 'login');
     $this->add_route('signup', $this->AdminRoutes, 'signup');
     $this->add_route('verify', $this->AdminRoutes, 'verify');
@@ -107,11 +106,7 @@ class Routes {
   private function profile() {
 
 
-    if ( $this->User->is_logged_in() && $this->User->is_admin() ):
-
-      Routing::redirect_to( $this->Page->url_for('admin/profile') );
-
-    elseif ( $this->User->is_logged_in() ):
+    if ( $this->User->is_logged_in() ):
 
       $cur_user = $this->User->get( Session::get_key(['user', 'id']) );
     

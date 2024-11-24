@@ -118,7 +118,7 @@ class AdminRoutes {
       
     if ( $this->user->is_logged_in() ):
   
-      $redirect_path = ( $this->auth->is_admin() ) ? 'admin/dash' : '/';
+      $redirect_path = ( $this->user->is_admin() ) ? 'admin/dash' : '/';
 
       Routing::redirect_to( $this->page->url_for($redirect_path) );
 
@@ -344,7 +344,7 @@ class AdminRoutes {
     if (
         $this->user->is_logged_in() &&
         !( Routing::is_route('verify', $this->path) || 
-           Routing::is_route('admin/form-handler', $this->path) ) &&  
+           Routing::is_route('form-handler', $this->path) ) &&  
         !$this->user->is_verified()
       ):
 

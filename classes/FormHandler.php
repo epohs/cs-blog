@@ -274,17 +274,7 @@ class FormHandler {
       Session::set_key(['user', 'role'], $user_to_verify['role']);
       
       
-      // If the user is an admin user use that profile page
-      // otherwise, use the non-admin profile page.
-      if ( Session::get_key(['user', 'role']) == 'admin' ):
-        
-        Routing::redirect_to( $this->page->url_for('admin/profile') );
-        
-      else:
-        
-        Routing::redirect_to( $this->page->url_for('profile') );
-        
-      endif;
+      Routing::redirect_to( $this->page->url_for('profile') );
       
       
     // Otherwise, redirect back to verify page with an error
