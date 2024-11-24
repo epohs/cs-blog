@@ -8,7 +8,8 @@ Super basic blog, built for my dad.
 
 
 
-
+- Add session based rate limiting to RateLimits class.
+  - IP & Session.
 - If User is not verified we need to handle them differently.
   - Create is_verified() method in User.
     - Add ID param to force db check. Check session user role by default.
