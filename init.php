@@ -47,9 +47,10 @@ endif;
 
 
 
-
-if ( !Session::key_isset('id') || (strlen(Session::get_key('id') != 32) ) ):
-
+// Set a Session ID variable of a predictable length
+// to use for client identification in rate limiting.
+if ( !Session::key_isset('id') || (Session::key_isset('id') && strlen(Session::get_key('id')) != 32) ):
+  
   $new_session_id = Utils::generate_random_string(32);
   
   Session::set_key('id', $new_session_id);
