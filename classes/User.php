@@ -5,7 +5,7 @@ class User {
     
   private static $instance = null;
   
-  private $db = null;
+  private $Db = null;
   
   
   
@@ -13,7 +13,7 @@ class User {
   private function __construct() {
     
 
-    $this->db = Db::get_instance();
+    $this->Db = Db::get_instance();
 
     
   } // __construct()
@@ -30,14 +30,14 @@ class User {
     
     $result = false;
     
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
     
     
-    $user_role = ( !$this->db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
+    $user_role = ( !$this->Db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
     
-    $verify_key = $this->db->get_unique_column_val('Users', 'verify_key', ['min_len' => 8]);
+    $verify_key = $this->Db->get_unique_column_val('Users', 'verify_key', ['min_len' => 8]);
     
-    $selector = $this->db->get_unique_column_val('Users', 'selector');
+    $selector = $this->Db->get_unique_column_val('Users', 'selector');
     
     
     
@@ -97,7 +97,7 @@ class User {
 
   public function get( int $user_id ) {
 
-    return $this->db->get_row_by_id('Users', $user_id);
+    return $this->Db->get_row_by_id('Users', $user_id);
 
   } // get()
 
@@ -117,7 +117,7 @@ class User {
   public function get_by(string $key, $value) {
 
     
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
     
     
     $valid_keys = [
@@ -181,7 +181,7 @@ class User {
   private function get_column(string $column, int $user_id) {
     
     
-    return $this->db->get_column('Users', $column, $user_id);
+    return $this->Db->get_column('Users', $column, $user_id);
     
     
   } // get_column()
@@ -200,7 +200,7 @@ class User {
   private function set_column(string $column, $value, int $user_id): bool {
     
     
-    return $this->db->set_column('Users', $column, $value, $user_id);
+    return $this->Db->set_column('Users', $column, $value, $user_id);
     
     
   } // set_column()
@@ -312,7 +312,7 @@ class User {
   public function update_last_login(int $value, string $key = 'id'): void {
     
     
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
     
     
     $valid_keys = [
@@ -379,7 +379,7 @@ class User {
       
       $user_key_type = ( is_int($user_key) ) ? 'id' : 'email';
       
-      return $this->db->row_exists('Users', $user_key_type, $user_key);
+      return $this->Db->row_exists('Users', $user_key_type, $user_key);
       
     endif;
     
@@ -712,7 +712,7 @@ class User {
       // If we made it here we have a valid User, and that user is
       // eligible for a new password reset.
       // @todo make length a config setting
-      $new_reset_token = $this->db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
+      $new_reset_token = $this->Db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
 
 
       $now = date('Y-m-d H:i:s');
@@ -752,7 +752,7 @@ class User {
   public function check_password_reset_token( string $token ): int|false {
 
     
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
 
     $stmt = $db_conn->prepare("SELECT id
                                 FROM Users 
@@ -791,7 +791,7 @@ class User {
 
       $failed_login_attempts++;
 
-      $db_conn = $this->db->get_conn();
+      $db_conn = $this->Db->get_conn();
 
       // Extend the lockout period but do not increment
       // the failed lockout count.
@@ -855,7 +855,7 @@ class User {
     endif;
     
 
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
 
   
     if ( is_null($locked_until) ):
@@ -908,7 +908,7 @@ class User {
 
     $user_id = is_array($user) ? (int) $user['id'] : $user;
 
-    $db_conn = $this->db->get_conn();
+    $db_conn = $this->Db->get_conn();
 
   
     if ( $mode == 'lockout-only' ):
