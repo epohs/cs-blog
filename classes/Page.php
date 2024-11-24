@@ -14,6 +14,8 @@ class Page {
   private $errors = [];
   
   private $db = null;
+
+  private $User = null;
   
   private $partial_root = 'partials';
   
@@ -36,6 +38,8 @@ class Page {
     
     $this->errors = array_merge($this->errors, $config_errors);
     
+    $this->User = User::get_instance();
+
     
     $request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
     
@@ -238,6 +242,8 @@ class Page {
    
       // Make the Page class available inside the included file.
       $page = $this;
+
+      $User = $this->User;
       
    
       // If we have args, extract them into variables
