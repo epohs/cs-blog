@@ -48,7 +48,7 @@ endif;
 
 
 
-if ( !Session::key_isset('id') || (strlen(Session::get_key('id') <= 32) ) ):
+if ( !Session::key_isset('id') || (strlen(Session::get_key('id') != 32) ) ):
 
   $new_session_id = Utils::generate_random_string(32);
   
