@@ -8,8 +8,6 @@ Super basic blog, built for my dad.
 
 
 
-- Add session based rate limiting to RateLimits class.
-  - IP & Session.
 - If User is not verified we need to handle them differently.
   - Create is_verified() method in User.
     - Add ID param to force db check. Check session user role by default.
@@ -22,16 +20,28 @@ Super basic blog, built for my dad.
 - Move Auth::is_logged_in() and is_admin() to User.
 - Move form-handler out of admin.
 - Merge profile pages and move out of admin.
-- Document and clean everything
-  - Cast all method parameters and define return values where possible
-  - Class properties that are references to other classes should be uppercase
-  - Add phpdoc for every class and method explaining *why* it exists
-  - Inline document only tricky lines
-- Rework on-page error display to handle non-error messages
-- Profile page to update display name
-- Delete expired nonces
-- Check all User db flags and datetimes are updated correctly
-- Revisit failed login process to remove cyclical functions and multiple db calls
+- All templates need User passed as an arg.
+- Templates with forms need a `show_form` arg.
+  - When `show_form` is false we need a `form_denied_msg` arg.
+- Rework on-page error display to handle non-error messages.
+  - Create a new Routing::redirect_with_err() method. This method will take a url_for
+  string, and a level string, and a code string. It will set a session var with this 
+  level and code, then it will redirect_to the url with the query var.
+  - Change all redirect_to() that have errors to redirect_with_err().
+  - Rename Page::errors property to page_messages.
+  - Move $acceptable_levels to a class property. Set in construct.
+  - Rename all Page methods that are _error related to more generic
+  - Change Page::handle_queryvar_errs() to a more generic handle_queryvar_msg() that
+  will parse the message type.
+- Document and clean everything.
+  - Cast all method parameters and define return values where possible.
+  - Class properties that are references to other classes should be uppercase.
+  - Add phpdoc for every class and method explaining *why* it exists.
+  - Inline document only tricky lines.
+- Profile page to update display name.
+- Delete expired nonces.
+- Check all User db flags and datetimes are updated correctly.
+- Revisit failed login process to remove cyclical functions and multiple db calls.
 
 
 
