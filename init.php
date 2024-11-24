@@ -48,6 +48,16 @@ endif;
 
 
 
+if ( !Session::key_isset('id') || (strlen(Session::get_key('id') <= 32) ) ):
+
+  $new_session_id = Utils::generate_random_string(32);
+  
+  Session::set_key('id', $new_session_id);
+  
+endif;
+
+
+
 
 $theme = $config->get('theme');
 
