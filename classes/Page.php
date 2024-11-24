@@ -9,11 +9,11 @@ class Page {
   
   private static $instance = null;
   
-  private $config = null;
+  private $Config = null;
   
   private $errors = [];
   
-  private $db = null;
+  private $Db = null;
 
   private $User = null;
   
@@ -32,9 +32,9 @@ class Page {
     // when our Config class ran at the begining of 
     // the page load and merge them into our Page
     // errors property.
-    $this->config = Config::get_instance();
+    $this->Config = Config::get_instance();
     
-    $config_errors = $this->config->get_errors();
+    $config_errors = $this->Config->get_errors();
     
     $this->errors = array_merge($this->errors, $config_errors);
     
@@ -57,7 +57,7 @@ class Page {
       
       
       // Setup our database
-      $this->db = Db::get_instance();
+      $this->Db = Db::get_instance();
       
       
       // @todo Think of a better way to handle this initial
@@ -103,7 +103,7 @@ class Page {
   
   public function site_root(): string {
     
-    return rtrim($this->config->get('site_root'), '/');
+    return rtrim($this->Config->get('site_root'), '/');
     
   } // site_root()
   
@@ -134,7 +134,7 @@ class Page {
   
   public function get_page_title(): string {
     
-    return $this->config->get('site_name');
+    return $this->Config->get('site_name');
     
   } // get_page_title()
   
@@ -451,7 +451,7 @@ class Page {
     
 
     // Strip out info and warn level msgs when not in debug mode
-    if ( !$this->config->get('debug') && !$level ):
+    if ( !$this->Config->get('debug') && !$level ):
 
       $filtered_errors = array_filter($this->errors, function($item) {
         
