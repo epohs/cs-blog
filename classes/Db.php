@@ -5,12 +5,16 @@ class Db {
   
   private static $instance = null;
   
+  private $Page = null;
+  
   private $db_conn = null;
   
   
   
   
   private function __construct() {
+    
+    $this->Page = Page::get_instance();
 
     $this->db_init();
       
@@ -251,11 +255,8 @@ class Db {
           
       } catch (PDOException $e) {
         
-        
-        $page = Page::get_instance();
-        
       
-        $page->add_error( "Failed to create the database: " . $e->getMessage() );
+        $this->Page->add_error( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -271,9 +272,7 @@ class Db {
           
       } catch (PDOException $e) {
         
-        $page = Page::get_instance();
-        
-        $page->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
+        $this->Page->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
       
@@ -304,10 +303,8 @@ class Db {
       RateLimits::make_tables( $db );
       
     else:
-
-      $page = Page::get_instance();
             
-      $page->add_error("can't find db connection");
+      $this->Page->add_error("can't find db connection");
       
     endif;
     
