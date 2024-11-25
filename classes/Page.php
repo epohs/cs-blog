@@ -58,7 +58,7 @@ class Page {
     if ( $first_run ):
       
       // Setup our database
-      $this->Db = Db::get_instance($first_run);
+      $this->Db = Db::get_instance( true );
       
       
       // @todo Think of a better way to handle this initial
