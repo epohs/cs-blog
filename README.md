@@ -18,6 +18,7 @@ Super basic blog, built for my dad.
     don't match, redirect.
     - It will also look for data in the session and build the output using this if
     it is there.
+    - I will have to clear the page message session variable at some point. After get_template()?
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
