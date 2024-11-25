@@ -14,6 +14,8 @@ class Db {
   
   private function __construct( $first_run ) {
     
+    debug_log('Db::__construct()');
+    
     
     if ( $first_run ):
       

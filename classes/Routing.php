@@ -28,13 +28,13 @@ class Routing {
 
 
   
-  private function __construct( $page, $request_uri ) {
+  private function __construct( $request_uri ) {
 
     
     $this->block_direct_access();
     
     
-    $this->page = $page;
+    $this->page = Page::get_instance();
 
     
     $this->path = $this->process_path( $request_uri );
@@ -374,11 +374,9 @@ class Routing {
     
     if ( !Page::validate_nonce($nonce, $action) ):
       
-      $page = Page::get_instance();
-      
       $redir_path = ( $redir_path !== '' ) ? $redir_path : $action;
       
-      $redir_path = $page->site_root() . '/' . $redir_path;
+      $redir_path = $this->page->site_root() . '/' . $redir_path;
       
       self::redirect_to( $redir_path . '?err=' . rawurlencode($err) );
       
@@ -460,11 +458,11 @@ class Routing {
   
   
   
-  public static function get_instance( $page, $request_uri ) {
+  public static function get_instance( $request_uri ) {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $page, $request_uri );
+      self::$instance = new self( $request_uri );
     
     endif;
     

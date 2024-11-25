@@ -23,6 +23,8 @@ class Page {
   
   private function __construct( $first_run ) {
     
+    debug_log('Page::__construct()');
+    
     
     $this->block_direct_access();
     
@@ -65,7 +67,7 @@ class Page {
       // instead of an explicit login check?
       $this->User->is_logged_in();
     
-      Routing::get_instance( $this, $request_uri );
+      Routing::get_instance( $request_uri );
       
     endif;
     
@@ -230,8 +232,9 @@ class Page {
     // it is found.
     if ( file_exists($partial_path) ):
    
+      
       // Make the Page class available inside the included file.
-      $page = $this;
+      $page = static::$instance;
 
       $User = $this->User;
       
