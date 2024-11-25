@@ -28,6 +28,7 @@ Super basic blog, built for my dad.
 - Public templates with forms need a `show_form` arg.
   - When `show_form` is false we need a `form_denied_msg` arg.
 - Check all User db flags and datetimes are updated correctly.
+- Why does Page::__construct() run twice?
 - Revisit failed login process to remove cyclical functions and multiple db calls.
 
 
