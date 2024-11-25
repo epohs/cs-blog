@@ -12,11 +12,18 @@ class Db {
   
   
   
-  private function __construct() {
+  private function __construct( $first_run ) {
     
-    $this->Page = Page::get_instance();
+    
+    if ( $first_run ):
+      
+      $this->Page = Page::get_instance();
+      
+    endif;
 
+    
     $this->db_init();
+    
       
   } // __construct()
   
@@ -342,11 +349,11 @@ class Db {
   
   
   
-  public static function get_instance() {
+  public static function get_instance( ?bool $first_run = false ) {
   
     if (self::$instance === null):
       
-      self::$instance = new self();
+      self::$instance = new self($first_run);
     
     endif;
     

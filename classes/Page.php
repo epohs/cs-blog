@@ -55,9 +55,8 @@ class Page {
     // during the first page load process.
     if ( $first_run ):
       
-      
       // Setup our database
-      $this->Db = Db::get_instance();
+      $this->Db = Db::get_instance($first_run);
       
       
       // @todo Think of a better way to handle this initial
@@ -618,11 +617,11 @@ class Page {
   
   
   
-  public static function get_instance( ?bool $process_route = false ) {
+  public static function get_instance( ?bool $first_run = false ) {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $process_route );
+      self::$instance = new self( $first_run );
 
     endif;
   
