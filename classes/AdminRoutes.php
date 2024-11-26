@@ -371,7 +371,18 @@ class AdminRoutes {
   public function get_template(string $file, ?string $suffix = null, $args = false) {
     
     
+    debug_log('Admin::get_template()');
+    
+    
     $this->page->get_partial($file, $suffix, $args, 'admin');
+
+
+    // @ todo Reassess this.
+    //
+    // get_template() should never be called twice, so
+    // we can ditch the page_message session here.
+    debug_log('Deleting session key');
+    Session::delete_key('page_message');
     
     
   } // get_template()

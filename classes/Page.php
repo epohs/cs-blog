@@ -144,7 +144,17 @@ class Page {
   public function get_template(string $file, ?string $suffix = null, $args = false): void {
     
     
+    debug_log('get_template()');
+
     $this->get_partial($file, $suffix, $args, '');
+
+
+    // @ todo Reassess this.
+    //
+    // get_template() should never be called twice, so
+    // we can ditch the page_message session here.
+    debug_log('Deleting session key');
+    Session::delete_key('page_message');
     
     
   } // get_template()
@@ -493,10 +503,23 @@ class Page {
     
       
     // Check if the 'err' key exists in the query string
-    if ( isset($_GET['err']) ) :
+    if ( isset($_GET['msg']) ) :
 
       // Sanitize the 'err' value
-      $err_code = htmlspecialchars( trim($_GET['err']) );
+      $err_code = htmlspecialchars( trim($_GET['msg']) );
+
+
+      // @todo Figure out a way to get the current url without any parameters
+      // and redirect there if the session key doesn't match the code in the url.
+      if ( Session::get_key(['page_message', 'code']) !== $err_code ):
+
+        debug_log('Session code does not match qvar.');
+        debug_log('Session code: ' . Session::get_key(['page_message', 'code']));
+        debug_log("Qvar code: {$err_code}");
+
+      endif;
+
+
       
       // Determine the error message based on the 'err' value
       switch ( $err_code ):

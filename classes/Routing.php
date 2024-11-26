@@ -355,6 +355,36 @@ class Routing {
     
     
   } // redirect_to()
+
+
+
+
+
+
+
+
+
+  public static function redirect_with_msg( string $url, array $msg_array ): void {
+
+
+    $default_msg_array = [
+      'level' => 'msg',
+      'code' => null,
+      'message' => null
+    ];
+
+    // Merge passed arguments with defaults
+    $page_message = array_merge($default_msg_array, $msg_array);
+
+
+    debug_log('Setting page message session.');
+    Session::set_key('page_message', $page_message);
+
+
+    self::redirect_to($url . "?msg={$page_message['code']}");
+
+
+  } // redirect_with_msg()
   
   
   

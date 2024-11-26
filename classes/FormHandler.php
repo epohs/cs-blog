@@ -221,7 +221,7 @@ class FormHandler {
     else:
       
       // Login attempt failed. Redirect back with an error.
-      Routing::redirect_to( $this->page->url_for('login') . '?err=005' );
+      Routing::redirect_with_msg( $this->page->url_for('login'), ['code' => '005'] );
 
       
     endif;
