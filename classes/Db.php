@@ -5,7 +5,7 @@ class Db {
   
   private static $instance = null;
   
-  private $Page = null;
+  private $Config = null;
   
   private $db_conn = null;
   
@@ -14,15 +14,8 @@ class Db {
   
   private function __construct( $first_run ) {
     
-    debug_log('Db::__construct()');
     
-    
-    if ( $first_run ):
-      
-      $this->Page = Page::get_instance();
-      
-    endif;
-
+    $this->Config = Config::get_instance();
     
     $this->db_init();
     
@@ -265,7 +258,7 @@ class Db {
       } catch (PDOException $e) {
         
       
-        $this->Page->add_error( "Failed to create the database: " . $e->getMessage() );
+        $this->Config->add_error( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -281,7 +274,7 @@ class Db {
           
       } catch (PDOException $e) {
         
-        $this->Page->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
+        $this->Config->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
       
@@ -313,7 +306,7 @@ class Db {
       
     else:
             
-      $this->Page->add_error("can't find db connection");
+      $this->Config->add_error("can't find db connection");
       
     endif;
     

@@ -35,6 +35,7 @@ $config = Config::get_instance();
 
 
 
+
 // If we're in debug mode display errors
 if ( $config->get('debug') ):
   
@@ -44,6 +45,15 @@ if ( $config->get('debug') ):
   error_reporting(E_ALL);
   
 endif;
+
+
+
+
+
+// Instantiate a few key classes so they are ready later
+Db::get_instance();
+User::get_instance();
+
 
 
 
@@ -60,9 +70,13 @@ endif;
 
 
 
+
+
 $theme = $config->get('theme');
 
 $theme_functions_file = ROOT_PATH . "themes/{$theme}/functions.php";
+
+
 
 
 
@@ -77,6 +91,18 @@ if ( file_exists($theme_functions_file) ):
 endif;
 
 
+
+
+
+
+
+
+
+
+
+$request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
+
+$Routing = Routing::get_instance();
 
 
 
@@ -101,8 +127,3 @@ function debug_log(string $message): void {
   endif;
 
 } // debug_log()
-
-
-
-
-

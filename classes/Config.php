@@ -57,19 +57,13 @@ class Config {
 
       else:
 
-        $this->config_errors[] = [
-          'level' => 'error',
-          'msg' => 'Config file does not return a valid array.'
-        ];
+        $this->add_error('Config file does not return a valid array.');
 
       endif;
 
     else:
 
-      $this->config_errors[] = [
-        'level' => 'error',
-        'msg' => 'No config file found.'
-      ];
+      $this->add_error('No config file found.');
 
     endif;
 
@@ -97,7 +91,7 @@ class Config {
     else:
       
       
-      $this->config_errors[] = ['level' => 'warn', 'msg' => "Config key {$key} not found"];
+      $this->add_error(["Config key {$key} not found", 'warn']);
       
       return false;
       
@@ -120,6 +114,26 @@ class Config {
   } // get_errors()
   
   
+  
+  
+
+
+  public function add_error( array|string $error ): array {
+
+    if ( is_string($error) ):
+
+      $error = [$error, 'error'];
+
+    endif;
+    
+    $this->config_errors[] = $error;
+    
+    return $this->config_errors;
+    
+    
+  } // add_error()
+
+
   
   
   

@@ -16,14 +16,14 @@ class Page {
   private $Db = null;
 
   private $User = null;
+
+  private $Routing = null;
   
   private $partial_root = 'partials';
   
   
   
   private function __construct( $first_run ) {
-    
-    debug_log('Page::__construct()');
     
     
     $this->block_direct_access();
@@ -39,11 +39,14 @@ class Page {
     $config_errors = $this->Config->get_errors();
     
     $this->errors = array_merge($this->errors, $config_errors);
+      
+    $this->Db = Db::get_instance();
     
     $this->User = User::get_instance();
 
+    $this->Routing = Routing::get_instance();
+
     
-    $request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
     
     
     
@@ -57,9 +60,6 @@ class Page {
     // during the first page load process.
     if ( $first_run ):
       
-      // Setup our database
-      $this->Db = Db::get_instance( true );
-      
       
       // @todo Think of a better way to handle this initial
       // logged in check.
@@ -67,11 +67,9 @@ class Page {
       // instead of an explicit login check?
       $this->User->is_logged_in();
     
-      Routing::get_instance( $request_uri );
+      //$this->Routing->serve_route( $request_uri );
       
     endif;
-    
-    
     
     
   } // __construct();
@@ -234,7 +232,7 @@ class Page {
    
       
       // Make the Page class available inside the included file.
-      $page = static::$instance;
+      $page = Page::get_instance();
 
       $User = $this->User;
       

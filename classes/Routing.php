@@ -28,26 +28,9 @@ class Routing {
 
 
   
-  private function __construct( $request_uri ) {
-
+  private function __construct() {
     
     $this->block_direct_access();
-    
-    
-    $this->page = Page::get_instance();
-
-    
-    $this->path = $this->process_path( $request_uri );
-
-
-    $this->Routes = Routes::get_instance( $this->page, $this->path );
-
-
-    $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
-    
-    
-    $this->serve_route( $this->path );
-    
     
   } // __construct()
   
@@ -66,11 +49,23 @@ class Routing {
    *
    * @todo clean up segment parsing
    */
-  private function serve_route( array $path ) {
+  public function serve_route( string $request_uri ) {
 
     
+    $this->page = Page::get_instance();
+
+
+    $this->path = $this->process_path( $request_uri );
+
+    $this->Routes = Routes::get_instance( $this->page, $this->path );
+
+    $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
     
-    $this->first_run_check( $path );
+    
+    //$this->serve_route( $this->path );
+
+    
+    $this->first_run_check( $this->path );
     
     $all_routes = $this->Routes->get_routes();
 
@@ -85,7 +80,7 @@ class Routing {
     //              those. I would need to handle the site root so that / matches.
     foreach( $all_routes as $route_key => $handler ):
 
-      if ( $this->is_route($route_key, $path) ):
+      if ( $this->is_route($route_key, $this->path) ):
 
         $valid_route = true;
 
@@ -458,11 +453,11 @@ class Routing {
   
   
   
-  public static function get_instance( $request_uri ) {
+  public static function get_instance() {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $request_uri );
+      self::$instance = new self();
     
     endif;
     

@@ -14,7 +14,7 @@ class User {
     
 
     $this->Db = Db::get_instance();
-
+    
     
   } // __construct()
   

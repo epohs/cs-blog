@@ -10,5 +10,5 @@
 include('init.php');
 
 
-$page = Page::get_instance(true);
+$Routing->serve_route( $request_uri );
 
