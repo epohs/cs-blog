@@ -49,7 +49,9 @@ class Page {
 
     
     // Handle error codes passed in the query string
-    $this->handle_queryvar_errs();
+    // @internal Moving this to Routing, after the path
+    // is determined.
+    //$this->handle_queryvar_errs();
     
     
 
@@ -111,6 +113,31 @@ class Page {
     
   } // url_for()
   
+
+
+
+
+
+
+
+  public function get_url(): string|null {
+
+    $return = '';
+
+    $path = $this->Routing->get_path();
+
+    if ( !is_null($path) && array_key_exists('segments', $path) ):
+
+      $joined_path = implode('/', $path['segments']);
+
+      $return = $this->url_for($joined_path);
+
+    endif;
+
+
+    return $return;
+
+  } // get_url()
   
   
   
@@ -143,17 +170,14 @@ class Page {
    */
   public function get_template(string $file, ?string $suffix = null, $args = false): void {
     
-    
-    debug_log('get_template()');
 
     $this->get_partial($file, $suffix, $args, '');
 
 
-    // @ todo Reassess this.
+    // @todo Reassess this.
     //
     // get_template() should never be called twice, so
     // we can ditch the page_message session here.
-    debug_log('Deleting session key');
     Session::delete_key('page_message');
     
     
@@ -513,9 +537,7 @@ class Page {
       // and redirect there if the session key doesn't match the code in the url.
       if ( Session::get_key(['page_message', 'code']) !== $err_code ):
 
-        debug_log('Session code does not match qvar.');
-        debug_log('Session code: ' . Session::get_key(['page_message', 'code']));
-        debug_log("Qvar code: {$err_code}");
+        Routing::redirect_to($this->get_url());
 
       endif;
 

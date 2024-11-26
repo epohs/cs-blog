@@ -54,8 +54,10 @@ class Routing {
     
     $this->page = Page::get_instance();
 
-
     $this->path = $this->process_path( $request_uri );
+    
+    // Handle error codes passed in the query string
+    $this->page->handle_queryvar_errs();
 
     $this->Routes = Routes::get_instance( $this->page, $this->path );
 
@@ -330,6 +332,18 @@ class Routing {
   } // get_route_vars()
   
   
+
+
+
+
+
+
+  public function get_path() {
+
+    return $this->path;
+
+  } // get_path()
+
   
   
   
@@ -376,8 +390,7 @@ class Routing {
     // Merge passed arguments with defaults
     $page_message = array_merge($default_msg_array, $msg_array);
 
-
-    debug_log('Setting page message session.');
+    
     Session::set_key('page_message', $page_message);
 
 
