@@ -12,8 +12,8 @@ class Db {
   
   
   
-  private function __construct( $first_run ) {
-    
+  private function __construct() {
+
     
     $this->Config = Config::get_instance();
     
@@ -344,11 +344,11 @@ class Db {
   
   
   
-  public static function get_instance( ?bool $first_run = false ) {
+  public static function get_instance() {
   
     if (self::$instance === null):
       
-      self::$instance = new self($first_run);
+      self::$instance = new self();
     
     endif;
     

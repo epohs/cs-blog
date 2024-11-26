@@ -23,7 +23,7 @@ class Page {
   
   
   
-  private function __construct( $first_run ) {
+  private function __construct() {
     
     
     $this->block_direct_access();
@@ -46,30 +46,18 @@ class Page {
 
     $this->Routing = Routing::get_instance();
 
-    
-    
-    
+
     
     // Handle error codes passed in the query string
     $this->handle_queryvar_errs();
     
     
-    
-    // The only time we want to automatically process
-    // routes when we instantiate the Page object is
-    // during the first page load process.
-    if ( $first_run ):
-      
-      
-      // @todo Think of a better way to handle this initial
-      // logged in check.
-      // @internal Maybe this could be a user_init() function
-      // instead of an explicit login check?
-      $this->User->is_logged_in();
-    
-      //$this->Routing->serve_route( $request_uri );
-      
-    endif;
+
+    // @todo Think of a better way to handle this initial
+    // logged in check.
+    // @internal Maybe this could be a user_init() function
+    // instead of an explicit login check?
+    $this->User->is_logged_in();
     
     
   } // __construct();
@@ -618,11 +606,11 @@ class Page {
   
   
   
-  public static function get_instance( ?bool $first_run = false ) {
+  public static function get_instance() {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $first_run );
+      self::$instance = new self();
 
     endif;
   
