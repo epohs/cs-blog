@@ -97,9 +97,6 @@ endif;
 
 
 
-
-
-
 $request_uri = isset($_SERVER['REQUEST_URI']) ? strval($_SERVER['REQUEST_URI']) : null;
 
 $Routing = Routing::get_instance();
