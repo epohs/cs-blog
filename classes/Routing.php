@@ -57,7 +57,7 @@ class Routing {
     $this->path = $this->process_path( $request_uri );
     
     // Handle error codes passed in the query string
-    $this->page->process_page_messages();
+    $this->page->process_page_alerts();
 
     $this->Routes = Routes::get_instance( $this->page, $this->path );
 
@@ -378,26 +378,26 @@ class Routing {
 
 
 
-  public static function redirect_with_msg( string $url, array $msg_array ): void {
+  public static function redirect_with_alert( string $url, array $alert_arr ): void {
 
 
-    $default_msg_array = [
+    $default_alert_arr = [
       'level' => 'msg',
       'code' => null,
       'text' => null
     ];
 
     // Merge passed arguments with defaults
-    $page_message = array_merge($default_msg_array, $msg_array);
+    $alert = array_merge($default_alert_arr, $alert_arr);
 
     
-    Session::set_key('page_message', $page_message);
+    Session::set_key('page_alert', $alert);
 
 
-    self::redirect_to($url . "?msg={$page_message['code']}");
+    self::redirect_to($url . "?alert={$alert['code']}");
 
 
-  } // redirect_with_msg()
+  } // redirect_with_alert()
   
   
   

@@ -177,8 +177,8 @@ class Page {
     // @todo Reassess this.
     //
     // get_template() should never be called twice, so
-    // we can ditch the page_message session here.
-    Session::delete_key('page_message');
+    // we can ditch the page_alert session here.
+    Session::delete_key('page_alert');
     
     
   } // get_template()
@@ -519,22 +519,22 @@ class Page {
   
   
   
-  function process_page_messages(): bool {
+  function process_page_alerts(): bool {
     
-    $has_msg = false;
+    $has_alert = false;
     
       
-    // Check if there is a message code querystring variable.
-    if ( isset($_GET['msg']) ) :
+    // Check if there is an alert code querystring variable.
+    if ( isset($_GET['alert']) ) :
 
-      $querystring_code = htmlspecialchars( trim($_GET['msg']) );
-      $session_msg = Session::get_key('page_message');
-      $session_code = isset($session_msg['code']) ? $session_msg['code'] : false;
-      $session_level = isset($session_msg['level']) ? $session_msg['level'] : 'error';
+      $querystring_code = htmlspecialchars( trim($_GET['alert']) );
+      $session_alert = Session::get_key('page_alert');
+      $session_code = isset($session_alert['code']) ? $session_alert['code'] : false;
+      $session_level = isset($session_alert['level']) ? $session_alert['level'] : 'error';
       $msg_text = null;
 
 
-      // Redirect if the messge code in our session doesn't match the querystring code.
+      // Redirect if the alert code in our session doesn't match the querystring code.
       if ( $session_code !== $querystring_code ):
 
         Routing::redirect_to( $this->get_url() );
@@ -543,15 +543,15 @@ class Page {
 
 
       
-      // Check the message code in the querystring against a pre-determined
+      // Check the alert code in the querystring against a pre-determined
       // set of codes. If it doesn't match one of them it is an invalid message.
       switch ( $querystring_code ):
       
         case '001':
           
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ?? 'Timed out. Please try again.';
+          $msg_text = $session_alert['text'] ?? 'Timed out. Please try again.';
         
           $this->add_error( $msg_text, $session_level );
           
@@ -559,9 +559,9 @@ class Page {
       
         case '002':
           
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ?? 'User already exists.';
+          $msg_text = $session_alert['text'] ?? 'User already exists.';
         
           $this->add_error( $msg_text, $session_level );
           
@@ -569,9 +569,9 @@ class Page {
       
         case '003':
           
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ?? 'Password invalid.';
+          $msg_text = $session_alert['text'] ?? 'Password invalid.';
         
           $this->add_error( $msg_text, $session_level );
           
@@ -579,9 +579,9 @@ class Page {
       
         case '004':
           
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ??'Incorrect verification code.' ;
+          $msg_text = $session_alert['text'] ??'Incorrect verification code.' ;
         
           $this->add_error( $msg_text, $session_level );
           
@@ -589,9 +589,9 @@ class Page {
       
         case '005':
           
-          $has_msg = true;
+          $has_alert = true;
         
-          $msg_text = $session_msg['text'] ?? 'Incorrect login info.';
+          $msg_text = $session_alert['text'] ?? 'Incorrect login info.';
 
           $this->add_error( $msg_text, $session_level );
           
@@ -599,9 +599,9 @@ class Page {
 
         case '006':
 
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ?? 'Invalid email address';
+          $msg_text = $session_alert['text'] ?? 'Invalid email address';
 
           $this->add_error( $msg_text, $session_level );
 
@@ -609,9 +609,9 @@ class Page {
       
         case '070':
           
-          $has_msg = true;
+          $has_alert = true;
 
-          $msg_text = $session_msg['text'] ?? 'Something went wrong.';
+          $msg_text = $session_alert['text'] ?? 'Something went wrong.';
         
           $this->add_error( $msg_text, $session_level );
           
@@ -629,9 +629,9 @@ class Page {
     endif;
     
     
-    return $has_msg;
+    return $has_alert;
     
-  } // process_page_messages()
+  } // process_page_alerts()
 
   
   

@@ -377,8 +377,8 @@ class AdminRoutes {
     // @ todo Reassess this.
     //
     // get_template() should never be called twice, so
-    // we can ditch the page_message session here.
-    Session::delete_key('page_message');
+    // we can ditch the page_alert session here.
+    Session::delete_key('page_alert');
     
     
   } // get_template()
