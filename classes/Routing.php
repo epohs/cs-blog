@@ -57,7 +57,7 @@ class Routing {
     $this->path = $this->process_path( $request_uri );
     
     // Handle error codes passed in the query string
-    $this->page->handle_queryvar_errs();
+    $this->page->process_page_messages();
 
     $this->Routes = Routes::get_instance( $this->page, $this->path );
 
@@ -384,7 +384,7 @@ class Routing {
     $default_msg_array = [
       'level' => 'msg',
       'code' => null,
-      'message' => null
+      'text' => null
     ];
 
     // Merge passed arguments with defaults
