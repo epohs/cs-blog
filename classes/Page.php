@@ -51,7 +51,7 @@ class Page {
     // Handle error codes passed in the query string
     // @internal Moving this to Routing, after the path
     // is determined.
-    //$this->handle_queryvar_errs();
+    //$this->process_page_messages();
     
     
 
@@ -519,86 +519,101 @@ class Page {
   
   
   
-  function handle_queryvar_errs(): bool {
+  function process_page_messages(): bool {
     
-    $is_error = false;
-    $err_code = null;
-    $queryvar_err_msg = [];
+    $has_msg = false;
     
       
-    // Check if the 'err' key exists in the query string
+    // Check if there is a message code querystring variable.
     if ( isset($_GET['msg']) ) :
 
-      // Sanitize the 'err' value
-      $err_code = htmlspecialchars( trim($_GET['msg']) );
+      $querystring_code = htmlspecialchars( trim($_GET['msg']) );
+      $session_msg = Session::get_key('page_message');
+      $session_code = isset($session_msg['code']) ? $session_msg['code'] : false;
+      $session_level = isset($session_msg['level']) ? $session_msg['level'] : 'error';
+      $msg_text = null;
 
 
-      // @todo Figure out a way to get the current url without any parameters
-      // and redirect there if the session key doesn't match the code in the url.
-      if ( Session::get_key(['page_message', 'code']) !== $err_code ):
+      // Redirect if the messge code in our session doesn't match the querystring code.
+      if ( $session_code !== $querystring_code ):
 
-        Routing::redirect_to($this->get_url());
+        Routing::redirect_to( $this->get_url() );
 
       endif;
 
 
       
-      // Determine the error message based on the 'err' value
-      switch ( $err_code ):
+      // Check the message code in the querystring against a pre-determined
+      // set of codes. If it doesn't match one of them it is an invalid message.
+      switch ( $querystring_code ):
       
         case '001':
           
-          $is_error = true;
+          $has_msg = true;
+
+          $msg_text = $session_msg['text'] ?? 'Timed out. Please try again.';
         
-          $this->add_error( 'Timed out. Please try again.' );
+          $this->add_error( $msg_text, $session_level );
           
           break;
       
         case '002':
           
-          $is_error = true;
+          $has_msg = true;
+
+          $msg_text = $session_msg['text'] ?? 'User already exists.';
         
-          $this->add_error( 'User already exists.' );
+          $this->add_error( $msg_text, $session_level );
           
           break;
       
         case '003':
           
-          $is_error = true;
+          $has_msg = true;
+
+          $msg_text = $session_msg['text'] ?? 'Password invalid.';
         
-          $this->add_error( 'Password invalid.' );
+          $this->add_error( $msg_text, $session_level );
           
           break;
       
         case '004':
           
-          $is_error = true;
+          $has_msg = true;
+
+          $msg_text = $session_msg['text'] ??'Incorrect verification code.' ;
         
-          $this->add_error( 'Incorrect verification code.' );
+          $this->add_error( $msg_text, $session_level );
           
           break;
       
         case '005':
           
-          $is_error = true;
+          $has_msg = true;
         
-          $this->add_error( 'Incorrect login info.' );
+          $msg_text = $session_msg['text'] ?? 'Incorrect login info.';
+
+          $this->add_error( $msg_text, $session_level );
           
           break;
 
         case '006':
 
-          $is_error = true;
+          $has_msg = true;
 
-          $this->add_error( 'Invalid email address' );
+          $msg_text = $session_msg['text'] ?? 'Invalid email address';
+
+          $this->add_error( $msg_text, $session_level );
 
           break;
       
         case '070':
           
-          $is_error = true;
+          $has_msg = true;
+
+          $msg_text = $session_msg['text'] ?? 'Something went wrong.';
         
-          $this->add_error( 'Something went wrong.' );
+          $this->add_error( $msg_text, $session_level );
           
           break;
           
@@ -614,9 +629,9 @@ class Page {
     endif;
     
     
-    return $is_error;
+    return $has_msg;
     
-  } // handle_queryvar_errs()
+  } // process_page_messages()
 
   
   
