@@ -187,13 +187,14 @@ class Db {
       endfor;
 
 
-      // Check the database for existing values in this batch
+      // Create the number of questionmarks to match the number of strings in our batch.
       $placeholders = implode(',', array_fill(0, count($batch), '?'));
 
       $query = "SELECT `{$column}` FROM `{$table}` WHERE `{$column}` IN ($placeholders)";
       
       $stmt = $this->db_conn->prepare($query);
 
+      // Pass our array of strings to fill the placeholders in our query.
       $stmt->execute($batch);
       
       $existing_values = $stmt->fetchAll(PDO::FETCH_COLUMN);
