@@ -9,7 +9,7 @@ Super basic blog, built for my dad.
   - ✓ Create a new Routing::redirect_with_err() method. This method will take a url_for
   string, and a level string, and a code string, and optional data array. It will set 
   a session var with this level, and code, and data, then it will redirect_to the url with the query var.
-  - Change all redirect_to() that have errors to redirect_with_err().
+  - ✓ Change all redirect_to() that have errors to redirect_with_err().
   - Rename Page::errors property to page_messages.
   - Move $acceptable_levels to a class property. Set in construct.
   - Rename all Page methods that are _error related to more generic
