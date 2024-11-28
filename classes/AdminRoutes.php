@@ -301,7 +301,7 @@ class AdminRoutes {
 
       if ( $key_exists && !$active_key_found ):
 
-        Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+        Routing::redirect_with_alert( $this->page->url_for('password-reset'), ['code' => '007'] );
 
       endif;
 

@@ -416,7 +416,7 @@ class Routing {
       
       $redir_path = $this->page->site_root() . '/' . $redir_path;
       
-      self::redirect_to( $redir_path . '?err=' . rawurlencode($err) );
+      self::redirect_with_alert( $redir_path, ['code' => rawurlencode($err)] );
       
     endif;
     
