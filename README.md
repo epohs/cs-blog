@@ -6,7 +6,7 @@ Super basic blog, built for my dad.
 
 
 - Rework on-page error display to handle non-error messages.
-  ✓ Create a new Routing::redirect_with_err() method. This method will take a url_for
+  - ✓ Create a new Routing::redirect_with_err() method. This method will take a url_for
   string, and a level string, and a code string, and optional data array. It will set 
   a session var with this level, and code, and data, then it will redirect_to the url with the query var.
   - Change all redirect_to() that have errors to redirect_with_err().
@@ -18,6 +18,13 @@ Super basic blog, built for my dad.
   - Class properties that are references to other classes should be uppercase.
   - Add phpdoc for every class and method explaining *why* it exists.
   - Inline document only tricky lines.
+- Rework Db::get_unique_column_val().
+  - Add 'batch_per_step'.
+  - For each loop:
+    - Get 'row_per_batch' number of random strings.
+    - Loop through them checking whether they exist in the column passed.
+      - Do this 'batch_per_step' number of times.
+    - Init min_len by 1 until max_len.
 - Profile page to update display name.
 - Public templates with forms need a `show_form` arg.
   - When `show_form` is false we need a `form_denied_msg` arg.
