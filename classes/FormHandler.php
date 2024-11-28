@@ -280,7 +280,8 @@ class FormHandler {
     // Otherwise, redirect back to verify page with an error
     else:
       
-      Routing::redirect_to( $this->page->url_for('verify') . '?err=004' );
+
+      Routing::redirect_with_alert( $this->page->url_for('verify'), ['code' => '004'] );
       
     endif;
 
@@ -331,22 +332,22 @@ class FormHandler {
         
       else:
         
-        Routing::redirect_to( $this->page->url_for('signup') . '?err=070' );
+        Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '070'] );
         
       endif;
       
       
     elseif ( $this->user->user_exists($user_email) ):
       
-      Routing::redirect_to( $this->page->url_for('signup') . '?err=002' );
+      Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '002'] );
         
     elseif ( !$this->user->validate_pass($user_pass) ):
       
-      Routing::redirect_to( $this->page->url_for('signup') . '?err=003' );
+      Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '003'] );
         
     else:
       
-      Routing::redirect_to( $this->page->url_for('signup') . '?err=070' );
+      Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '070'] );
       
     endif;
 
@@ -397,7 +398,7 @@ class FormHandler {
 
     else:
 
-      Routing::redirect_to( $this->page->url_for('forgot') . '?err=006' );
+      Routing::redirect_with_alert( $this->page->url_for('forgot'), ['code' => '006'] );
 
     endif;
 
@@ -435,10 +436,11 @@ class FormHandler {
 
       // This should never really happen because a user should never be able to get
       // to the form that allows them to enter a new password if they don't have a reset key
-      // that matches a user, but to be safe 
+      // that matches a user, but to be safe..
       if ( !$user_to_reset ):
 
-        Routing::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=070" );
+        debug_log('Password reset for user that doesnt match.');
+        Routing::redirect_with_alert( $this->page->url_for('password-reset') . "/{$reset_key}", ['code' => '070'] );
 
       endif;
 
@@ -452,17 +454,17 @@ class FormHandler {
 
         if ( $pass_updated ):
 
-          Routing::redirect_to( $this->page->url_for('login') . "?msg=101" );
+          Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '101'] );
 
         else:
 
-          Routing::redirect_to( $this->page->url_for('password-reset') . "?err=070" );
+          Routing::redirect_with_alert( $this->page->url_for('password-reset'), ['code' => '070'] );
 
         endif;
 
       else:
 
-        Routing::redirect_to( $this->page->url_for('password-reset') . "/{$reset_key}?err=003" );
+        Routing::redirect_with_alert( $this->page->url_for('password-reset') . "/{$reset_key}", ['code' => '003'] );
 
       endif;
       
@@ -489,7 +491,7 @@ class FormHandler {
         Session::delete_key('reset_key');
 
         // Redirect back with an error
-        Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+        Routing::redirect_with_alert( $this->page->url_for('password-reset'), ['code' => '007'] );
 
       endif;
 
@@ -497,7 +499,7 @@ class FormHandler {
 
       Session::delete_key('reset_key');
 
-      Routing::redirect_to( $this->page->url_for('password-reset') . '?err=007' );
+      Routing::redirect_with_alert( $this->page->url_for('password-reset'), ['code' => '007'] );
 
     endif;
 
