@@ -5,7 +5,7 @@
 
 <body>
   
-<?php $page->get_partial('errors'); ?>
+<?php $page->get_partial('page-alerts'); ?>
   
   
 <h1>Page not found</h1>

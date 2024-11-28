@@ -259,7 +259,7 @@ class Db {
       } catch (PDOException $e) {
         
       
-        $this->Config->add_error( "Failed to create the database: " . $e->getMessage() );
+        $this->Config->add_alert( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -275,7 +275,7 @@ class Db {
           
       } catch (PDOException $e) {
         
-        $this->Config->add_error( "Failed to connect to the existing database: " . $e->getMessage() );
+        $this->Config->add_alert( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
       
@@ -307,7 +307,7 @@ class Db {
       
     else:
             
-      $this->Config->add_error("can't find db connection");
+      $this->Config->add_alert("can't find db connection");
       
     endif;
     

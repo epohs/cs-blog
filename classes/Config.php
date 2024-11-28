@@ -12,7 +12,7 @@ class Config {
   // This file runs before our Page class is
   // ready.  We'll grab these and display them
   // later.
-  private $config_errors = [];
+  private $config_alerts = [];
   
   
   
@@ -57,13 +57,13 @@ class Config {
 
       else:
 
-        $this->add_error('Config file does not return a valid array.');
+        $this->add_alert('Config file does not return a valid array.');
 
       endif;
 
     else:
 
-      $this->add_error('No config file found.');
+      $this->add_alert('No config file found.');
 
     endif;
 
@@ -91,7 +91,7 @@ class Config {
     else:
       
       
-      $this->add_error(["Config key {$key} not found", 'warn']);
+      $this->add_alert(["Config key {$key} not found", 'warn']);
       
       return false;
       
@@ -105,33 +105,33 @@ class Config {
   
   
   
-  public function get_errors() {
+  public function get_alerts() {
     
     
-    return $this->config_errors;
+    return $this->config_alerts;
     
     
-  } // get_errors()
+  } // get_alerts()
   
   
   
   
 
 
-  public function add_error( array|string $error ): array {
+  public function add_alert( array|string $alert ): array {
 
-    if ( is_string($error) ):
+    if ( is_string($alert) ):
 
-      $error = [$error, 'error'];
+      $alert = [$alert, 'error'];
 
     endif;
     
-    $this->config_errors[] = $error;
+    $this->config_alerts[] = $alert;
     
-    return $this->config_errors;
+    return $this->config_alerts;
     
     
-  } // add_error()
+  } // add_alert()
 
 
   

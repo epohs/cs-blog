@@ -20,7 +20,7 @@
 
     <main class="content">
       
-      <?php $page->get_partial('errors'); ?>
+      <?php $page->get_partial('page-alerts'); ?>
     
       <h1>Hello.</h1>
     

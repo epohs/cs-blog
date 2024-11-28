@@ -167,7 +167,7 @@ class Routing {
     // page we need to serve so log an error and bail.
     if ( is_null($request_uri) ):
       
-      $this->page->add_error('Bad REQUEST_URI.');
+      $this->page->add_alert('Bad REQUEST_URI.');
       
       return $parsed_request;
       

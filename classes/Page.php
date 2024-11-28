@@ -11,7 +11,9 @@ class Page {
   
   private $Config = null;
   
-  private $errors = [];
+  private $alerts = [];
+
+  private $alert_levels = [];
   
   private $Db = null;
 
@@ -30,15 +32,17 @@ class Page {
     
     
     
-    // We need to grab any errors that were stashed
+    // We need to grab any alerts that were stashed
     // when our Config class ran at the begining of 
     // the page load and merge them into our Page
-    // errors property.
+    // alerts property.
     $this->Config = Config::get_instance();
     
-    $config_errors = $this->Config->get_errors();
+    $config_alerts = $this->Config->get_alerts();
     
-    $this->errors = array_merge($this->errors, $config_errors);
+    $this->alerts = array_merge($this->alerts, $config_alerts);
+
+    $this->alert_levels = ['info', 'warn', 'error'];
       
     $this->Db = Db::get_instance();
     
@@ -277,7 +281,7 @@ class Page {
       
       // @internal This error will never be been in any case where
       // the errors.php partial isn't included.
-      $this->add_error("Partial {$file} not found.", 'warn');
+      $this->add_alert("Partial {$file} not found.", 'warn');
 
       return false;
     
@@ -409,15 +413,9 @@ class Page {
   
   
   
-  public function add_error(mixed $error_msg, ?string $level = null):void {
-
-
-    $acceptable_levels = [
-      'info',
-      'warn',
-      'error'
-    ];
+  public function add_alert(mixed $alert_text, ?string $level = null):void {
     
+
     $default_level = 'error';
     
     
@@ -425,7 +423,7 @@ class Page {
     // Default to 'error' if something else is passed.
     if ( !is_null($level) ):
       
-      $level = ( in_array($level, $acceptable_levels, true) ) ? $level : $default_level;
+      $level = ( in_array($level, $this->alert_levels, true) ) ? $level : $default_level;
       
     else:
       
@@ -436,11 +434,11 @@ class Page {
     
     
     
-    $this->errors[] = ['level' => $level, 'msg' => $error_msg];
+    $this->alerts[] = ['level' => $level, 'text' => $alert_text];
     
     
     
-  } // add_error()
+  } // add_alert()
   
   
   
@@ -451,16 +449,16 @@ class Page {
   /**
    * 
    */
-  public function has_errors($level = false): bool {
+  public function has_alerts($level = false): bool {
     
-    // @todo add ability to only get errors of a certain level
+    // @todo add ability to only get alerts of a certain level
 
     // @todo ignore info and warn level msgs when not in debug mode
 
-    return ( is_array($this->errors) && !empty($this->errors) );
+    return ( is_array($this->alerts) && !empty($this->alerts) );
     
     
-  } // has_errors()
+  } // has_alerts()
   
 
 
@@ -469,13 +467,13 @@ class Page {
 
 
 
-  public function get_errors($level = false): mixed {
+  public function get_alerts($level = false): mixed {
     
 
     // Strip out info and warn level msgs when not in debug mode
     if ( !$this->Config->get('debug') && !$level ):
 
-      $filtered_errors = array_filter($this->errors, function($item) {
+      $filtered_alerts = array_filter($this->alerts, function($item) {
         
         return $item['level'] === 'error';
         
@@ -484,25 +482,25 @@ class Page {
 
       // re-index the array to correct gaps
       // left when we filtered.
-      return array_values($filtered_errors);
+      return array_values($filtered_alerts);
       
     else:
       
-      // If a specific level was requested return only errors
-      // of that level, otherwise return all errors.
+      // If a specific level was requested return only alerts
+      // of that level, otherwise return all alerts.
       if ( $level ):
         
-        $filtered_errors = array_filter($this->errors, function($item) use ($level) {
+        $filtered_alerts = array_filter($this->alerts, function($item) use ($level) {
       
           return $item['level'] === $level;
           
         });
        
-        return array_values($filtered_errors);
+        return array_values($filtered_alerts);
 
       else:
         
-        return $this->errors;
+        return $this->alerts;
         
       endif;
       
@@ -510,7 +508,7 @@ class Page {
     endif;
     
     
-  } // get_errors()
+  } // get_alerts()
 
 
   
@@ -553,7 +551,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'Timed out. Please try again.';
         
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -563,7 +561,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'User already exists.';
         
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -573,7 +571,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'Password invalid.';
         
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -583,7 +581,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ??'Incorrect verification code.' ;
         
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -593,7 +591,7 @@ class Page {
         
           $msg_text = $session_alert['text'] ?? 'Incorrect login info.';
 
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
 
@@ -603,7 +601,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'Invalid email address';
 
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
 
           break;
       
@@ -613,7 +611,7 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'Something went wrong.';
         
-          $this->add_error( $msg_text, $session_level );
+          $this->add_alert( $msg_text, $session_level );
           
           break;
           

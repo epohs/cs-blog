@@ -19,7 +19,7 @@
 
     <main class="content">
       
-      <?php $page->get_partial('errors', null, false, 'admin/partials'); ?>
+      <?php $page->get_partial('page-alerts', null, false, 'admin/partials'); ?>
     
       <h1>Signup</h1>
 

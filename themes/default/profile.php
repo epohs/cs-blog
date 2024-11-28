@@ -20,7 +20,7 @@
 
     <main class="content">
       
-      <?php $page->get_partial('errors'); ?>
+      <?php $page->get_partial('page-alerts'); ?>
     
       <?php if ( $User->is_admin() ): ?>
       <h1>Admin profile page.</h1>
