@@ -1,35 +1,25 @@
 <?php
 
 /**
-* 
+* Useful functions that come in handy throughout out application.
 *
+* All functions here should be static and not rely too much on other classes.
 */
 class Utils {
   
-  
-  private static $instance = null;
-  
-  
-  
-  
+
+
+
+
   
   
-  
-  
-  private function __construct() {
-    
-    
-    
-  } // __construct()
-  
-  
-  
-  
-  
-  
-  
-  
+  /**
+  * Take a string and return a number of seconds.
+  *
+  * For instance '1 hour' would return 3600, '5 minutes' returns 300.
+  */
   public static function convert_to_seconds(string $time_string): int|false {
+    
     
     // Regular expression to match the pattern "number + unit"
     if (preg_match('/^\s*(\d+)\s*(seconds?|minutes?|hours?|days?)\s*$/i', $time_string, $matches)) :
@@ -48,8 +38,8 @@ class Utils {
       
     endif;
     
-    // Return false if the format doesn't match
     
+    // Return false if the format doesn't match
     return false;
     
   } // convert_to_seconds()
@@ -62,7 +52,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Test whether a string is valid JSON or not.
+  */
   public static function is_valid_json( $str ): bool {
     
     json_decode($str);
@@ -78,7 +70,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Test whether a string is is a valid datetime AND matches a specific format.
+  */
   public static function is_valid_datetime(string $datetime, string $format = 'Y-m-d H:i:s'): bool {
     
     $dt = DateTime::createFromFormat($format, $datetime);
@@ -94,7 +88,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Test whether a datetime string is in the future.
+  */
   public static function is_future_datetime(string $datetime): bool {
     
     try {
@@ -119,7 +115,9 @@ class Utils {
 
 
 
-
+  /**
+  * Test whether a datetime string is in the past.
+  */
   public static function is_past_datetime(string $datetime): bool {
     
     try {
@@ -145,11 +143,24 @@ class Utils {
   
   
   
+  /**
+  * Return a formatted datetime string.
+  *
+  * We use UTC for all internal datetimes, but anywhere dates or times are displayed
+  * publically we need to convert those to, preferably, the user's local timezone.
+  * This function should be used everywhere a date is displayed in a template.
+  *
+  * @param $time_str string UTC formatted datetime string. Ctreate NOW string if null.
+  * @param $format string Return datetime format.
+  * @param $tz string Return datetime time zone.
+  */
   public static function format_date( $time_str = null, ?string $format = null, ?string $tz = null ): string {
     
     
+    // @todo move this to a config variable.
     $default_format = 'F j, Y, g:i a';
     
+    // @todo move this to a config variable.
     $default_timezone = 'America/New_York';
     
     
@@ -180,7 +191,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Return an alphanumeric string of a given length.
+  */
   public static function generate_random_string(int $length): string {
     
     $characters = '0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
@@ -208,7 +221,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Test whether a given string is alphanumeric.
+  */
   public static function is_alphanumeric(string $str): bool {
     
     return preg_match('/^[a-zA-Z0-9]+$/', $str) === 1;
@@ -221,7 +236,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Test whether all array values are integers.
+  */
   public static function all_integers(array $arr): bool {
     
     return count(array_filter($arr, fn($value) => !is_int($value))) === 0;
@@ -233,7 +250,9 @@ class Utils {
   
   
   
-  
+  /**
+  * Return the IP address of the current visitor.
+  */
   public static function get_client_ip(): string|false {
     
     
