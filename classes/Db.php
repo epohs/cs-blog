@@ -137,14 +137,20 @@ class Db {
 
 
 
-
+  /**
+  * Return a randomized, unique string that does not already exist in
+  * a given database column within a given table.
+  *
+  * We do this by creating an array of random strings then selecting 
+  * rows where our column matches any of those strings.
+  */
   public function get_unique_column_val(string $table, string $column, array $args = []): string|false {
 
     $defaults = [
       'min_len' => 5,
       'max_len' => 16,
-      'step' => 1,
       'str_per_batch' => 15,
+      'step' => 1,
       'batch_per_step' => 2
     ];
 
@@ -152,62 +158,71 @@ class Db {
     $args = array_merge($defaults, $args);
 
 
-
-
-
+    
     // Ensure max_len is greater than or equal to min_len
     if ( !Utils::all_integers($args) || ($args['max_len'] < $args['min_len']) ):
       
       return false;
 
     endif;
-
-
     
-
+    
     
     foreach ( range($args['min_len'], $args['max_len'], $args['step'] ) as $length):
-
-      $batch = [];
       
-      for ($i = 0; $i < $args['str_per_batch']; $i++):
-
-        $batch[] = Utils::generate_random_string($length);
-
-      endfor;
-
-
-      // Create the number of questionmarks to match the number of strings in our batch.
-      $placeholders = implode(',', array_fill(0, count($batch), '?'));
-
-      $query = "SELECT `{$column}` FROM `{$table}` WHERE `{$column}` IN ($placeholders)";
       
-      $stmt = $this->db_conn->prepare($query);
-
-      // Pass our array of strings to fill the placeholders in our query.
-      $stmt->execute($batch);
+      $step_count = 1;
       
-      $existing_values = $stmt->fetchAll(PDO::FETCH_COLUMN);
+      
+      while ($step_count <= $args['batch_per_step']):
+  
+        $batch = [];
+        
+        
+        for ($i = 0; $i < $args['str_per_batch']; $i++):
+  
+          $batch[] = Utils::generate_random_string($length);
+  
+        endfor;
+        
+        
+        // Create the number of question marks to match the number of strings in our batch.
+        $placeholders = implode(',', array_fill(0, count($batch), '?'));
+  
+        $query = "SELECT `{$column}` FROM `{$table}` WHERE `{$column}` IN ($placeholders)";
+        
+        $stmt = $this->db_conn->prepare($query);
+  
+        // Pass our array of strings to fill the placeholders in our query.
+        $stmt->execute($batch);
+        
+        $existing_values = $stmt->fetchAll(PDO::FETCH_COLUMN);
+  
+  
+        // Find any strings that exist in this batch
+        // but not in our database column.
+        $unique_strings = array_diff($batch, $existing_values);
+        
 
-
-      // Find the first unique string
-      foreach ($batch as $string):
-
-        if ( !in_array($string, $existing_values) ):
-
-          return $string;
-
+        if ( !empty($unique_strings) ):
+          
+          // If there are unique strings, return the first one.
+          return reset($unique_strings);
+        
         endif;
+      
 
-      endforeach;
-
-
+      endwhile;
+      
+      
+      $step_count++;
+      
+    
     endforeach;
-
+  
+      
     // Return false if no unique value is found
     return false;
-
-
 
 
   } // get_unique_column_val()
