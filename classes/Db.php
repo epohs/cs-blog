@@ -143,7 +143,9 @@ class Db {
     $defaults = [
       'min_len' => 5,
       'max_len' => 16,
-      'str_per_batch' => 10
+      'step' => 1,
+      'str_per_batch' => 15,
+      'batch_per_step' => 2
     ];
 
     // Merge passed arguments with defaults
@@ -154,29 +156,17 @@ class Db {
 
 
     // Ensure max_len is greater than or equal to min_len
-    if ( !is_int($args['min_len']) || 
-          !is_int($args['max_len']) || 
-          !is_int($args['str_per_batch']) || 
-          ($args['max_len'] < $args['min_len'])
-        ):
+    if ( !Utils::all_integers($args) || ($args['max_len'] < $args['min_len']) ):
       
       return false;
 
     endif;
 
 
+    
 
-
-
-    // Calculate the median length
-    $median_len = (int) floor( ($args['min_len'] + $args['max_len']) / 2 );
-
-    // Generate 3 batches of random strings with longer
-    // lenghts in each successive batch.
-    $lengths = [$args['min_len'], $median_len, $args['max_len']];
-
-
-    foreach ($lengths as $length):
+    
+    foreach ( range($args['min_len'], $args['max_len'], $args['step'] ) as $length):
 
       $batch = [];
       
