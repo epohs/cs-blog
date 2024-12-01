@@ -222,6 +222,17 @@ class Utils {
   
   
   
+  public static function all_integers(array $arr): bool {
+    
+    return count(array_filter($arr, fn($value) => !is_int($value))) === 0;
+    
+  } // all_integers()
+  
+  
+  
+  
+  
+  
   
   public static function get_client_ip(): string|false {
     
