@@ -1,6 +1,6 @@
 <?php
 
-class Db {
+class Database {
 
   
   private static $instance = null;
@@ -36,7 +36,7 @@ class Db {
     
     $stmt = $this->db_conn->prepare("SELECT $columnList FROM $table WHERE id = :id LIMIT 1");
     
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
     $stmt->execute();
     
@@ -62,7 +62,7 @@ class Db {
     
     $stmt = $this->db_conn->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
     
-    $stmt->bindParam(':value', $value, PDO::PARAM_STR); 
+    $stmt->bindValue(':value', $value, PDO::PARAM_STR); 
     
     $stmt->execute();
     
@@ -92,7 +92,7 @@ class Db {
     
     $stmt = $this->db_conn->prepare($query);
     
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
     $stmt->execute();
     
@@ -122,7 +122,7 @@ class Db {
     
     $stmt = $this->db_conn->prepare($query);
     
-    $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
     $stmt->bindValue(':value', $value);
     
@@ -371,4 +371,4 @@ class Db {
   } // get_instance()
 
     
-} // ::Db
+} // ::Database
