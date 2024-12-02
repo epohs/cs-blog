@@ -13,7 +13,7 @@ class User {
   private function __construct() {
     
 
-    $this->Db = Db::get_instance();
+    $this->Db = Database::get_instance();
     
     
   } // __construct()
@@ -54,11 +54,11 @@ class User {
       $stmt = $db_conn->prepare( $query );
   
       // Bind the parameters
-      $stmt->bindParam(':email', $user_data['email'], PDO::PARAM_STR);
-      $stmt->bindParam(':password', $hashed_pass, PDO::PARAM_STR);
-      $stmt->bindParam(':selector', $selector, PDO::PARAM_STR);
-      $stmt->bindParam(':role', $user_role, PDO::PARAM_STR);
-      $stmt->bindParam(':verify_key', $verify_key, PDO::PARAM_STR);
+      $stmt->bindValue(':email', $user_data['email'], PDO::PARAM_STR);
+      $stmt->bindValue(':password', $hashed_pass, PDO::PARAM_STR);
+      $stmt->bindValue(':selector', $selector, PDO::PARAM_STR);
+      $stmt->bindValue(':role', $user_role, PDO::PARAM_STR);
+      $stmt->bindValue(':verify_key', $verify_key, PDO::PARAM_STR);
   
       // Execute the statement and return the ID of the User
       // we just added, or false if something failed.
@@ -153,7 +153,7 @@ class User {
     $param_type = is_numeric($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
     
     // Bind the parameters
-    $stmt->bindParam(':value', $value, $param_type);
+    $stmt->bindValue(':value', $value, $param_type);
     
     
     $stmt->execute();
@@ -334,7 +334,7 @@ class User {
     
     $stmt = $db_conn->prepare($query);
     
-    $stmt->bindParam(':value', $value, PDO::PARAM_STR);
+    $stmt->bindValue(':value', $value, PDO::PARAM_STR);
     $stmt->bindValue(':current_time', $current_time);
     
     $stmt->execute();
@@ -805,19 +805,19 @@ class User {
       endif;
       
 
-      $query = $db_conn->prepare('
+      $stmt = $db_conn->prepare('
         UPDATE `Users` 
         SET `failed_login_attempts` = :failed_login_attempts
         WHERE `id` = :id
       ');
 
 
-      $query->bindParam(':failed_login_attempts', $failed_login_attempts, PDO::PARAM_INT);
-      $query->bindParam(':id', $user_id, PDO::PARAM_INT);
+      $stmt->bindValue(':failed_login_attempts', $failed_login_attempts, PDO::PARAM_INT);
+      $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
 
       
 
-      return $query->execute();
+      return $stmt->execute();
 
     else:
 
@@ -890,8 +890,8 @@ class User {
     ');
 
 
-    $stmt->bindParam(':locked_until', $new_locked_until, PDO::PARAM_STR);
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(':locked_until', $new_locked_until, PDO::PARAM_STR);
+    $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
   
     $stmt->execute();
     
@@ -939,7 +939,7 @@ class User {
     
     $stmt = $db_conn->prepare($query);
     
-    $stmt->bindParam(':id', $user_id, PDO::PARAM_INT);
+    $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
     
   
     $stmt->execute();

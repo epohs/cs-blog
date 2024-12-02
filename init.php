@@ -51,7 +51,7 @@ endif;
 
 
 // Instantiate a few key classes so they are ready later
-Db::get_instance();
+Database::get_instance();
 User::get_instance();
 
 

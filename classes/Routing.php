@@ -122,7 +122,7 @@ class Routing {
     if ( !$this->is_route('signup', $path) &&
          !$this->is_route('form-handler', $path) ):
     
-      $db = Db::get_instance();
+      $db = Database::get_instance();
     
       // Ensure that we have at least one admin user
       if ( !$db->row_exists('Users', 'role', 'admin') ):

@@ -44,7 +44,7 @@ class Page {
 
     $this->alert_levels = ['info', 'warn', 'error'];
       
-    $this->Db = Db::get_instance();
+    $this->Db = Database::get_instance();
     
     $this->User = User::get_instance();
 

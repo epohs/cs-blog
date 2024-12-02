@@ -23,7 +23,7 @@ class RateLimits {
   public function __construct() {
     
     
-    $db = Db::get_instance();
+    $db = Database::get_instance();
     
     $this->db = $db->get_conn();
     
@@ -170,10 +170,10 @@ class RateLimits {
       $stmt = $this->db->prepare($query);
       
       // Bind parameters
-      $stmt->bindParam(':key', $key, PDO::PARAM_STR);
-      $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
-      $stmt->bindParam(':session_id', $session_id, PDO::PARAM_STR);
-      $stmt->bindParam(':expires_at', $expires_at_str, PDO::PARAM_STR);
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
+      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+      $stmt->bindValue(':expires_at', $expires_at_str, PDO::PARAM_STR);
       
       
       // Execute the query
@@ -255,11 +255,11 @@ class RateLimits {
       $stmt = $this->db->prepare($query);
     
       // Bind the parameters
-      $stmt->bindParam(':key', $key, PDO::PARAM_STR);
-      $stmt->bindParam(':current_time', $current_time, PDO::PARAM_STR);
-      $stmt->bindParam(':client_ip', $client_ip, PDO::PARAM_STR);
-      $stmt->bindParam(':session_id', $session_id, PDO::PARAM_STR);
-      $stmt->bindParam(':limit', $limit, PDO::PARAM_INT);
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
+      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
+      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+      $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
       
       
       $stmt->execute();
