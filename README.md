@@ -10,6 +10,8 @@ Super basic blog, built for my dad.
 - Instead of 'db_conn' use 'pdo'.
   - PDO calls are '$stmt'.
   - SQL queries are '$query'.
+- Rename get_unique_column_val() to get_unique_column_str().
+- I can probably change all uses of bindParam() to bindValue().
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
