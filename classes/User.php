@@ -630,32 +630,33 @@ class User {
       // Loop through the tokens array
       foreach ($tokens as $token_data):
 
-          // Check if 'token' and 'created_at' keys exist and are properly formatted
-          if ( !isset($token_data['token'], $token_data['created_at']) ):
-              continue;
-          endif;
+        // Check if 'token' and 'created_at' keys exist and are properly formatted
+        if ( !isset($token_data['token'], $token_data['created_at']) ):
+            continue;
+        endif;
 
-          // Check if 'created_at' is a valid date
-          $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
+        // Check if 'created_at' is a valid date
+        // @todo use Utils::is_valid_datetime() instead.
+        $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
 
-          // Skip if 'created_at' is not valid
-          if (!$created_at):
-              continue; 
-          endif;
+        // Skip if 'created_at' is not valid
+        if (!$created_at):
+            continue; 
+        endif;
 
-          // Get difference between the current date and 'created_at'
-          $interval = $now->diff($created_at);
+        // Get difference between the current date and 'created_at'
+        $interval = $now->diff($created_at);
 
-          // Skip tokens older than 30 days
-          if ($interval->days > 30):
-              continue; 
-          endif;
+        // Skip tokens older than 30 days
+        if ($interval->days > 30):
+            continue; 
+        endif;
 
-          // If everything is valid, add it to the valid tokens array
-          $valid_tokens[] = [
-              'token' => $token_data['token'],
-              'created_at' => $token_data['created_at']
-          ];
+        // If everything is valid, add it to the valid tokens array
+        $valid_tokens[] = [
+            'token' => $token_data['token'],
+            'created_at' => $token_data['created_at']
+        ];
 
       endforeach;
 
