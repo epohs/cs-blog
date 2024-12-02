@@ -363,6 +363,8 @@ class User {
     
 
     // Check if the input is a valid email address
+    // @todo this check will always run even if we already know the key
+    // is an int.. don't do this.
     if ( filter_var($id_or_email, FILTER_VALIDATE_EMAIL) ):
       
       $user_key = trim($id_or_email);
