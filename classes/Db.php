@@ -62,7 +62,6 @@ class Db {
     
     $stmt = $this->db_conn->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
     
-    // Use the appropriate PDO::PARAM_* based on your data type
     $stmt->bindParam(':value', $value, PDO::PARAM_STR); 
     
     $stmt->execute();
@@ -97,6 +96,7 @@ class Db {
 
     $stmt->execute();
     
+    
     return $stmt->fetchColumn();
     
     
@@ -123,7 +123,9 @@ class Db {
     $stmt = $this->db_conn->prepare($query);
     
     $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+    
     $stmt->bindValue(':value', $value);
+    
     
     return ( $stmt->execute() ) ? true : false;
     
@@ -138,11 +140,12 @@ class Db {
 
 
   /**
-  * Return a randomized, unique string that does not already exist in
-  * a given database column within a given table.
+  * Return a randomized, unique string that does not already exist
+  * in a given database table and column.
   *
-  * We do this by creating an array of random strings then selecting 
-  * rows where our column matches any of those strings.
+  * We do this by creating an array of random strings, then selecting 
+  * a number of rows where our column matches any of those strings. 
+  * Returning the first string that wasn't matched.
   */
   public function get_unique_column_val(string $table, string $column, array $args = []): string|false {
 
@@ -199,7 +202,7 @@ class Db {
         $existing_values = $stmt->fetchAll(PDO::FETCH_COLUMN);
   
   
-        // Find any strings that exist in this batch
+        // Find any strings that exist in this batch,
         // but not in our database column.
         $unique_strings = array_diff($batch, $existing_values);
         
@@ -221,7 +224,7 @@ class Db {
     endforeach;
   
       
-    // Return false if no unique value is found
+    // Return false if no unique value is found.
     return false;
 
 
@@ -238,23 +241,42 @@ class Db {
   
   private function db_init() {
     
-    // Define the path to the SQLite database file
+    // Define the path to the SQLite database file.
     $db_file = ROOT_PATH . 'data/db.sqlite';
    
     
     
-    // Check if the database file exists
-    if ( !file_exists($db_file) ) {
-      
+    // Test whether the database file exists.
+    if ( file_exists($db_file) ):
+
+
       try {
-      
-        // Create the database by connecting to it
-        $pdo = new PDO('sqlite:' . $db_file);
         
-        // Set the error mode to exception
+        // Connect to the existing database.
+        $pdo = new PDO('sqlite:' . $db_file);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        // Save database connection
+        // Save database connection for use throught the application.
+        $this->db_conn = $pdo;
+          
+      } catch (PDOException $e) {
+        
+        $this->Config->add_alert( "Failed to connect to the existing database: " . $e->getMessage() );
+      
+      }
+
+      
+    else:
+      
+
+      try {
+      
+        // Create the database by connecting to it.
+        $pdo = new PDO('sqlite:' . $db_file);
+        
+        // Set the error mode to exception.
+        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        
         $this->db_conn = $pdo;
         
         
@@ -268,23 +290,8 @@ class Db {
         
       }
       
-    } else {
       
-      try {
-        
-        // Connect to the existing database
-        $pdo = new PDO('sqlite:' . $db_file);
-        $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-        
-        $this->db_conn = $pdo;
-          
-      } catch (PDOException $e) {
-        
-        $this->Config->add_alert( "Failed to connect to the existing database: " . $e->getMessage() );
-      
-      }
-      
-    } // file_exists(config)
+    endif; // file_exists(config)
     
     
     
@@ -318,7 +325,7 @@ class Db {
     
     
     
-  } // make_tables;
+  } // make_tables()
   
   
   
