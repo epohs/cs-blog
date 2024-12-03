@@ -5,8 +5,6 @@ Super basic blog, built for my dad.
 ## To-Do ✓list
 
 
-- Instead of 'db_conn' use 'pdo'.
-  - Results are '$result'.
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
