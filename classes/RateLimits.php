@@ -11,7 +11,7 @@ class RateLimits {
   
   private static $instance = null;
   
-  private $db = null;
+  private $pdo = null;
   
   private $limiters = [];
   
@@ -23,9 +23,9 @@ class RateLimits {
   public function __construct() {
     
     
-    $db = Database::get_instance();
+    $Db = Database::get_instance();
     
-    $this->db = $db->get_conn();
+    $this->pdo = $Db->get_pdo();
     
     
   } // _construct()
@@ -167,7 +167,7 @@ class RateLimits {
 
     try {
       
-      $stmt = $this->db->prepare($query);
+      $stmt = $this->pdo->prepare($query);
       
       // Bind parameters
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
@@ -179,7 +179,7 @@ class RateLimits {
       // Execute the query
       if ( $stmt->execute() ):
         
-        return $this->db->lastInsertId();
+        return $this->pdo->lastInsertId();
         
       else:
         
@@ -252,7 +252,7 @@ class RateLimits {
     
     try {
 
-      $stmt = $this->db->prepare($query);
+      $stmt = $this->pdo->prepare($query);
     
       // Bind the parameters
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
@@ -362,7 +362,7 @@ class RateLimits {
     
     try {
 
-      $stmt = $this->db->prepare($query);
+      $stmt = $this->pdo->prepare($query);
       
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
       $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
@@ -394,13 +394,13 @@ class RateLimits {
     
     
     
-  public static function make_tables( $db ): bool {
+  public static function make_tables( $pdo ): bool {
     
     
     try {
       
       
-      $result = $db->exec(
+      $result = $pdo->exec(
         "CREATE TABLE IF NOT EXISTS `RateLimits` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `key` VARCHAR(64) NOT NULL,

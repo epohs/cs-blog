@@ -7,7 +7,7 @@ class Database {
   
   private $Config = null;
   
-  private $db_conn = null;
+  private $pdo = null;
   
   
   
@@ -34,7 +34,7 @@ class Database {
     
     $columnList = implode(', ', $columns);
     
-    $stmt = $this->db_conn->prepare("SELECT $columnList FROM $table WHERE id = :id LIMIT 1");
+    $stmt = $this->pdo->prepare("SELECT $columnList FROM $table WHERE id = :id LIMIT 1");
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
@@ -60,7 +60,7 @@ class Database {
   public function row_exists(string $table, string $column = 'id', $value = null): bool {
     
     
-    $stmt = $this->db_conn->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
+    $stmt = $this->pdo->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
     
     $stmt->bindValue(':value', $value, PDO::PARAM_STR); 
     
@@ -90,7 +90,7 @@ class Database {
     $query = "SELECT `{$column}` FROM `{$table}` WHERE id = :id";
     
     
-    $stmt = $this->db_conn->prepare($query);
+    $stmt = $this->pdo->prepare($query);
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
@@ -120,7 +120,7 @@ class Database {
     $query = "UPDATE `{$table}` SET `{$column}` = :value WHERE id = :id";
     
     
-    $stmt = $this->db_conn->prepare($query);
+    $stmt = $this->pdo->prepare($query);
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
@@ -194,7 +194,7 @@ class Database {
   
         $query = "SELECT `{$column}` FROM `{$table}` WHERE `{$column}` IN ($placeholders)";
         
-        $stmt = $this->db_conn->prepare($query);
+        $stmt = $this->pdo->prepare($query);
   
         // Pass our array of strings to fill the placeholders in our query.
         $stmt->execute($batch);
@@ -257,7 +257,7 @@ class Database {
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
         // Save database connection for use throught the application.
-        $this->db_conn = $pdo;
+        $this->pdo = $pdo;
           
       } catch (PDOException $e) {
         
@@ -277,7 +277,7 @@ class Database {
         // Set the error mode to exception.
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
         
-        $this->db_conn = $pdo;
+        $this->pdo = $pdo;
         
         
         $this->make_tables();
@@ -308,14 +308,14 @@ class Database {
   private function make_tables() {
     
     
-    $db = $this->get_conn();
+    $pdo = $this->get_pdo();
     
     
-    if ( $db ):
+    if ( $pdo ):
     
-      User::make_tables( $db );
+      User::make_tables( $pdo );
       
-      RateLimits::make_tables( $db );
+      RateLimits::make_tables( $pdo );
       
     else:
             
@@ -340,13 +340,13 @@ class Database {
   
   
   
-  public function get_conn() {
+  public function get_pdo() {
     
     
-    return $this->db_conn;
+    return $this->pdo;
     
     
-  } // get_conn()
+  } // pdo()
   
   
   

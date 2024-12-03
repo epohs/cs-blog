@@ -6,6 +6,8 @@ class User {
   private static $instance = null;
   
   private $Db = null;
+
+  private $pdo = null;
   
   
   
@@ -14,6 +16,8 @@ class User {
     
 
     $this->Db = Database::get_instance();
+
+    $this->pdo = $this->Db->get_pdo();
     
     
   } // __construct()
@@ -29,9 +33,6 @@ class User {
     
     
     $result = false;
-    
-    $db_conn = $this->Db->get_conn();
-    
     
     $user_role = ( !$this->Db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
     
@@ -51,7 +52,7 @@ class User {
                 VALUES (:email, :password, :selector, :role, :verify_key)";
       
       
-      $stmt = $db_conn->prepare( $query );
+      $stmt = $this->pdo->prepare( $query );
   
       // Bind the parameters
       $stmt->bindValue(':email', $user_data['email'], PDO::PARAM_STR);
@@ -64,7 +65,7 @@ class User {
       // we just added, or false if something failed.
       if ( $stmt->execute() ):
         
-        $result = $db_conn->lastInsertId();
+        $result = $this->pdo->lastInsertId();
         
       else:
         
@@ -115,9 +116,6 @@ class User {
    * 
    */
   public function get_by(string $key, $value) {
-
-    
-    $db_conn = $this->Db->get_conn();
     
     
     $valid_keys = [
@@ -148,7 +146,7 @@ class User {
     endif;
     
     
-    $stmt = $db_conn->prepare($query);
+    $stmt = $this->pdo->prepare($query);
 
     $param_type = is_numeric($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
     
@@ -312,9 +310,6 @@ class User {
   public function update_last_login(int $value, string $key = 'id'): void {
     
     
-    $db_conn = $this->Db->get_conn();
-    
-    
     $valid_keys = [
       'id',
       'selector'
@@ -332,7 +327,7 @@ class User {
     $query = "UPDATE Users SET last_login = :current_time WHERE `{$key}` = :value";
     
     
-    $stmt = $db_conn->prepare($query);
+    $stmt = $this->pdo->prepare($query);
     
     $stmt->bindValue(':value', $value, PDO::PARAM_STR);
     $stmt->bindValue(':current_time', $current_time);
@@ -754,10 +749,7 @@ class User {
 
   public function check_password_reset_token( string $token ): int|false {
 
-    
-    $db_conn = $this->Db->get_conn();
-
-    $stmt = $db_conn->prepare("SELECT id
+    $stmt = $this->pdo->prepare("SELECT id
                                 FROM Users 
                                 WHERE password_reset_token = :token
                                 AND password_reset_expires >= :now
@@ -794,8 +786,6 @@ class User {
 
       $failed_login_attempts++;
 
-      $db_conn = $this->Db->get_conn();
-
       // Extend the lockout period but do not increment
       // the failed lockout count.
       if ( $extend_lockout ):
@@ -805,7 +795,7 @@ class User {
       endif;
       
 
-      $stmt = $db_conn->prepare('
+      $stmt = $this->pdo->prepare('
         UPDATE `Users` 
         SET `failed_login_attempts` = :failed_login_attempts
         WHERE `id` = :id
@@ -856,9 +846,6 @@ class User {
       return false;
       
     endif;
-    
-
-    $db_conn = $this->Db->get_conn();
 
   
     if ( is_null($locked_until) ):
@@ -883,7 +870,7 @@ class User {
     $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
     
   
-    $stmt = $db_conn->prepare('
+    $stmt = $this->pdo->prepare('
       UPDATE `Users` 
       SET `locked_until` = :locked_until 
       WHERE `id` = :id
@@ -911,8 +898,6 @@ class User {
 
     $user_id = is_array($user) ? (int) $user['id'] : $user;
 
-    $db_conn = $this->Db->get_conn();
-
   
     if ( $mode == 'lockout-only' ):
       
@@ -937,7 +922,7 @@ class User {
     
     
     
-    $stmt = $db_conn->prepare($query);
+    $stmt = $this->pdo->prepare($query);
     
     $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
     
@@ -957,13 +942,13 @@ class User {
   
   
   
-  public static function make_tables( $db ): bool {
+  public static function make_tables( $pdo ): bool {
     
   
     try {
       
       // Optionally, create tables or perform other setup tasks here
-      $result = $db->exec(
+      $result = $pdo->exec(
         "CREATE TABLE IF NOT EXISTS Users (
           id INTEGER PRIMARY KEY AUTOINCREMENT,
           selector VARCHAR(16) UNIQUE,
