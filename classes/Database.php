@@ -346,7 +346,7 @@ class Database {
     return $this->pdo;
     
     
-  } // pdo()
+  } // get_pdo()
   
   
   
@@ -371,4 +371,5 @@ class Database {
   } // get_instance()
 
     
+  
 } // ::Database
