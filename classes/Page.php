@@ -2,8 +2,12 @@
 
 
 /**
- * 
+ * Handles the preparation and display of all pages, including logic for
+ * metadata, internal URLs, error display, and template rendering.
+ *
+ * This class is made public in all templates.
  */
+
 class Page {
 
   
@@ -24,18 +28,18 @@ class Page {
   private $partial_root = 'partials';
   
   
+
+
   
+
+
+
   private function __construct() {
     
     
-    $this->block_direct_access();
-    
-    
-    
-    // We need to grab any alerts that were stashed
-    // when our Config class ran at the begining of 
-    // the page load and merge them into our Page
-    // alerts property.
+    // Grab any alerts that were stashed when the Config 
+    // class ran earlier in the process and merge 
+    // them into the Page alerts property.
     $this->Config = Config::get_instance();
     
     $config_alerts = $this->Config->get_alerts();
@@ -43,20 +47,14 @@ class Page {
     $this->alerts = array_merge($this->alerts, $config_alerts);
 
     $this->alert_levels = ['info', 'warn', 'error'];
-      
+    
+
     $this->Db = Database::get_instance();
     
     $this->User = User::get_instance();
 
     $this->Routing = Routing::get_instance();
 
-
-    
-    // Handle error codes passed in the query string
-    // @internal Moving this to Routing, after the path
-    // is determined.
-    //$this->process_page_messages();
-    
     
 
     // @todo Think of a better way to handle this initial
@@ -75,9 +73,9 @@ class Page {
 
 
 
-
-
   /**
+   * Is the page currently being viewed an admin level page?
+   * 
    * @todo this needs to be rewritten to check whether the page is an
    *        admin route.
    */
@@ -89,11 +87,16 @@ class Page {
 
 
   
+
   
   
 
   
-  
+  /**
+   * Return the URL of this website without a trailing slash.
+   * 
+   * Uses the value set in our config process to determine the URL.
+   */
   public function site_root(): string {
     
     return rtrim($this->Config->get('site_root'), '/');
@@ -104,9 +107,13 @@ class Page {
   
   
   
+
   
   
-  
+  /**
+   * Take a string representing a route within this website and
+   * return a fully formed absolute URL.
+   */
   public function url_for( string $path ): string {
     
     $path = ( $path === '/' ) ? '' : $path;
@@ -124,6 +131,9 @@ class Page {
 
 
 
+  /**
+   * Get the full URL for the current page.
+   */
   public function get_url(): string|null {
 
     $return = '';
@@ -147,9 +157,14 @@ class Page {
   
   
   
+
   
   
-  
+  /**
+   * Get the page title for the current page.
+   * 
+   * Mostly used for the HTML <title>.
+   */
   public function get_page_title(): string {
     
     return $this->Config->get('site_name');
@@ -159,18 +174,17 @@ class Page {
   
   
   
-  
-  
+
   
   
   
   /**
-   * We treat template files the same as partials
-   * except instead of being served from the /partials/
-   * sub-directory, they're served directly out of
-   * the theme root. So, this function is just a thin
-   * wrapper around the get_partial() function, but we
-   * change the root directory.
+   * Render the primary HTML template file for a page.
+   * 
+   * We treat template files the same as partials except instead of being 
+   * served from the /partials/ sub-directory, they're served directly out 
+   * of the theme root. This function is a thin wrapper around the 
+   * get_partial() function, but we change the serving directory.
    */
   public function get_template(string $file, ?string $suffix = null, $args = false): void {
     
@@ -178,10 +192,9 @@ class Page {
     $this->get_partial($file, $suffix, $args, '');
 
 
-    // @todo Reassess this.
-    //
-    // get_template() should never be called twice, so
-    // we can ditch the page_alert session here.
+    // After the page has been viewed, remove page alerts to avoid a
+    // situation where multiple alerts are triggered during a page
+    // refresh.
     Session::delete_key('page_alert');
     
     
@@ -191,11 +204,19 @@ class Page {
   
   
   
+
   
   
-  
-  
-  
+  /**
+   * Render a piece of an HTML template for a page.
+   * 
+   * This function will look for a file containing the HTML for a partial,
+   * first in the active theme, and if the file isn't found it will look
+   * in the 'default' theme directory for the same file. This allows for 
+   * themes that customize only part of the default theme.
+   * 
+   * @todo add fallback to default theme.
+   */
   public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
     
@@ -224,7 +245,7 @@ class Page {
     // If $partial_root has any other value, build the path
     // using the string we passed.
     // This is to accomodate admin pages being served from
-    // outside the theme directory.
+    // outside the theme directory - primarily admin pages.
     else:
     
       
@@ -292,12 +313,17 @@ class Page {
 
   
   
+
   
   
   
-  
-  
+    
   /**
+   * Create a nonce with an action key, and an expiration time in seconds.
+   * Save this nonce to the session.
+   * 
+   * Used for CSRF protection, and repeated form submissions.
+   * 
    * @todo Move nonce related functions to the Auth class?
    */
   public static function set_nonce(string $action, int $ttl = 3600): string {
@@ -306,8 +332,8 @@ class Page {
     $expires = time() + $ttl;
     
     $nonce_data = [
-        'nonce' => $nonce,
-        'expires' => $expires
+      'nonce' => $nonce,
+      'expires' => $expires
     ];
     
     // Store nonce data in the session overriding any
@@ -323,10 +349,16 @@ class Page {
   
   
   
-  
+
+
+  /**
+   * Test whether a nonce for a given action is valid against
+   * the nonce saved in the session.
+   */
   public static function validate_nonce(string $nonce, string $action): bool {
 
-    $_ret = false;
+
+    $return = false;
     
 
     if ( Session::key_isset(['nonces', $action]) ):
@@ -337,7 +369,7 @@ class Page {
       
       if ( $nonceData['expires'] >= time() ):
         
-        $_ret = true;
+        $return = true;
         
       endif;
 
@@ -349,7 +381,7 @@ class Page {
     endif;
 
     
-    return $_ret;
+    return $return;
 
   } // validate_nonce()
 
@@ -360,8 +392,9 @@ class Page {
 
 
 
-
-
+  /**
+   * Remove any expired nonces from this session.
+   */
   public static function remove_expired_nonces(): bool {
 
 
@@ -408,18 +441,20 @@ class Page {
   
   
   
+
   
   
   
-  
-  
-  public function add_alert(mixed $alert_text, ?string $level = null):void {
+  /**
+   * Add a page alert to be displayed when the page is rendered.
+   */
+  public function add_alert(string $alert_text, ?string $level = null):void {
     
 
     $default_level = 'error';
     
     
-    // Only allow levels listed in the array above.
+    // Only allow levels set in the alert_levels class property.
     // Default to 'error' if something else is passed.
     if ( !is_null($level) ):
       
@@ -432,10 +467,7 @@ class Page {
     endif;
       
     
-    
-    
-    $this->alerts[] = ['level' => $level, 'text' => $alert_text];
-    
+    $this->alerts[] = ['text' => $alert_text, 'level' => $level];
     
     
   } // add_alert()
@@ -444,10 +476,11 @@ class Page {
   
   
   
+
   
   
   /**
-   * 
+   * Test whether this page load has any alerts.
    */
   public function has_alerts($level = false): bool {
     
@@ -467,11 +500,15 @@ class Page {
 
 
 
+  /**
+   * Get any alerts for this page that have been added during this page load.
+   */
   public function get_alerts($level = false): mixed {
     
 
-    // Strip out info and warn level msgs when not in debug mode
+    // Strip out info and warn level msgs when not in debug mode.
     if ( !$this->Config->get('debug') && !$level ):
+
 
       $filtered_alerts = array_filter($this->alerts, function($item) {
         
@@ -483,10 +520,11 @@ class Page {
       // re-index the array to correct gaps
       // left when we filtered.
       return array_values($filtered_alerts);
+
       
     else:
       
-      // If a specific level was requested return only alerts
+      // If a specific level was requested, return only alerts
       // of that level, otherwise return all alerts.
       if ( $level ):
         
@@ -512,18 +550,36 @@ class Page {
 
 
   
+
   
   
   
   
-  
+  /**
+   * Look for a page alert code in the querystring for this page request
+   * and determine if it is a valid page alert.
+   * 
+   * If it is, add the alert to be displayed when the template is rendered.
+   * 
+   * All valid alert codes are defined in this function, and compared
+   * with codes saved in the session before the redirect to protect against 
+   * repeated triggering during page refreshes.
+   * 
+   * The alert level is defined in the session data, as well as optional 
+   * alert text that will override the default alert text defined in this 
+   * function.
+   * 
+   * @return bool True if the alert code was a valid alert.
+   */
   function process_page_alerts(): bool {
     
+
     $has_alert = false;
     
       
     // Check if there is an alert code querystring variable.
     if ( isset($_GET['alert']) ) :
+
 
       $querystring_code = htmlspecialchars( trim($_GET['alert']) );
       $session_alert = Session::get_key('page_alert');
@@ -532,13 +588,12 @@ class Page {
       $msg_text = null;
 
 
-      // Redirect if the alert code in our session doesn't match the querystring code.
+      // Redirect if the alert code in the querystring doesn't match the session code.
       if ( $session_code !== $querystring_code ):
 
         Routing::redirect_to( $this->get_url() );
 
       endif;
-
 
       
       // Check the alert code in the querystring against a pre-determined
@@ -629,6 +684,7 @@ class Page {
     
     return $has_alert;
     
+
   } // process_page_alerts()
 
   
@@ -638,32 +694,9 @@ class Page {
   
   
   
-  
-  
   /**
-   * If this class is instantiated outside the proper
-   * scope prevent further instantiation.
-   *
-   * @internal I don't think this method is needed.
+   * Return an instance of this class.
    */
-  private function block_direct_access() {
-    
-    if ( !defined('ROOT_PATH') ):
-      
-      die('Class called incorrectly.');
-    
-    endif;
-    
-    
-  } // block_direct_access()
-  
-  
-  
-  
-  
-  
-  
-  
   public static function get_instance() {
   
     if (self::$instance === null):
