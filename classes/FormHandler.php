@@ -122,9 +122,11 @@ class FormHandler {
     
     if ( !$this->limits->check('form_login') ):
 
-      echo "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
+      $err_msg = "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
       
-      exit;
+      // Login attempt failed. Redirect back with an error.
+      Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
+
 
     endif;
 
