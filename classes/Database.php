@@ -1,5 +1,12 @@
 <?php
 
+/**
+ * Handles crucial database setup and core methods used
+ * by other classes throughout the appliction.
+ *
+ * This class handles the creation of our database, and
+ * shares the db connection with all other classes.
+ */
 class Database {
 
   
@@ -8,6 +15,8 @@ class Database {
   private $Config = null;
   
   private $pdo = null;
+  
+  
   
   
   
@@ -29,12 +38,33 @@ class Database {
   
   
   
+  /**
+   * Return the PDO for all other classes to use to
+   * connect to the database.
+   */
+  public function get_pdo() {
     
+    
+    return $this->pdo;
+    
+    
+  } // get_pdo()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Get selected columns from a row by it's ID.
+   */  
   public function get_row_by_id( string $table, int $id, array $columns = ['*'] ) {
     
     $columnList = implode(', ', $columns);
     
-    $stmt = $this->pdo->prepare("SELECT $columnList FROM $table WHERE id = :id LIMIT 1");
+    $stmt = $this->pdo->prepare("SELECT {$columnList} FROM `{$table}` WHERE `id` = :id LIMIT 1");
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
@@ -53,14 +83,14 @@ class Database {
   
   
   
-  
-  
-  
-  
+  /**
+   * Test whether a row exists by selecting a row that matches 
+   * a selected column with a given value.
+   */
   public function row_exists(string $table, string $column = 'id', $value = null): bool {
     
     
-    $stmt = $this->pdo->prepare("SELECT 1 FROM $table WHERE $column = :value LIMIT 1");
+    $stmt = $this->pdo->prepare("SELECT 1 FROM `{$table}` WHERE `{$column}` = :value LIMIT 1");
     
     $stmt->bindValue(':value', $value, PDO::PARAM_STR); 
     
@@ -73,24 +103,19 @@ class Database {
   } // row_exists()
 
   
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   /**
-   * 
+   * Get a single column by the row's ID.
    */
-  public function get_column(string $table, string $column, int $id ) {
+  public function get_column(string $table, string $column, int $id ): mixed {
     
     
-    $query = "SELECT `{$column}` FROM `{$table}` WHERE id = :id";
-    
-    
-    $stmt = $this->pdo->prepare($query);
+    $stmt = $this->pdo->prepare("SELECT `{$column}` FROM `{$table}` WHERE `id` = :id");
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
 
@@ -109,22 +134,18 @@ class Database {
 
 
 
-
-
   /**
-   * 
+   * Set a single column to a given value. The row is targetted
+   * by it's ID.
    */
   public function set_column(string $table, string $column, $value, int $id): bool {
     
     
-    $query = "UPDATE `{$table}` SET `{$column}` = :value WHERE id = :id";
-    
-    
-    $stmt = $this->pdo->prepare($query);
-    
-    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+    $stmt = $this->pdo->prepare("UPDATE `{$table}` SET `{$column}` = :value WHERE `id` = :id");
     
     $stmt->bindValue(':value', $value);
+    
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
     
     return ( $stmt->execute() ) ? true : false;
@@ -157,12 +178,11 @@ class Database {
       'batch_per_step' => 2
     ];
 
-    // Merge passed arguments with defaults
+    // Merge passed arguments with defaults.
     $args = array_merge($defaults, $args);
 
-
     
-    // Ensure max_len is greater than or equal to min_len
+    // Ensure max_len is greater than or equal to min_len.
     if ( !Utils::all_integers($args) || ($args['max_len'] < $args['min_len']) ):
       
       return false;
@@ -170,7 +190,8 @@ class Database {
     endif;
     
     
-    
+    // Loop from the smallest length string to the largest in our
+    // range of strings, stepping by our defined increment.
     foreach ( range($args['min_len'], $args['max_len'], $args['step'] ) as $length):
       
       
@@ -181,7 +202,8 @@ class Database {
   
         $batch = [];
         
-        
+      
+        // Create the defined number of strings to check.  
         for ($i = 0; $i < $args['str_per_batch']; $i++):
   
           $batch[] = Utils::generate_random_string($length);
@@ -203,7 +225,7 @@ class Database {
   
   
         // Find any strings that exist in this batch,
-        // but not in our database column.
+        // but not in our target database column.
         $unique_strings = array_diff($batch, $existing_values);
         
 
@@ -230,7 +252,6 @@ class Database {
 
   } // get_unique_column_val()
 
-
   
   
   
@@ -238,13 +259,19 @@ class Database {
   
   
   
-  
+  /**
+   * Initialize the database, and set up the PDO object for use 
+   * by the application.
+   * 
+   * If the database doesn't exist create it, and kick off creating
+   * the tables the application needs otherwise just connect.
+   */
   private function db_init() {
+   
     
     // Define the path to the SQLite database file.
     $db_file = ROOT_PATH . 'data/db.sqlite';
    
-    
     
     // Test whether the database file exists.
     if ( file_exists($db_file) ):
@@ -258,6 +285,7 @@ class Database {
         
         // Save database connection for use throught the application.
         $this->pdo = $pdo;
+        
           
       } catch (PDOException $e) {
         
@@ -270,6 +298,7 @@ class Database {
       
 
       try {
+        
       
         // Create the database by connecting to it.
         $pdo = new PDO('sqlite:' . $db_file);
@@ -294,8 +323,6 @@ class Database {
     endif; // file_exists(config)
     
     
-    
-    
   } // db_init()
   
   
@@ -305,6 +332,9 @@ class Database {
   
   
   
+  /**
+   * Manage the creation of database tables defined in all other classes.
+   */
   private function make_tables() {
     
     
@@ -324,7 +354,6 @@ class Database {
     endif;
     
     
-    
   } // make_tables()
   
   
@@ -334,29 +363,9 @@ class Database {
   
   
   
-  
-  
-  
-  
-  
-  
-  public function get_pdo() {
-    
-    
-    return $this->pdo;
-    
-    
-  } // get_pdo()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
+  /**
+   * Return an instance of this class.
+   */
   public static function get_instance() {
   
     if (self::$instance === null):

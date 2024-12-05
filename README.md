@@ -5,6 +5,8 @@ Super basic blog, built for my dad.
 ## To-Do ✓list
 
 
+- Rate limiting might not be extending, or even logging attempts
+  once lockout is in place.
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
