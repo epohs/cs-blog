@@ -83,9 +83,12 @@ class RateLimits {
   public function check(string $key, ?bool $increment = true ): bool {
     
     
+    $return = false;
+    
+    
     if ( !isset($this->limiters[$key]) ):
       
-      return false;
+      return $return;
       
     endif;
     
@@ -94,26 +97,32 @@ class RateLimits {
     $tries_used = $this->get_tries_used($key);
 
 
+    // If the number of tries used has reached the number of tries
+    // allowed by this limiter, leave the return value false as
+    // this attempt failed, otherwise set return to true.
+    //
+    // We clear the expired tries during failed attempts to put
+    // the database burden on the offenders.
     if ( is_countable($tries_used) && (count($tries_used) >= $this->limiters[$key]['limit']) ):
 
       $del = $this->delete_expired($key);
       
-      return false;
-      
     else:
-
-
-      if ( $increment ):
-        
-        $new_id = $this->add_hit( $key );
-        
-      endif;
       
-      
-      return true;
-      
+      $return = true;
       
     endif;
+    
+
+    
+    if ( $increment ):
+      
+      $new_id = $this->add_hit( $key );
+      
+    endif;
+    
+    
+    return $return;
     
 
   } // check()
@@ -246,7 +255,7 @@ class RateLimits {
             WHERE `key` = :key
               AND (`client_ip` = :client_ip OR `session_id` = :session_id)
               AND `expires_at` > :current_time
-            ORDER BY `expires_at` ASC
+            ORDER BY `expires_at` DESC
             LIMIT :limit";
     
     
@@ -271,7 +280,12 @@ class RateLimits {
 
       else:
 
-        return $stmt->fetchAll(PDO::FETCH_ASSOC);
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Reorder to chronological order
+        usort($results, fn($a, $b) => strtotime($a['expires_at']) <=> strtotime($b['expires_at']));
+        
+        return $results;
 
       endif;
       
