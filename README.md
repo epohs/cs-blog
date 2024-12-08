@@ -5,9 +5,6 @@ Super basic blog, built for my dad.
 ## To-Do ✓list
 
 
-- Rate limiting get_try_again_after is returning the time offset for the 
-  most recent attempt, which is incorrect. it needs to calculate the offset
-  from the oldest attempt.
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
