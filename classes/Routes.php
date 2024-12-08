@@ -1,10 +1,11 @@
 <?php
 
-
-
-
 use League\HTMLToMarkdown\HtmlConverter;
 
+/**
+ * Hande the logic for individual routes in the application.
+ * 
+ */
 class Routes {
 
   
@@ -18,16 +19,16 @@ class Routes {
 
   private $FormHandler = null;
 
+  // Map a URL segment to a function that handles
+  // the logic for a specific route.
   public $map = null;
 
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   
   private function __construct( $Page, $path ) {
 
@@ -60,35 +61,33 @@ class Routes {
     // Forms
     $this->add_route('form-handler', $this->FormHandler, 'process');
 
-
-  
-    
     
   } // __construct()
 
   
+  
+  
+  
+  
+  
+  
+  /**
+   * Homepage
+   */
+  private function home(): void {
 
-
-
-
-
-
-
-  private function home() {
-
-    $this->Page->get_template( "index" );
+    $this->Page->get_template( 'index' );
 
   } // home()
 
   
-
-
-
-
-
-
-
-  private function post() {
+  
+  
+  
+  
+  
+  
+  private function post(): void {
       
     $converter = new HtmlConverter(array('strip_tags' => true));
     
@@ -96,14 +95,17 @@ class Routes {
 
   } // post()
 
-
-
-
-
-
-
-
-  private function profile() {
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * User profile
+   */
+  private function profile(): void {
 
 
     if ( $this->User->is_logged_in() ):
@@ -120,17 +122,18 @@ class Routes {
 
 
   } // profile()
-
-
-
-
-
-
-
-
-
-
-  private function logout() {
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * User logout
+   */
+  private function logout(): void {
       
 
     $auth = Auth::get_instance();
@@ -141,28 +144,34 @@ class Routes {
 
 
   } // logout()
-
-
-
-
-
-
-
-
-  private function _404() {
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Page not found
+   */
+  private function _404(): void {
     
     $this->Page->get_template( '404' );
 
   } // 404()
-
-
-
-
-
-
-
-
-  private function add_route(string $key, $class_instance, string $method_name) {
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Add a route to the map property
+   */
+  private function add_route(string $key, $class_instance, string $method_name): void {
 
     // Initialize $map if it's null
     $this->map ??= [];
@@ -170,13 +179,17 @@ class Routes {
     $this->map[$key] = [$class_instance, $method_name];
 
   } // add_route()
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Get the route map
+   */
   public function get_routes(): array|null {
 
 
@@ -184,35 +197,48 @@ class Routes {
 
 
   } // get_routes()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Call the appropriate route handler function
+   * as registered in the route map.
+   */
+  public function serve(string $key): bool {
+    
 
-
-
-
-
-
-
-
-  public function serve(string $key) {
-
-    if (isset($this->map[$key]) && is_callable($this->map[$key])) {
+    if ( isset($this->map[$key]) && is_callable($this->map[$key]) ):
 
       call_user_func($this->map[$key]);
+      
+      return true;
 
-    } else {
+    else:
 
-      echo "Method for '$key' not callable or does not exist.";
+      debug_log("Method for '$key' not callable or does not exist.");
+      
+      return false;
 
-    }
+    endif;
+    
 
   } // serve()
-
-
-
-
-
-
-
   
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Return an instance of this class.
+   */
   public static function get_instance( $Page, $path ) {
   
     if (self::$instance === null):
