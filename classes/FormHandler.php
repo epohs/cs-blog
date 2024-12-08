@@ -54,21 +54,28 @@ class FormHandler {
 
 
 
+  /**
+   *
+   */
+  public function process(): bool {
 
-  public function process() {
 
-
+    $return = false;
+    
+    $debug_msg = null;
+    
     $post_vars = Routing::clean_post_vars( $_POST );
 
+    $form_name = $post_vars['form_name'] ?? null;
+    
+    $nonce = $post_vars['nonce'] ?? null;
+    
 
-    if ( isset($post_vars['form_name']) && isset($post_vars['nonce']) ):
+    if ( $form_name && $nonce ):
+
       
-      
-      $form_name = $post_vars['form_name'];
-      $nonce = $post_vars['nonce'];
-
-
-
+      // Check whether the form name posted matches a form
+      // name that has been mapped to a handler function.
       if ( is_array($this->map) && array_key_exists($form_name, $this->map) ):
 
         $this->post_vars = $post_vars;
@@ -76,24 +83,33 @@ class FormHandler {
         $this->nonce = $nonce;
 
         $this->serve( $form_name );
+        
+        $return = true;
 
       else:
 
-        echo '<br>bad form name<br>';
-        
-        echo 'Post vars: ' . var_export($post_vars['form_name'], true);  
+        $debug_msg = "Bad form name: {$form_name}";
 
       endif;
 
 
-
     else:
 
-      echo '<br>bad post<br>';
-        
-      echo 'Post vars: ' . var_export($post_vars, true);
+      $debug_msg = "Bad post to form handler. form_name: {$form_name} | nonce: {$nonce}";
 
     endif;
+    
+    
+    if ( $debug_msg ):
+      
+      debug_log($debug_msg);
+      
+    endif;
+    
+    
+    // If processing the form post gets to this point, return
+    // should always be false, and no form was served.
+    return $return;
     
 
   } // process()
