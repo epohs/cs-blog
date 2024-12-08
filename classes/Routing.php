@@ -49,12 +49,13 @@ class Routing {
    *
    * @todo clean up segment parsing
    */
-  public function serve_route( string $request_uri ) {
+  public function serve_route( string $request_uri ): bool {
 
     
     $this->page = Page::get_instance();
 
     $this->path = $this->process_path( $request_uri );
+    
     
     // Handle error codes passed in the query string
     $this->page->process_page_alerts();
@@ -62,9 +63,6 @@ class Routing {
     $this->Routes = Routes::get_instance( $this->page, $this->path );
 
     $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
-    
-    
-    //$this->serve_route( $this->path );
 
     
     $this->first_run_check( $this->path );
@@ -84,9 +82,7 @@ class Routing {
 
       if ( $this->is_route($route_key, $this->path) ):
 
-        $valid_route = true;
-
-        $this->Routes->serve($route_key);
+        $valid_route = $this->Routes->serve($route_key);
 
         break;
 
@@ -103,6 +99,8 @@ class Routing {
 
     endif;
     
+    
+    return $valid_route;
     
     
   } // serve_route()
