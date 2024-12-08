@@ -1,11 +1,13 @@
 <?php
 
-
 /**
-* Very basic IP address based rate limiting.
-* 
-* @todo this needs to check for Redis and use that if available
-*/
+ * Allow for the creation of limits to the number of times a user can 
+ * carry out a given action within a given period of time.
+ *
+ * User identification is handled both by IP address and session variables.
+ * 
+ * @todo this needs to check for Redis and use that if available
+ */
 class RateLimits {
   
   
@@ -35,14 +37,15 @@ class RateLimits {
     
     
     
-    
+   
+  
   /**
-  * Configure a rate limiter with a specific key and policy.
-  *
-  * @param string $key Unique identifier for the rate limiter.
-  * @param int $limit Maximum number of actions allowed.
-  * @param string $interval Time window for the rate limit (e.g., '5 minutes').
-  */
+   * Configure a rate limiter with a specific key and policy.
+   *
+   * @param string $key Unique identifier for the rate limiter.
+   * @param int $limit Maximum number of actions allowed.
+   * @param string $interval Time window for the rate limit (e.g., '5 minutes').
+   */
   public function set(string $key, int $limit, string $interval): bool {
     
     
@@ -73,13 +76,15 @@ class RateLimits {
     
   
   
+  
   /**
-  * Check and consume tokens for a specific limiter.
-  *
-  * @param string $key Identifier of the rate limiter.
-  *
-  * @return bool True if the request is allowed, false otherwise.
-  */
+   * Check and consume tokens for a specific limiter.
+   *
+   * @param string $key Identifier of the rate limiter.
+   * @param bool $increment Should a hit be added to the limiter.
+   *
+   * @return bool True if the request is allowed, false otherwise.
+   */
   public function check(string $key, ?bool $increment = true ): bool {
     
     
@@ -134,17 +139,20 @@ class RateLimits {
     
     
     
-    
-    
-    
-    
   /**
    * Add a new entry for this limiter. Set the expires_at
    * to the appropriate number of seconds in the future.
    * 
-   * 
+   * @return int The ID of the hit added or false if adding failed.
    */
   private function add_hit( string $key ): int|false {
+    
+    
+    if ( !isset($this->limiters[$key]) ):
+      
+      return false;
+      
+    endif;
     
     
     $client_ip = Utils::get_client_ip();
@@ -152,7 +160,10 @@ class RateLimits {
     $session_id = Session::get_key('id');
     
     
-    if ( !isset($this->limiters[$key]) || ($client_ip === false) ):
+    // If neither the session ID, nor client IP are valid
+    // then we can't identify the user, and rate limiting is
+    // useless.
+    if ( !$session_id && ($client_ip === false) ):
       
       return false;
       
@@ -170,8 +181,8 @@ class RateLimits {
     $expires_at_str = $date->format('Y-m-d H:i:s');
     
 
-    $query = "INSERT INTO `RateLimits` (`key`, `client_ip`, `session_id`, `expires_at`) 
-              VALUES (:key, :client_ip, :session_id, :expires_at)";
+    $query = 'INSERT INTO `RateLimits` (`key`, `client_ip`, `session_id`, `expires_at`) 
+              VALUES (:key, :client_ip, :session_id, :expires_at)';
 
 
     try {
@@ -211,15 +222,15 @@ class RateLimits {
     
     
     
-    
-  
   /**
-  * Get the tries used for a specific limiter.
-  *
-  * @param string $key Identifier of the rate limiter.
-  *
-  * @return array|false Array of tries used.
-  */
+   * Get the tries used for a specific limiter.
+   *
+   * @param string $key Identifier of the rate limiter.
+   * @param int $limit Number of tries to return. Default is the
+   *.       limit defined by the limiter.
+   *
+   * @return array|false Array of tries used.
+   */
   public function get_tries_used(string $key, ?int $limit = 0): array|false {
     
     
@@ -250,20 +261,20 @@ class RateLimits {
     endif;
     
     
-    $query = "SELECT *
+    $query = 'SELECT *
             FROM `RateLimits`
             WHERE `key` = :key
               AND (`client_ip` = :client_ip OR `session_id` = :session_id)
               AND `expires_at` > :current_time
             ORDER BY `expires_at` DESC
-            LIMIT :limit";
+            LIMIT :limit';
     
     
     try {
 
       $stmt = $this->pdo->prepare($query);
     
-      // Bind the parameters
+      
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
       $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
@@ -273,21 +284,12 @@ class RateLimits {
       
       $stmt->execute();
       
+      $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
       
-      if ( $limit === 1 ):
-
-        return $stmt->fetch(PDO::FETCH_ASSOC);
-
-      else:
-
-        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-        
-        // Reorder to chronological order
-        usort($results, fn($a, $b) => strtotime($a['expires_at']) <=> strtotime($b['expires_at']));
-        
-        return $results;
-
-      endif;
+      // Reorder to chronological order.
+      usort($results, fn($a, $b) => strtotime($a['expires_at']) <=> strtotime($b['expires_at']));
+      
+      return $results;
       
 
     } catch (PDOException $e) {
@@ -306,16 +308,13 @@ class RateLimits {
     
     
     
-    
-    
-  
   /**
-  * Get the next time when this limiter can be successfully hit again.
-  *
-  * @param string $key Identifier of the rate limiter.
-  *
-  * @return string|false Next available retry time, or false if limiter not found.
-  */
+   * Get the next time when this limiter can be successfully hit again.
+   *
+   * @param string $key Identifier of the rate limiter.
+   *
+   * @return string|false Next available retry time, or false if limiter not found.
+   */
   public function get_retry_after(string $key): string|false {
     
     
@@ -326,12 +325,16 @@ class RateLimits {
     endif;
 
     
-    $seconds = $this->limiters[$key]['interval'];     
+    $seconds = $this->limiters[$key]['interval'];
+   
+    $limit = $this->limiters[$key]['limit'];
     
     
-    $first_try_in_window = $this->get_tries_used($key, 1);
+    $tries_used = $this->get_tries_used($key, $limit);
+    
+    $first_try = is_array($tries_used) && !empty($tries_used) ? reset($tries_used) : null;
 
-    $expires_at = $first_try_in_window['expires_at'];
+    $expires_at = !is_null($first_try) ? $first_try['expires_at'] : 'now';
 
     $expires_at_date = new DateTime($expires_at);
 
@@ -352,10 +355,11 @@ class RateLimits {
     
     
     
-    
-    
-    
-    
+  /**
+   * Delete all expired hits for a given limiter.
+   *
+   * @return int Number of rows deleted.
+   */
   function delete_expired(string $key): int {
 
     
@@ -369,9 +373,9 @@ class RateLimits {
     $current_time = date('Y-m-d H:i:s');
 
 
-    $query = "DELETE FROM `RateLimits`
+    $query = 'DELETE FROM `RateLimits`
               WHERE `key` = :key
-                AND `expires_at` < :current_time";
+                AND `expires_at` < :current_time';
 
     
     try {
@@ -394,20 +398,17 @@ class RateLimits {
     
 
   } // delete_expired()
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Create the database tables needed for rate limits.
+   */
   public static function make_tables( $pdo ): bool {
     
     
@@ -415,13 +416,13 @@ class RateLimits {
       
       
       $result = $pdo->exec(
-        "CREATE TABLE IF NOT EXISTS `RateLimits` (
+        'CREATE TABLE IF NOT EXISTS `RateLimits` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `key` VARCHAR(64) NOT NULL,
-          `client_ip` VARCHAR(255) NOT NULL,
-          `session_id` VARCHAR(32) NOT NULL,
+          `client_ip` VARCHAR(255),
+          `session_id` VARCHAR(32),
           `expires_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        );"
+        )'
       );
       
       
@@ -446,7 +447,9 @@ class RateLimits {
     
     
     
-    
+  /**
+   * Return an instance of this class.
+   */   
   public static function get_instance() {
     
     if (self::$instance === null):
@@ -461,9 +464,7 @@ class RateLimits {
   } // get_instance()
     
     
-    
-    
-    
+     
 } // ::RateLimits
   
   
