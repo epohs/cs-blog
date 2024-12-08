@@ -221,9 +221,10 @@ class Routing {
   
   public static function is_route(string $url, array $path): bool {
     
-    // If eithier of our parameters are empty, or if
+    
+    // If either of our parameters are empty, or if
     // the 'segments' key doesn't exist in $path then
-    // our comparissons will fail so we can return
+    // our comparisons will fail so we can return
     // false without the need to look further.
     if ( empty($url) || empty($path) || !isset($path['segments']) ):
       
@@ -276,6 +277,7 @@ class Routing {
             return false;
           
           endif;
+          
           
         else:
           
@@ -348,12 +350,12 @@ class Routing {
   
   
   
-  public static function redirect_to(string $url, int $statusCode = 302): void {
+  public static function redirect_to(string $url, int $status_code = 302): void {
     
     
     if ( !headers_sent() ):
       
-      http_response_code($statusCode);
+      http_response_code($status_code);
       header("Location: " . $url);
       exit();
     
