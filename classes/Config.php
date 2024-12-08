@@ -1,7 +1,7 @@
 <?php
 
 /**
- * Handle crucial configuration values for use throughout this application.
+ * Handle crucial configuration values used throughout this application.
  * 
  * Default values are defined in the Defaults class. User defined
  * values are set in the config.php file in the root of the application
@@ -38,7 +38,6 @@ class Config {
     $this->init();
     
   } // __construct()
-  
   
   
   
@@ -95,7 +94,6 @@ class Config {
 
   } // init()
   
- 
  
  
   
