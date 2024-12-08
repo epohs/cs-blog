@@ -87,7 +87,6 @@ class FormHandler {
 
 
 
-
     else:
 
       echo '<br>bad post<br>';
@@ -95,13 +94,7 @@ class FormHandler {
       echo 'Post vars: ' . var_export($post_vars, true);
 
     endif;
-
-
-
-    // Clear temporarilly stored values to avoid problems on the next request
-    // @todo think of a cleaner way to do this
-    //$this->post_vars = null;
-    //$this->nonce = null;
+    
 
   } // process()
 
@@ -387,7 +380,6 @@ class FormHandler {
       if ( is_array($user_to_reset) && isset($user_to_reset['id']) ):
 
         // A user with this email adress was found. Set the reset password token.
-        // @todo this returns a bool. Check if false and redirect with err if so.
         $this->user->set_password_reset_token( $user_to_reset['id'] );
 
       endif;
