@@ -153,9 +153,10 @@ class FormHandler {
 
         $new_locked_until = $this->user->extend_lockout($user_to_login);
 
-        echo "Too many failed login attempts. Try again after " . Utils::format_date($new_locked_until) . ".";
+        $err_msg = "Too many failed login attempts. Try again after " . Utils::format_date($new_locked_until) . ".";
         
-        exit;
+        // Login attempt failed. Redirect back with an error.
+        Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
 
 
       elseif ( isset($user_to_login['locked_until']) &&
