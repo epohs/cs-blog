@@ -136,7 +136,7 @@ class FormHandler {
       
       $retry_after_str = Utils::format_date($retry_after);
       
-      $retry_after_header = $retry_after->format('D, d M Y H:i:s') . ' GMT';
+      $retry_after_header = Utils::format_date($retry_after, 'D, d M Y H:i:s') . ' GMT';
       
         
       $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
@@ -171,12 +171,19 @@ class FormHandler {
           ):
           
 
-        $new_locked_until = $this->user->extend_lockout($user_to_login);
-
-        $err_msg = "Too many failed login attempts. Try again after " . Utils::format_date($new_locked_until) . ".";
+        $locked_until = $this->user->extend_lockout($user_to_login);
+      
+        $retry_after_str = Utils::format_date($locked_until);
+      
+        $retry_after_header = Utils::format_date($locked_until, 'D, d M Y H:i:s') . ' GMT';
         
+        $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
+      
+      
+        header("Retry-After: {$retry_after_header}");
+      
         // Login attempt failed. Redirect back with an error.
-        Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
+        Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
 
 
       elseif ( isset($user_to_login['locked_until']) &&
