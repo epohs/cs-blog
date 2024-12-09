@@ -204,9 +204,10 @@ class FormHandler {
         // the last_login timestamp.
         $update_last_login = ( intval($user_to_login['is_verified']) == 1 ) ? true : false;
 
-        // Optionally set a cookie to remember user across sessions
+        // Optionally set a cookie to remember user across sessions.
         $remember_me = ( isset($this->post_vars['remember_me']) && (intval($this->post_vars['remember_me']) == 1) ) ? true : false;
 
+        // Log this user in.
         $is_logged_in = $this->auth->login( $user_to_login['id'], $update_last_login, $remember_me );
         
       else:
