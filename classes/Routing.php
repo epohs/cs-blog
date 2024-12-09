@@ -378,7 +378,7 @@ class Routing {
 
 
 
-  public static function redirect_with_alert( string $url, array $alert_arr ): void {
+  public static function redirect_with_alert( string $url, array $alert_arr, ?int $status_code = 0 ): void {
 
 
     $default_alert_arr = [
@@ -393,8 +393,16 @@ class Routing {
     
     Session::set_key('page_alert', $alert);
 
+    
+    if ( $status_code ): 
 
-    self::redirect_to($url . "?alert={$alert['code']}");
+      self::redirect_to($url . "?alert={$alert['code']}", $status_code);
+      
+    else:
+      
+      self::redirect_to($url . "?alert={$alert['code']}");
+      
+    endif;
 
 
   } // redirect_with_alert()

@@ -131,10 +131,21 @@ class FormHandler {
     
     if ( !$this->limits->check('form_login') ):
 
-      $err_msg = "Too many login attempts. Try again after " . $this->limits->get_retry_after('form_login') . ".";
+      
+      $retry_after = $this->limits->get_retry_after('form_login');
+      
+      $retry_after_str = Utils::format_date($retry_after);
+      
+      $retry_after_header = $retry_after->format('D, d M Y H:i:s') . ' GMT';
+      
+        
+      $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
+      
+      
+      header("Retry-After: {$retry_after_header}");
       
       // Login attempt failed. Redirect back with an error.
-      Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
+      Routing::redirect_with_alert( $this->page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
 
 
     endif;
