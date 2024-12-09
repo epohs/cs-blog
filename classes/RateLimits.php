@@ -262,12 +262,12 @@ class RateLimits {
     
     
     $query = 'SELECT *
-            FROM `RateLimits`
-            WHERE `key` = :key
-              AND (`client_ip` = :client_ip OR `session_id` = :session_id)
-              AND `expires_at` > :current_time
-            ORDER BY `expires_at` DESC
-            LIMIT :limit';
+              FROM `RateLimits`
+              WHERE `key` = :key
+                AND (`client_ip` = :client_ip OR `session_id` = :session_id)
+                AND `expires_at` > :current_time
+              ORDER BY `expires_at` DESC
+              LIMIT :limit';
     
     
     try {
@@ -337,10 +337,8 @@ class RateLimits {
     $expires_at = !is_null($first_try) ? $first_try['expires_at'] : 'now';
 
     $expires_at_date = new DateTime($expires_at);
-
-    $expires_at_str = $expires_at_date->format('Y-m-d H:i:s');
-    
-    $retry_after = Utils::format_date($expires_at_str);
+      
+    $retry_after = $expires_at_date->format('Y-m-d H:i:s');
     
     
     return $retry_after;
