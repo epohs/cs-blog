@@ -1,5 +1,8 @@
 <?php
 
+/**
+ *
+ */
 class User {
     
     
@@ -8,6 +11,10 @@ class User {
   private $Db = null;
 
   private $pdo = null;
+  
+  
+  
+  
   
   
   
@@ -28,7 +35,9 @@ class User {
   
   
   
-  
+  /**
+   *
+   */
   public function new( array $user_data ): int|false {
     
     
@@ -48,8 +57,8 @@ class User {
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
   
       // Prepare the SQL statement
-      $query = "INSERT INTO Users (email, password, selector, role, verify_key) 
-                VALUES (:email, :password, :selector, :role, :verify_key)";
+      $query = 'INSERT INTO Users (`email`, `password`, `selector`, `role`, `verify_key`) 
+                VALUES (:email, :password, :selector, :role, :verify_key)';
       
       
       $stmt = $this->pdo->prepare( $query );
@@ -76,37 +85,36 @@ class User {
     
     } catch (PDOException $e) {
     
-      echo "Error: " . $e->getMessage() . '<br>';
+      debug_log('New User creation failed: ' . $e->getMessage());
       
       $result = false;
       
     }
     
     
-    
     return $result;
+    
     
   } // new()
   
- 
-
-
-
-
-
-
-
-  public function get( int $user_id ) {
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
+  public function get( int $user_id ): array|false {
 
     return $this->Db->get_row_by_id('Users', $user_id);
 
   } // get()
 
-
-
-
-
-
+  
+  
   
   
   
@@ -115,7 +123,7 @@ class User {
   /**
    * 
    */
-  public function get_by(string $key, $value) {
+  public function get_by(string $key, $value): array|false {
     
     
     $valid_keys = [
@@ -130,14 +138,14 @@ class User {
     
     if ( $key == 'remember_me' ):
 
-      $query = "SELECT * 
-        FROM Users 
+      $query = 'SELECT * 
+        FROM `Users` 
         WHERE EXISTS ( 
             SELECT 1 
-            FROM json_each(remember_me) 
+            FROM json_each(`remember_me`) 
             WHERE json_each.value->>'token' = :value 
                AND date(json_each.value->>'created_at') >= date('now', '-30 days')
-        )";
+        )';
 
     else:
 
@@ -163,12 +171,8 @@ class User {
   } // get_by()
   
   
-
-
-
-
-
-
+  
+  
   
   
   
@@ -176,7 +180,7 @@ class User {
   /**
    * Private function to set any single column
    */
-  private function get_column(string $column, int $user_id) {
+  private function get_column(string $column, int $user_id): mixed {
     
     
     return $this->Db->get_column('Users', $column, $user_id);
@@ -184,9 +188,8 @@ class User {
     
   } // get_column()
 
-
-
-
+  
+  
   
   
   
@@ -210,13 +213,12 @@ class User {
   
   
   
-  
   /**
    * @internal instead of doing separate db calls, think
    *            of a nice way to do this with a transaction.
    *            Add a flag to set_column to allow for this.
    */
-  public function verify(int $user_id ): bool {
+  public function verify( int $user_id ): bool {
     
     
     $remove_verifiy_key = $this->set_column('verify_key', null, $user_id);
@@ -236,11 +238,14 @@ class User {
   
   
   
-
-
-
-
-
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function is_verified( $user_id = false ): bool {
 
 
@@ -262,15 +267,16 @@ class User {
 
   } // is_verified()
 
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function get_role( $user_id = false ): string|false {
 
     
@@ -292,7 +298,7 @@ class User {
 
   } // get_role()
 
-
+  
   
   
   
@@ -339,22 +345,26 @@ class User {
   
   
   
-    
-    
-    
   
   
+  
+  
+  
+  /**
+   *
+   */
   public function user_exists( $id_or_email ): bool {
     
+    
     $user_key = null;
+    
     
     // Check if the input is a valid integer
     if ( is_numeric($id_or_email) && intval($id_or_email) == $id_or_email ):
     
       $user_key = intval($id_or_email);
       
-    endif;
-    
+    endif;    
     
 
     // Check if the input is a valid email address
@@ -364,8 +374,7 @@ class User {
       
       $user_key = trim($id_or_email);
         
-    endif;
-    
+    endif;  
     
     
     if ( is_null($user_key) ):
@@ -380,19 +389,15 @@ class User {
       
     endif;
     
-    
-    
+     
   } // user_exists()
   
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   
   /**
    *
@@ -447,12 +452,10 @@ class User {
   
   
   
-
-
-
-
-
-
+  
+  
+  
+  
   /**
    * @internal Is this thorough enough?
    */
@@ -460,7 +463,7 @@ class User {
 
     return ( $this->is_logged_in() && ($this->get_role() == 'admin') );
 
-  } // is_admin
+  } // is_admin()
   
   
   
@@ -472,7 +475,7 @@ class User {
   /**
    * @todo Flesh this function out
    */
-  public function validate_pass( string $password ) {
+  public function validate_pass( string $password ): bool {
     
     
     return ( strlen($password) >= 4 );
@@ -487,7 +490,9 @@ class User {
   
   
   
-  
+  /**
+   *
+   */
   public function set_remember_me( int $user_id, string $token ): bool {
     
     
@@ -518,13 +523,15 @@ class User {
   } // set_remember_me()
   
   
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function update_last_active( ?int $user_id = 0, ?string $time_str = null ): bool {
     
     
@@ -539,11 +546,12 @@ class User {
   } // update_last_active()
   
   
-
-
-
-
-
+  
+  
+  
+  
+  
+  
   /**
    * 
    */
@@ -555,15 +563,16 @@ class User {
 
   } // update_password()
 
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
 
 
@@ -589,15 +598,16 @@ class User {
 
   } // delete_remember_me_token()
 
-
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   private function clean_remember_me_tokens( $tokens ): array {
 
 
@@ -612,9 +622,7 @@ class User {
     endif;
 
 
-
     $valid_tokens = [];
-
 
 
     if ( !empty($tokens) ):
@@ -665,16 +673,21 @@ class User {
 
   } // clean_remember_me_tokens()
 
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function set_password_reset_token( int $user_id ): string|false {
 
 
     $user_to_reset = $this->get( $user_id );
+    
 
     // Is this a valid existing User ID?
     if ( is_array($user_to_reset) && isset($user_to_reset['id']) ):
@@ -709,7 +722,6 @@ class User {
 
       // If we made it here we have a valid User, and that user is
       // eligible for a new password reset.
-      // @todo make length a config setting
       $new_reset_token = $this->Db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
 
 
@@ -729,7 +741,9 @@ class User {
     
       $is_good_date = $this->set_column('password_reset_expires', $new_reset_expires, $user_id);
 
+      
       return ( $is_good_token && $is_good_date );
+      
 
     else:
 
@@ -740,20 +754,23 @@ class User {
 
   } // set_password_reset_token()
 
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   public function check_password_reset_token( string $token ): int|false {
 
-    $stmt = $this->pdo->prepare("SELECT id
-                                FROM Users 
-                                WHERE password_reset_token = :token
-                                AND password_reset_expires >= :now
-                                LIMIT 1");
+    $stmt = $this->pdo->prepare('SELECT `id`
+                                FROM `Users`
+                                WHERE `password_reset_token` = :token
+                                AND `password_reset_expires` >= :now
+                                LIMIT 1');
                                       
 
     $stmt->execute([
@@ -767,18 +784,21 @@ class User {
 
   } // check_password_reset_token()
 
-
-
-
   
   
   
-
-
+  
+  
+  
+  
+  /**
+   *
+   */
   function increment_failed_login(array $user, ?bool $extend_lockout = true): bool {
     
 
     $user_id = $user['id'];
+    
     $failed_login_attempts = (int) $user['failed_login_attempts'];
     
 
@@ -805,7 +825,6 @@ class User {
       $stmt->bindValue(':failed_login_attempts', $failed_login_attempts, PDO::PARAM_INT);
       $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
 
-      
 
       return $stmt->execute();
 
@@ -817,14 +836,16 @@ class User {
 
   } // increment_failed_login()
 
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   *
+   */
   function extend_lockout(array $user, ?bool $increment = true): string|false {
     
 
@@ -886,15 +907,18 @@ class User {
 
   } // extend_lockout()
   
-
-
-
-
-
-
-
-
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * 
+   */
   function remove_lockout(array|int $user, ?string $mode = 'all'): void {
+    
 
     $user_id = is_array($user) ? (int) $user['id'] : $user;
 
@@ -912,14 +936,13 @@ class User {
       $query = 'UPDATE `Users`
                 SET `failed_login_attempts` = 0,
                     `locked_until` = NULL
-                      WHERE `id` = :id';
+                WHERE `id` = :id';
       
     else:
       
       return;
       
     endif;
-    
     
     
     $stmt = $this->pdo->prepare($query);
@@ -929,48 +952,48 @@ class User {
   
     $stmt->execute();
 
-  } // extend_lockout()  
-
-
-
-
-
-
-  
+    
+  } // remove_lockout()  
 
   
   
   
   
+  
+  
+  
+  /**
+   *
+   */
   public static function make_tables( $pdo ): bool {
     
   
     try {
       
       // Optionally, create tables or perform other setup tasks here
-      $result = $pdo->exec(
-        "CREATE TABLE IF NOT EXISTS Users (
-          id INTEGER PRIMARY KEY AUTOINCREMENT,
-          selector VARCHAR(16) UNIQUE,
-          email VARCHAR(255) NOT NULL UNIQUE,
-          password VARCHAR(255) NOT NULL,
-          display_name VARCHAR(128),
-          remember_me JSON DEFAULT NULL,
-          created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          updated_at DATETIME DEFAULT CURRENT_TIMESTAMP,
-          last_login DATETIME,
-          last_active DATETIME,
-          is_active BOOLEAN DEFAULT 1,
-          is_verified BOOLEAN DEFAULT 0,
-          verify_key VARCHAR(16) UNIQUE,
-          password_reset_token VARCHAR(64),
-          password_reset_expires DATETIME,
-          failed_login_attempts INTEGER DEFAULT 0,
-          locked_until DATETIME,
-          role TEXT DEFAULT 'user',
-          CHECK (role IN ('user', 'author', 'admin'))
-        );"
-      );
+      $result = $pdo->exec('
+         CREATE TABLE IF NOT EXISTS `Users` (
+          `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+          `selector` VARCHAR(16) UNIQUE,
+          `email` VARCHAR(255) NOT NULL UNIQUE,
+          `password` VARCHAR(255) NOT NULL,
+          `display_name` VARCHAR(128),
+          `remember_me` JSON DEFAULT NULL,
+          `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+          `last_login` DATETIME,
+          `last_active` DATETIME,
+          `is_active` BOOLEAN DEFAULT 1,
+          `is_verified` BOOLEAN DEFAULT 0,
+          `verify_key` VARCHAR(16) UNIQUE,
+          `password_reset_token` VARCHAR(64),
+          `password_reset_expires` DATETIME,
+          `failed_login_attempts` INTEGER DEFAULT 0,
+          `locked_until` DATETIME,
+          `role` TEXT DEFAULT 'user',
+          CHECK (`role` IN ('user', 'author', 'admin'))
+        )
+      ');
       
       
       return $result;
@@ -986,18 +1009,17 @@ class User {
 
   } // make_tables()
     
-    
-    
   
   
   
   
   
-    
   
   
   
-  
+  /**
+   * Return an instance of this class.
+   */
   public static function get_instance() {
     
     if ( is_null(self::$instance) ):
