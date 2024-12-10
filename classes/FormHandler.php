@@ -340,9 +340,12 @@ class FormHandler {
     
     $user_pass = isset($this->post_vars['password']) ? $this->post_vars['password'] : '';
     
+    $user_exists = $this->user->user_exists($user_email);
+    
+    $user_pass_valid = $this->user->validate_pass($user_pass);
     
     
-    if ( $user_email && !$this->user->user_exists($user_email) && $this->user->validate_pass($user_pass) ):
+    if ( $user_email && !$user_exists && $user_pass_valid ):
       
       
       $user_data = [
@@ -350,14 +353,17 @@ class FormHandler {
         'password' => $user_pass
       ];
       
+      // Create the new user.
       $new_user_id = $this->user->new($user_data);
       
+      // Test whether the user was successfully added.
       if ( $new_user_id ):
         
         // Manually set logged in cookie and session but
         // do not set last login timestamp.            
         $this->auth->login($new_user_id, false);
         
+        // @todo Add a pretty strict rate limit for this.
         
         Routing::redirect_to( $this->page->url_for('verify') );
         
@@ -368,11 +374,11 @@ class FormHandler {
       endif;
       
       
-    elseif ( $this->user->user_exists($user_email) ):
+    elseif ( $user_exists ):
       
       Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '002'] );
         
-    elseif ( !$this->user->validate_pass($user_pass) ):
+    elseif ( !$user_pass_valid ):
       
       Routing::redirect_with_alert( $this->page->url_for('signup'), ['code' => '003'] );
         
