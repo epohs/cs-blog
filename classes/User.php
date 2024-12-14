@@ -143,8 +143,9 @@ class User {
         WHERE EXISTS ( 
             SELECT 1 
             FROM json_each(`remember_me`) 
-            WHERE json_each.value->>'token' = :value 
-               AND date(json_each.value->>'created_at') >= date('now', '-30 days')
+            WHERE json_valid(`remember_me`)
+               AND json_each.value->>"token" = :value 
+               AND date(json_each.value->>"created_at") >= date("now", "-30 days")
         )';
 
     else:
@@ -990,8 +991,8 @@ class User {
           `password_reset_expires` DATETIME,
           `failed_login_attempts` INTEGER DEFAULT 0,
           `locked_until` DATETIME,
-          `role` TEXT DEFAULT 'user',
-          CHECK (`role` IN ('user', 'author', 'admin'))
+          `role` TEXT DEFAULT "user",
+          CHECK (`role` IN ("user", "author", "admin"))
         )
       ');
       
