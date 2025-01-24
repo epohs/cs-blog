@@ -72,7 +72,7 @@ class Routes {
   
   
   /**
-   * Homepage
+   * Homepage.
    */
   private function home(): void {
 
@@ -103,7 +103,7 @@ class Routes {
   
   
   /**
-   * User profile
+   * User profile.
    */
   private function profile(): void {
 
@@ -131,7 +131,7 @@ class Routes {
   
   
   /**
-   * User logout
+   * User logout.
    */
   private function logout(): void {
       
@@ -153,7 +153,7 @@ class Routes {
   
   
   /**
-   * Page not found
+   * Page not found.
    */
   private function _404(): void {
     
@@ -169,7 +169,7 @@ class Routes {
   
   
   /**
-   * Add a route to the map property
+   * Add a route to the map property.
    */
   private function add_route(string $key, $class_instance, string $method_name): void {
 
@@ -188,7 +188,7 @@ class Routes {
   
   
   /**
-   * Get the route map
+   * Get the route map.
    */
   public function get_routes(): array|null {
 

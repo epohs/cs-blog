@@ -65,6 +65,7 @@ class AdminRoutes {
       
     endif;
 
+
   } // dashboard()
   
   
@@ -74,41 +75,9 @@ class AdminRoutes {
 
   
 
-
-  public function profile() {
-
-
-    $this->verified_user_redirect();
-
-
-    // If the current user is an admin load the 
-    // admin dashboard, otherwise redirect home.
-    if ( $this->user->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
-      
-      $user = User::get_instance();
-
-      $cur_user = ( ( Session::get_key(['user', 'id']) ) ) ? $user->get( Session::get_key(['user', 'id']) ) : null;
-      
-      $this->get_template( 'profile', null, ['cur_user' => $cur_user] );
-      
-    else:
-      
-      Routing::redirect_to( $this->page->url_for('/') );
-      
-    endif;
-
-
-
-  } // profile()
-  
-  
-
-
-
-
-  
-
-
+  /**
+   * Login page.
+   */
   public function login() {
 
 
@@ -130,7 +99,6 @@ class AdminRoutes {
     endif;
 
 
-
   } // login()
   
   
@@ -140,7 +108,9 @@ class AdminRoutes {
 
   
 
-
+  /**
+   * New user sign up.
+   */
   public function signup() {
 
 
@@ -165,7 +135,6 @@ class AdminRoutes {
     endif;
 
 
-
   } // signup()
   
   
@@ -175,11 +144,14 @@ class AdminRoutes {
 
   
 
-
+  /**
+   * Verify new user's email address.
+   */
   public function verify() {
       
       
     $user_id = Session::get_key(['user', 'id']);
+
     
     if ( $user_id ):
       
@@ -206,7 +178,6 @@ class AdminRoutes {
     $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
 
 
-
   } // verify()
   
   
@@ -216,14 +187,18 @@ class AdminRoutes {
 
   
 
-
+  /**
+   * Forgot password.
+   * 
+   * Ask for the User's email, then lead to password reset form.
+   */
   public function forgot_password() {
 
 
     $this->verified_user_redirect( $this->path );
 
       
-    // If the user is already logged in redirect to their profile
+    // If the user is already logged in redirect to their profile.
     if ( Session::get_key(['user', 'id']) ):
 
       Routing::redirect_to( $this->page->url_for('profile') );
@@ -247,7 +222,17 @@ class AdminRoutes {
 
   
 
-
+  /**
+   * Password reset.
+   * 
+   * Password resets require a unique key that is emailed to the 
+   * address we have stored. This route either gets the 
+   * password reset key from the URL segment, or it displays a form
+   * to copy and paste the key from the email and re-POSTS back to 
+   * this page with the key in the URL.
+   * 
+   * Having a valid key will display the password reset form.
+   */
   public function password_reset() {
 
 
@@ -288,7 +273,7 @@ class AdminRoutes {
 
 
       // @todo We will delete the key either when it expires or when it is used to reset the pass
-      $active_key_found = $this->user->check_password_reset_token($reset_key);
+      $active_key_found = ( $key_valid ) ? $this->user->check_password_reset_token($reset_key) : false;
 
 
       if ( $key_exists && !$active_key_found ):
@@ -298,13 +283,11 @@ class AdminRoutes {
       endif;
 
 
-      
       $nonce = $this->page->set_nonce('password-reset');
       
       $tmpl_args = [
                     'nonce' => $nonce,
                     'key_exists' => $key_exists,
-                    'key_valid' => $key_valid, // @todo This isn't being used in the template. Review.
                     'active_key_found' => $active_key_found,
                     'reset_key' => $reset_key
                   ];
@@ -312,7 +295,6 @@ class AdminRoutes {
       $this->get_template( 'password-reset', null, $tmpl_args );
 
     endif;
-
 
 
   } // password_reset()
