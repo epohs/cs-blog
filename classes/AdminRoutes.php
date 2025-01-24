@@ -1,5 +1,11 @@
 <?php
 
+/**
+ * Admin related page routes have their own handlers and
+ * their own templates that are not themeable.
+ * 
+ * This class handles all of those routes.
+ */
 
 
 
@@ -30,23 +36,16 @@ class AdminRoutes {
     $this->user = User::get_instance();
       
   } // __construct()
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
-  
 
 
 
 
 
 
+
+  /**
+   * Landing page for the admin section.
+   */
   public function dashboard() {
 
 
@@ -262,13 +261,7 @@ class AdminRoutes {
 
     else:
       
-      // @todo Do some validation on the reset key
-      // ✓ does it exist
-      // ✓ is it the valid length, and does it contain only approved characters
-      // ✓ check the database. does it exist, is it expired?
-      // > if key doesn't exist display key entry form
-      // > if it does exist and is invalid, redirect to error
-      // > if it does exist and is valid, display reset form
+      // Get reset key from URL segement.
       $reset_key = Routing::get_route_vars('key');
         
       $key_exists = ( !empty($reset_key) );
@@ -281,15 +274,14 @@ class AdminRoutes {
 
       else:
 
-        // @internal We're deleting the session key here to avoid
-        //            false positives. We reset the session key when
-        //            there is a valid key in the URL, and then test
-        //            it against the key passed as a hidden input field
-        //            when the new password form is submitted.
+        // We're deleting the session key here to avoid
+        // false positives. We reset the session key when
+        // there is a valid key in the URL, and then test
+        // it against the key passed as a hidden input field
+        // when the new password form is submitted.
         Session::delete_key('reset_key');
 
-        // We will use this variable to decide to show the
-        // key entry field
+        // We should use this variable to decide to show the key entry field.
         $key_valid = false;
 
       endif;
@@ -312,7 +304,7 @@ class AdminRoutes {
       $tmpl_args = [
                     'nonce' => $nonce,
                     'key_exists' => $key_exists,
-                    'key_valid' => $key_valid,
+                    'key_valid' => $key_valid, // @todo This isn't being used in the template. Review.
                     'active_key_found' => $active_key_found,
                     'reset_key' => $reset_key
                   ];
@@ -374,7 +366,7 @@ class AdminRoutes {
     $this->page->get_partial($file, $suffix, $args, 'admin');
 
 
-    // @ todo Reassess this.
+    // @todo Reassess this.
     //
     // get_template() should never be called twice, so
     // we can ditch the page_alert session here.
