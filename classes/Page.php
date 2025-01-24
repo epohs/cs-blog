@@ -634,7 +634,7 @@ class Page {
           
           $has_alert = true;
 
-          $msg_text = $session_alert['text'] ??'Incorrect verification code.' ;
+          $msg_text = $session_alert['text'] ?? 'Incorrect verification code.' ;
         
           $this->add_alert( $msg_text, $session_level );
           
@@ -655,6 +655,16 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Invalid email address';
+
+          $this->add_alert( $msg_text, $session_level );
+
+          break;
+
+        case '007':
+
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Invalid password reset key';
 
           $this->add_alert( $msg_text, $session_level );
 
