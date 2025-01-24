@@ -14,7 +14,7 @@ class AdminRoutes {
   
   private static $instance = null;
   
-  private $page = null;
+  private $Page = null;
   
   private $path = null;
 
@@ -27,7 +27,7 @@ class AdminRoutes {
   
   private function __construct( $path ) {
 
-    $this->page = Page::get_instance();
+    $this->Page = Page::get_instance();
 
     $this->path = $path;
 
@@ -46,7 +46,7 @@ class AdminRoutes {
   /**
    * Landing page for the admin section.
    */
-  public function dashboard() {
+  public function dashboard(): void {
 
 
     $this->verified_user_redirect( $this->path );
@@ -56,12 +56,11 @@ class AdminRoutes {
     // admin dashboard, otherwise redirect home.
     if ( $this->user->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
       
-
       $this->get_template( 'dashboard' );
     
     else:
       
-      Routing::redirect_to( $this->page->url_for('/') );
+      Routing::redirect_to( $this->Page->url_for('/') );
       
     endif;
 
@@ -78,7 +77,7 @@ class AdminRoutes {
   /**
    * Login page.
    */
-  public function login() {
+  public function login(): void {
 
 
     $this->verified_user_redirect( $this->path );
@@ -88,11 +87,11 @@ class AdminRoutes {
   
       $redirect_path = ( $this->user->is_admin() ) ? 'admin/dash' : '/';
 
-      Routing::redirect_to( $this->page->url_for($redirect_path) );
+      Routing::redirect_to( $this->Page->url_for($redirect_path) );
 
     else:
       
-      $nonce = $this->page->set_nonce('login');
+      $nonce = $this->Page->set_nonce('login');
       
       $this->get_template( 'login', null, ['nonce' => $nonce] );
 
@@ -111,7 +110,7 @@ class AdminRoutes {
   /**
    * New user sign up.
    */
-  public function signup() {
+  public function signup(): void {
 
 
     $this->verified_user_redirect( $this->path );
@@ -120,7 +119,7 @@ class AdminRoutes {
     // If the user is already logged in redirect to their profile
     if ( Session::get_key(['user', 'id']) ):
 
-      Routing::redirect_to( $this->page->url_for('profile') );
+      Routing::redirect_to( $this->Page->url_for('profile') );
 
     else:
         
@@ -128,7 +127,7 @@ class AdminRoutes {
       // you were redirected to this page is because no users
       // existed yet.
       
-      $nonce = $this->page->set_nonce('signup');
+      $nonce = $this->Page->set_nonce('signup');
       
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
 
@@ -147,7 +146,7 @@ class AdminRoutes {
   /**
    * Verify new user's email address.
    */
-  public function verify() {
+  public function verify(): void {
       
       
     $user_id = Session::get_key(['user', 'id']);
@@ -160,18 +159,18 @@ class AdminRoutes {
       // If user is already logged in redirect to their profile
       if ( intval($cur_user['is_verified']) == 1 ):
 
-        Routing::redirect_to( $this->page->url_for('profile') );
+        Routing::redirect_to( $this->Page->url_for('profile') );
 
       endif;
     
     else:
 
-      Routing::redirect_to( $this->page->url_for('login') );
+      Routing::redirect_to( $this->Page->url_for('login') );
       
     endif;
     
     
-    $nonce = $this->page->set_nonce('verify');
+    $nonce = $this->Page->set_nonce('verify');
     
     $verify_key = $cur_user['verify_key'];
       
@@ -192,7 +191,7 @@ class AdminRoutes {
    * 
    * Ask for the User's email, then lead to password reset form.
    */
-  public function forgot_password() {
+  public function forgot_password(): void {
 
 
     $this->verified_user_redirect( $this->path );
@@ -201,11 +200,11 @@ class AdminRoutes {
     // If the user is already logged in redirect to their profile.
     if ( Session::get_key(['user', 'id']) ):
 
-      Routing::redirect_to( $this->page->url_for('profile') );
+      Routing::redirect_to( $this->Page->url_for('profile') );
 
     else:
       
-      $nonce = $this->page->set_nonce('forgot');
+      $nonce = $this->Page->set_nonce('forgot');
       
       $this->get_template( 'forgot', null, ['nonce' => $nonce] );
 
@@ -233,7 +232,7 @@ class AdminRoutes {
    * 
    * Having a valid key will display the password reset form.
    */
-  public function password_reset() {
+  public function password_reset(): void {
 
 
     $this->verified_user_redirect( $this->path );
@@ -242,7 +241,7 @@ class AdminRoutes {
     // If the user is already logged in redirect to their profile
     if ( Session::get_key(['user', 'id']) ):
 
-      Routing::redirect_to( $this->page->url_for('profile') );
+      Routing::redirect_to( $this->Page->url_for('profile') );
 
     else:
       
@@ -278,12 +277,12 @@ class AdminRoutes {
 
       if ( $key_exists && !$active_key_found ):
 
-        Routing::redirect_with_alert( $this->page->url_for('password-reset'), ['code' => '007'] );
+        Routing::redirect_with_alert( $this->Page->url_for('password-reset'), ['code' => '007'] );
 
       endif;
 
 
-      $nonce = $this->page->set_nonce('password-reset');
+      $nonce = $this->Page->set_nonce('password-reset');
       
       $tmpl_args = [
                     'nonce' => $nonce,
@@ -293,6 +292,7 @@ class AdminRoutes {
                   ];
       
       $this->get_template( 'password-reset', null, $tmpl_args );
+
 
     endif;
 
@@ -305,24 +305,24 @@ class AdminRoutes {
 
 
 
-
-  
-
-
-
-
-
-
+  /**
+   * In order to view most Admin routes the user must have validated
+   * their email address.
+   * 
+   * This function handles redirecting non-verified users
+   */
   private function verified_user_redirect(): void {
 
     if (
         $this->user->is_logged_in() &&
+        /* @internal I don't think this is needed if I just don't include this function in those routes.
         !( Routing::is_route('verify', $this->path) || 
            Routing::is_route('form-handler', $this->path) ) &&  
+        */
         !$this->user->is_verified()
       ):
 
-      Routing::redirect_to( $this->page->url_for('verify') );
+      Routing::redirect_to( $this->Page->url_for('verify') );
 
     endif;
 
@@ -342,10 +342,10 @@ class AdminRoutes {
    * wrapper around the get_partial() function, but we
    * change the root directory.
    */
-  public function get_template(string $file, ?string $suffix = null, $args = false) {
+  public function get_template(string $file, ?string $suffix = null, $args = false): void {
     
     
-    $this->page->get_partial($file, $suffix, $args, 'admin');
+    $this->Page->get_partial($file, $suffix, $args, 'admin');
 
 
     // @todo Reassess this.
@@ -366,8 +366,10 @@ class AdminRoutes {
   
   
   
-  
-  public static function get_instance( $path ) {
+  /**
+   * Return an instance of this class.
+   */
+  public static function get_instance( $path ): self {
   
     if (self::$instance === null):
       
