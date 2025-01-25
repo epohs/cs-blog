@@ -277,13 +277,14 @@ class FormHandler {
 
 
 
-
-
-
-  private function verify() {
+  /**
+   * User email verification.
+   */
+  private function verify(): void {
         
         
     Routing::nonce_redirect($this->nonce, 'verify');
+    
     
     // If there is not a user_id in the session
     // Redirect back to the login screen.
@@ -298,9 +299,10 @@ class FormHandler {
     
     $user_to_verify = $this->User->get_by('verify_key', $passed_verify_code);
     
+    
     // If there is a user with this verification key
     // and that user_id matches the user_id in the session
-    // then log the user in setting the last_login timestamp.
+    // then log the user in, setting the last_login timestamp.
     // Verify the user, and redirect to their profile page.
     if ( isset($user_to_verify['id']) && ($user_to_verify['id'] === $user_id) ):
       
@@ -308,20 +310,19 @@ class FormHandler {
       $this->Auth->login( $user_id );
       
       $this->User->verify( $user_id );
+      
 
       // We override the session of a non-verified user to 
       // always be null, so after we verify a user we need to 
       // set this back to what it should be.
       Session::set_key(['user', 'role'], $user_to_verify['role']);
       
-      
       Routing::redirect_to( $this->Page->url_for('profile') );
       
       
-    // Otherwise, redirect back to verify page with an error
     else:
       
-
+      // Otherwise, redirect back to verify page with an error
       Routing::redirect_with_alert( $this->Page->url_for('verify'), ['code' => '004'] );
       
     endif;
@@ -336,11 +337,10 @@ class FormHandler {
 
 
 
-
-
-
+  /**
+   * New user signup
+   */
   private function signup() {
-
         
       
     Routing::nonce_redirect($this->nonce, 'signup');
@@ -408,11 +408,10 @@ class FormHandler {
 
 
 
-
-
-
-  private function forgot_password() {
-
+  /**
+   * Reset user password.
+   */
+  private function forgot_password(): void {
 
 
     Routing::nonce_redirect($this->nonce, 'forgot');
@@ -425,8 +424,10 @@ class FormHandler {
     // address then we move forward, otherwise we redirect back
     // to the forgot password page with an error.
     if ( filter_var($user_email, FILTER_VALIDATE_EMAIL) ):
+      
 
       $user_to_reset = $this->User->get_by('email', $user_email);
+      
 
       if ( is_array($user_to_reset) && isset($user_to_reset['id']) ):
 
@@ -434,6 +435,7 @@ class FormHandler {
         $this->User->set_password_reset_token( $user_to_reset['id'] );
 
       endif;
+      
 
       // Redirect to the password reset page regardless.
       // @todo Make sure there's a message to check your email for the reset key
