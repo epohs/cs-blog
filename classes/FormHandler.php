@@ -65,11 +65,12 @@ class FormHandler {
 
 
   /**
-   * @internal This method is most likely not being used anymore. Verify and remove.
+   * Decide which method in thie class handles this request. 
+   * If the request is valid, use the serve() method to call 
+   * the correct handler.
    */
   public function process(): bool {
-
-    die('FormHandler::process() is actually being used');
+    
 
     $return = false;
     
@@ -198,6 +199,7 @@ class FormHandler {
           Utils::is_valid_datetime($user_to_login['locked_until']) &&  
           Utils::is_past_datetime($user_to_login['locked_until'])
         ):
+        
         
         // User was locked out but it expired. Clear the lockout.
         $this->User->remove_lockout($user_to_login, 'lockout-only');
