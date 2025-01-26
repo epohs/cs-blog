@@ -1,7 +1,7 @@
 <?php
 
 /**
- *
+ * Functionality specifically tied to user accounts.
  */
 class User {
     
@@ -36,13 +36,19 @@ class User {
   
   
   /**
+   * Create a new user.
    *
+   * Return the ID of the newly created user if the account
+   * creation succeeds. Otherwise, return false.
    */
   public function new( array $user_data ): int|false {
     
     
     $result = false;
     
+    // If no admin account exists, assume this is the
+    // first user and make it admin. Otherwise, default
+    // to a user role.
     $user_role = ( !$this->Db->row_exists('Users', 'role', 'admin') ) ? 'admin' : 'user';    
     
     $verify_key = $this->Db->get_unique_column_val('Users', 'verify_key', ['min_len' => 8]);
@@ -50,8 +56,8 @@ class User {
     $selector = $this->Db->get_unique_column_val('Users', 'selector');
     
     
-    
     try {
+      
       
       // Hash the password before storing it
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
@@ -59,19 +65,16 @@ class User {
       // Prepare the SQL statement
       $query = 'INSERT INTO Users (`email`, `password`, `selector`, `role`, `verify_key`) 
                 VALUES (:email, :password, :selector, :role, :verify_key)';
-      
-      
+        
       $stmt = $this->pdo->prepare( $query );
   
-      // Bind the parameters
       $stmt->bindValue(':email', $user_data['email'], PDO::PARAM_STR);
       $stmt->bindValue(':password', $hashed_pass, PDO::PARAM_STR);
       $stmt->bindValue(':selector', $selector, PDO::PARAM_STR);
       $stmt->bindValue(':role', $user_role, PDO::PARAM_STR);
       $stmt->bindValue(':verify_key', $verify_key, PDO::PARAM_STR);
   
-      // Execute the statement and return the ID of the User
-      // we just added, or false if something failed.
+      
       if ( $stmt->execute() ):
         
         $result = $this->pdo->lastInsertId();
@@ -105,7 +108,7 @@ class User {
   
   
   /**
-   *
+   * Get a user row by it's ID.
    */
   public function get( int $user_id ): array|false {
 
@@ -121,7 +124,12 @@ class User {
   
   
   /**
+   * Get a user row by certain allowed keys.
    * 
+   * @todo Audit code for any get_by() calls using id as key.
+   *       There ought to be a good reason to use this method
+   *       as opposed to get(). If there are none, remove id
+   *       from valid_keys.
    */
   public function get_by(string $key, $value): array|false {
     
@@ -135,6 +143,7 @@ class User {
     ];
     
     $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
+    
     
     if ( $key == 'remember_me' ):
 
@@ -159,7 +168,6 @@ class User {
 
     $param_type = is_numeric($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
     
-    // Bind the parameters
     $stmt->bindValue(':value', $value, $param_type);
     
     
@@ -179,7 +187,7 @@ class User {
   
   
   /**
-   * Private function to set any single column
+   * Private function to get a single user column.
    */
   private function get_column(string $column, int $user_id): mixed {
     
@@ -197,7 +205,7 @@ class User {
   
   
   /**
-   * 
+   * Private function to set a single user column.
    */
   private function set_column(string $column, $value, int $user_id): bool {
     
@@ -215,6 +223,8 @@ class User {
   
   
   /**
+   * Mark a user account as having a verified email address.
+   *
    * @internal instead of doing separate db calls, think
    *            of a nice way to do this with a transaction.
    *            Add a flag to set_column to allow for this.
@@ -235,7 +245,7 @@ class User {
     return ($remove_verifiy_key && $set_verified && $set_updated_at);
     
     
-  } // $remove_verify_key()
+  } // verify()
   
   
   
@@ -245,7 +255,12 @@ class User {
   
   
   /**
+   * Determine if a user has verified their email address.
    *
+   * If a User ID is passed check the `is_verified` column
+   * for that user id in the database. Otherwise, check in the 
+   * the current user's session. If the role is anything 
+   * other than 'null' then assume they are verified.
    */
   public function is_verified( $user_id = false ): bool {
 
@@ -259,12 +274,16 @@ class User {
 
     else:
 
+      // @todo Test whether it works the same to remove $user_id
+      // @todo get_role() could return false if the role key isn't set
+      //       in this case we shouldn't assume the user is verified.
       $return = ( $this->get_role($user_id) !== 'null' );
 
     endif;
     
 
     return $return;
+    
 
   } // is_verified()
 
@@ -276,7 +295,7 @@ class User {
   
   
   /**
-   *
+   * Get the role of a user either by user id in the db, or from the session.
    */
   public function get_role( $user_id = false ): string|false {
 
@@ -296,6 +315,7 @@ class User {
 
 
     return $return;
+    
 
   } // get_role()
 
@@ -331,7 +351,7 @@ class User {
     $current_time = date('Y-m-d H:i:s');
     
     
-    $query = "UPDATE Users SET last_login = :current_time WHERE `{$key}` = :value";
+    $query = "UPDATE `Users` SET `last_login` = :current_time WHERE `{$key}` = :value";
     
     
     $stmt = $this->pdo->prepare($query);
@@ -352,7 +372,7 @@ class User {
   
   
   /**
-   *
+   * Does the given user exist?
    */
   public function user_exists( $id_or_email ): bool {
     
@@ -401,7 +421,7 @@ class User {
   
   
   /**
-   *
+   * Is the current user logged in?
    */
   public function is_logged_in(): bool {
     
@@ -444,7 +464,6 @@ class User {
     endif;
 
     
-    
     return $return;
     
     
@@ -458,6 +477,11 @@ class User {
   
   
   /**
+   * Is the current user an admin user?
+   *
+   * This will govern which routes a user is able to visit
+   * and what functionality they have access to.
+   *
    * @internal Is this thorough enough?
    */
   public function is_admin(): bool {
@@ -474,6 +498,9 @@ class User {
   
   
   /**
+   * Determine whether a string is formatted as a valid
+   * password.
+   *
    * @todo Flesh this function out
    */
   public function validate_pass( string $password ): bool {
@@ -492,36 +519,15 @@ class User {
   
   
   /**
-   *
+   * Update the password for the given user ID.
    */
-  public function set_remember_me( int $user_id, string $token ): bool {
-    
-    
-    // Store the hashed version in the database
-    // @todo research whether this is secure enough
-    $hashed_token = hash('sha256', $token);
-    
-    $created_at = date('Y-m-d H:i:s');
+  public function update_password( int $user_id, string $password ): bool {
 
-    $new_token = ['token' => $hashed_token, 'created_at' => $created_at];
+    $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
 
-    $existing_tokens = $this->get_column('remember_me', $user_id);
+    return $this->set_column('password', $hashed_pass, $user_id);
 
-
-    $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
-
-
-    $clean_tokens[] = $new_token;
-
-    $clean_tokens = json_encode($clean_tokens);
-
-    $new_col = $this->set_column('remember_me', $clean_tokens, $user_id);
-
-
-    return $new_col;
-    
-    
-  } // set_remember_me()
+  } // update_password()
   
   
   
@@ -531,7 +537,9 @@ class User {
   
   
   /**
+   * Update the last_active column for a given user.
    *
+   * If time_str is null the current time will be used.
    */
   public function update_last_active( ?int $user_id = 0, ?string $time_str = null ): bool {
     
@@ -554,50 +562,42 @@ class User {
   
   
   /**
-   * 
-   */
-  public function update_password( int $user_id, string $password ): bool {
-
-    $hashed_pass = password_hash($password, PASSWORD_DEFAULT);
-
-    return $this->set_column('password', $hashed_pass, $user_id);
-
-  } // update_password()
-
-  
-  
-  
-  
-  
-  
-  
-  /**
+   * Set a remember_me token for the given user.
    *
+   * The token is stored in a cookie in the user's browser.
+   * We store a hashed version of the token in the database.
+   *
+   * To avoid overwriting remember_me tokens when using multiple
+   * browers, we store tokens in a JSON array in the database
+   * with a distinct creation time used to determining expiration.
    */
-  public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
+  public function set_remember_me( int $user_id, string $token ): bool {
+    
+    
+    // @todo research whether this is secure enough
+    $hashed_token = hash('sha256', $token);
+    
+    $created_at = date('Y-m-d H:i:s');
 
+    $new_token = ['token' => $hashed_token, 'created_at' => $created_at];
 
     $existing_tokens = $this->get_column('remember_me', $user_id);
 
+    
     $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
 
 
-    // Filter out the token to remove
-    $filtered_tokens = array_filter($clean_tokens, function ($t) use ($token_to_remove) {
+    $clean_tokens[] = $new_token;
 
-      $hashed_token = hash('sha256',  $token_to_remove);
+    $clean_tokens = json_encode($clean_tokens);
 
-      return $t['token'] !== $hashed_token;
+    $new_col = $this->set_column('remember_me', $clean_tokens, $user_id);
 
-    });
+
+    return $new_col;
     
-
-    $updated_tokens = json_encode(array_values($filtered_tokens));
     
-    return $this->set_column('remember_me', $updated_tokens, $user_id);
-
-
-  } // delete_remember_me_token()
+  } // set_remember_me()
 
   
   
@@ -607,7 +607,8 @@ class User {
   
   
   /**
-   *
+   * Remove expired and incorrectly formated remember_me tokens
+   * from an array of existing tokens.
    */
   private function clean_remember_me_tokens( $tokens ): array {
 
@@ -631,36 +632,41 @@ class User {
 
       $now = new DateTime('now', new DateTimeZone('UTC'));
 
-      // Loop through the tokens array
+      // Loop through the tokens array adding valid
+      // tokens to the valid_tokens array. Skipped
+      // tokens will effectively be removed.
       foreach ($tokens as $token_data):
+        
 
-        // Check if 'token' and 'created_at' keys exist and are properly formatted
+        // Check that both 'token' and 'created_at' keys exist.
         if ( !isset($token_data['token'], $token_data['created_at']) ):
             continue;
         endif;
 
-        // Check if 'created_at' is a valid date
+        // Check if 'created_at' is a valid date.
         // @todo use Utils::is_valid_datetime() instead.
         $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
 
-        // Skip if 'created_at' is not valid
-        if (!$created_at):
+        // Skip if 'created_at' is not valid.
+        if ( !$created_at ):
             continue; 
         endif;
 
-        // Get difference between the current date and 'created_at'
+        // Get difference between the current date and 'created_at'.
         $interval = $now->diff($created_at);
 
-        // Skip tokens older than 30 days
-        if ($interval->days > 30):
+        // Skip tokens older than 30 days.
+        if ( $interval->days > 30 ):
             continue; 
         endif;
+        
 
-        // If everything is valid, add it to the valid tokens array
+        // If everything looks good add this token to the valid tokens array.
         $valid_tokens[] = [
             'token' => $token_data['token'],
             'created_at' => $token_data['created_at']
         ];
+        
 
       endforeach;
 
@@ -682,7 +688,59 @@ class User {
   
   
   /**
+   * Delete the given remember_me token for the given user.
+   */
+  public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
+
+
+    $existing_tokens = $this->get_column('remember_me', $user_id);
+
+    $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
+    
+    $tokens_modified = false;
+
+
+    if ( !empty($clean_tokens) ):
+      
+      // Filter the given token out of the existing tokens
+      // that this user has stored in the database.
+      $filtered_tokens = array_filter($clean_tokens, function ($t) use ($token_to_remove) {
+  
+        $hashed_token = hash('sha256',  $token_to_remove);
+  
+        return $t['token'] !== $hashed_token;
+  
+      });
+      
+  
+      $updated_tokens = json_encode(array_values($filtered_tokens));
+      
+      $new_tokens = $this->set_column('remember_me', $updated_tokens, $user_id);
+      
+    endif;
+    
+    
+    return $new_tokens;
+
+
+  } // delete_remember_me_token()
+
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Create and set a new password reset token for the given user.
    *
+   * Password reset tokens last for a set period of time so we store
+   * both the token and the expiration.
+   *
+   * @todo Switch to created_at instead of expiration for consistency.
+   * @todo use $return for return value and use only one return.
+   * @internal Should this be JSON in a single column?
    */
   public function set_password_reset_token( int $user_id ): string|false {
 
@@ -763,7 +821,7 @@ class User {
   
   
   /**
-   *
+   * Check whether a given token exists and hasn't expired.
    */
   public function check_password_reset_token( string $token ): int|false {
 
@@ -793,7 +851,7 @@ class User {
   
   
   /**
-   *
+   * Increment the failed_login_attempts column for the given user.
    */
   function increment_failed_login(array $user, ?bool $extend_lockout = true): bool {
     
@@ -845,7 +903,18 @@ class User {
   
   
   /**
+   * Extend the locked_until timestamp for a given user.
+   * 
+   * The length of the extension of the lockout depends on
+   * the number of failed login attempts.
    *
+   * @todo Review everywhere `locked_until` is set.
+   *       As it is a malformed value will cause problems.
+   *       Consider better validation.
+   * @todo Consider using max() for all extensions other than
+   *       cases where locked_until is null. What if we allow
+   *       admins to lock an account for an extended period..
+   *       We don't want a failed login attempt to reduce the lockout.
    */
   function extend_lockout(array $user, ?bool $increment = true): string|false {
     
@@ -916,7 +985,10 @@ class User {
   
   
   /**
-   * 
+   * Remove the lockout from a given user.
+   *
+   * Conditionally remove only the locked_until timestamp, or
+   * the failed_login_attempts. Defaults to removing both.
    */
   function remove_lockout(array|int $user, ?string $mode = 'all'): void {
     
@@ -964,7 +1036,7 @@ class User {
   
   
   /**
-   *
+   * Create the database tables needed for users.
    */
   public static function make_tables( $pdo ): bool {
     
@@ -1008,8 +1080,7 @@ class User {
     }
     
 
-  } // make_tables()
-    
+  } // make_tables()  
   
   
   
@@ -1021,7 +1092,7 @@ class User {
   /**
    * Return an instance of this class.
    */
-  public static function get_instance() {
+  public static function get_instance(): self {
     
     if ( is_null(self::$instance) ):
       
