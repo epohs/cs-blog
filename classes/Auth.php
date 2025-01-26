@@ -1,5 +1,9 @@
 <?php
 
+/**
+ * Handle User authentication.
+ */
+
 class Auth {
     
     
@@ -15,6 +19,9 @@ class Auth {
     
     
   
+  
+  
+  
   private function __construct() {
     
     $this->login_length = $this->login_length_days * 24 * 60 * 60;
@@ -25,12 +32,6 @@ class Auth {
   
   
   
-  
-  
-  
-  
-  
-    
   
   
   
@@ -119,11 +120,13 @@ class Auth {
   
   
   
-  
-  
-  
-  
-  public function logout() {
+  /**
+   * Log out the current user.
+   *
+   * @todo How do we log out a specific User by ID? (banned user logout)
+   */
+  public function logout(): void {
+    
 
     // If the visitor has a remember_me token
     // remove it from their User row in the database.
@@ -152,6 +155,7 @@ class Auth {
     Session::destroy();
     Cookie::delete('remember_me');
     
+    
   } // logout()
   
   
@@ -164,8 +168,10 @@ class Auth {
   
   
   
-  // Get the singleton instance of the class
-  public static function get_instance() {
+  /**
+   * Return an instance of this class.
+   */
+  public static function get_instance(): self {
     
     if ( is_null(self::$instance) ):
       
