@@ -52,7 +52,7 @@ class Config {
    *
    * Values from the config file override defaults.
    */
-  public function init() {
+  public function init(): void {
     
 
     $defaults = Defaults::get_instance();
@@ -186,7 +186,7 @@ class Config {
   /**
    * Return an instance of this class.
    */
-  public static function get_instance() {
+  public static function get_instance(): self {
     
     if ( is_null(self::$instance) ):
       

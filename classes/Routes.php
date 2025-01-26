@@ -239,7 +239,7 @@ class Routes {
   /**
    * Return an instance of this class.
    */
-  public static function get_instance( $Page, $path ) {
+  public static function get_instance( $Page, $path ): self {
   
     if (self::$instance === null):
       

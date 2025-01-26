@@ -219,8 +219,6 @@ class Utils {
   
   
   
-  
-  
   /**
   * Test whether a given string is alphanumeric.
   */
@@ -312,10 +310,6 @@ class Utils {
     return false;
     
   } // get_client_ip()
-  
-  
-  
-  
   
   
   

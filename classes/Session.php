@@ -1,8 +1,11 @@
 <?php
 
 /**
- * 
+ * Handle reading from and writing to the session.
  *
+ * For use througout this application the session is
+ * a strictly formatted multi-dimensional array with
+ * named keys.
  */
 class Session {
 
@@ -10,6 +13,15 @@ class Session {
   
   
 
+  
+  
+  /**
+   * Set the given key to the given value.
+   *
+   * @param string|array $keys A string will set a key
+   *        on the first tier of the array. An array is
+   *        used to set a key in deeper levels.
+   */
   public static function set_key($keys, $value): void {
   
     
@@ -51,9 +63,14 @@ class Session {
   
   
   
-  
-  
-  public static function get_key($keys) {
+  /**
+   * Get the value of a given key.
+   *
+   * @param string|array $keys A string will get a key
+   *        on the first tier of the array. An array is
+   *        used to get keys in deeper levels.
+   */
+  public static function get_key( $keys ) {
     
     
     if ( is_string($keys) ):
@@ -101,35 +118,38 @@ class Session {
   
   
   
-  
-  
-  public static function key_isset($keys): bool {
+  /**
+   * Test whether a given key is set in the session.
+   *
+   * String for root level keys, for deeper keys pass an array.
+   */
+  public static function key_isset( $keys ): bool {
   
     
     if ( is_string($keys) ):
     
       
-      // Return true if the single key is set
+      // Return true if the single key is set.
       return isset($_SESSION[$keys]);
   
       
     elseif ( is_array($keys) ):
       
       
-      // Start from the session array
+      // Start from the session array.
       $cur_array = $_SESSION;
 
-      // Traverse the keys
+      // Traverse the keys.
       foreach ( $keys as $key ):
         
-        // If the key exists, move deeper
+        // If the key exists, move deeper.
         if ( isset($cur_array[$key]) ):
         
           $cur_array = $cur_array[$key];
         
         else:
         
-          // Return false if any key is not set
+          // Return false if any key is not set.
           return false;
         
         endif;
@@ -143,8 +163,9 @@ class Session {
     endif;
 
     
-    // Return false if neither string nor array was provided
+    // Return false if neither string nor array was provided.
     return false;
+    
 
   } // key_isset()
 
@@ -155,14 +176,15 @@ class Session {
   
   
   
-  
-  
+  /**
+   * Delete a given key.
+   */
   public static function delete_key( $keys ): void {
 
 
     if ( !isset($_SESSION) ):
       
-      // Session is not initialized, do nothing
+      // Session is not initialized, do nothing.
       return;
     
     endif;
@@ -171,16 +193,16 @@ class Session {
     if ( is_string($keys) ):
     
       
-      // Unset the single key if it exists
+      // Unset the single key if it exists.
       unset($_SESSION[$keys]);
   
       
     elseif ( is_array($keys) ):
       
-      // Copy the session array to a variable
+      // Copy the session array to a variable.
       $ref_array = &$_SESSION;
       
-      // Traverse array following the keys parameter
+      // Traverse array following the keys parameter.
       foreach ( $keys as $i => $key ):
 
         if ( isset($ref_array[$key]) ):
@@ -195,12 +217,12 @@ class Session {
           
           elseif ( is_array($ref_array[$key]) ):
           
-            // Move deeper into the array
+            // Move deeper into the array.
             $ref_array = &$ref_array[$key];
 
           else:
 
-            // Key is not an array, stop here
+            // Key is not an array, stop here.
             return;
           
           endif;
@@ -208,7 +230,7 @@ class Session {
         
         else:
         
-          // Key not found, nothing to delete
+          // Key not found, nothing to delete.
           return;
         
         endif;
@@ -228,8 +250,9 @@ class Session {
   
   
   
-  
-  
+  /**
+   * Destroy the session and remove all session data.
+   */
   public static function destroy(): void {
 
     session_unset();
@@ -242,6 +265,10 @@ class Session {
   
   
   
+  
+  /**
+   * Regenerate the session ID while preserving existing session data.
+   */
   public static function regenerate(): void {
   
     session_regenerate_id(true);
@@ -249,9 +276,6 @@ class Session {
   } // regenerate()
 
 
-  
-
-  
   
 
     

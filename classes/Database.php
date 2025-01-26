@@ -286,7 +286,6 @@ class Database {
         // Save database connection for use throught the application.
         $this->pdo = $pdo;
         
-          
       } catch (PDOException $e) {
         
         $this->Config->add_alert( "Failed to connect to the existing database: " . $e->getMessage() );
@@ -313,7 +312,6 @@ class Database {
 
           
       } catch (PDOException $e) {
-        
       
         $this->Config->add_alert( "Failed to create the database: " . $e->getMessage() );
         
@@ -366,7 +364,7 @@ class Database {
   /**
    * Return an instance of this class.
    */
-  public static function get_instance() {
+  public static function get_instance(): self {
   
     if (self::$instance === null):
       

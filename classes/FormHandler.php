@@ -604,7 +604,10 @@ class FormHandler {
 
 
 
-  public static function get_instance( $process_route = false ) {
+  /**
+   * Return an instance of this class.
+   */
+  public static function get_instance( $process_route = false ): self {
   
     if (self::$instance === null):
       

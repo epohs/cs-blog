@@ -500,10 +500,9 @@ class Routing {
   
   
   
-  
-  
-  
-  
+  /**
+   * Return an instance of this class.
+   */
   public static function get_instance() {
   
     if (self::$instance === null):
@@ -516,6 +515,7 @@ class Routing {
     return self::$instance;
   
   } // get_instance()
+  
 
     
 } // ::Routing

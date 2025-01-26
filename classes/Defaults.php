@@ -1,8 +1,10 @@
 <?php
 
 /**
- * 
+ * Set the default values of certain config variables.
  *
+ * Each of the variables here can be overridden in the
+ * config.php file in the root of the application.
  */
 class Defaults {
 
@@ -46,7 +48,9 @@ class Defaults {
 
 
   /**
-   * 
+   * Get a value from the defaults array by it's key.
+   *
+   * If no key is passed return the entire array of defaults.
    */
   public function get( ?string $key = null ): mixed {
 
@@ -70,10 +74,8 @@ class Defaults {
 
 
 
-
-
   /**
-   * 
+   * Get the root URL that the application is being served on.
    */
   private function get_base_url(): string {
 
@@ -84,10 +86,10 @@ class Defaults {
     $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
 
     // Combine protocol and host
-    $baseUrl = $protocol . $host;
+    $base_url = $protocol . $host;
 
     // Ensure no trailing slash
-    return rtrim($baseUrl, '/');
+    return rtrim($base_url, '/');
 
   } // get_base_url()
   
@@ -99,8 +101,10 @@ class Defaults {
 
 
   
-  
-  public static function get_instance() {
+  /**
+   * Return an instance of this class.
+   */
+  public static function get_instance(): self {
   
     if (self::$instance === null):
       

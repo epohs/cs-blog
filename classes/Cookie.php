@@ -1,7 +1,7 @@
 <?php
 
 /**
- * 
+ * Handle reading from and writing to cookies.
  *
  */
 class Cookie {
@@ -29,13 +29,10 @@ class Cookie {
   
   
   
-  
-  
-  
-  
   /**
-   * @todo turn args after $expiry into generic $args array
-   * with defaults
+   * Set a cookie value.
+   *
+   * Overwrite if cookie already exists.
    */
   public static function set($name, $value, $expiry = 3600, array $args = []): void {
     
@@ -50,10 +47,9 @@ class Cookie {
     // Merge passed arguments with defaults
     $args = array_merge($defaults, $args);
     
-    
-    
     setcookie($name, $value, time() + $expiry, $args['path'], $args['domain'], $args['secure'], $args['http_only']);
   
+    
   } // set()
   
   
@@ -61,7 +57,12 @@ class Cookie {
   
   
   
-  public static function get($name) {
+  
+  
+  /**
+   * Get a cookie by name.
+   */
+  public static function get($name): string|null {
     
     return $_COOKIE[$name] ?? null;
     
@@ -72,7 +73,12 @@ class Cookie {
   
   
   
-  public static function delete($name): void {
+  
+  
+  /**
+   * Delete a cookie by name.
+   */
+  public static function delete( $name ): void {
     
     setcookie($name, '', time() - 3600, '/');
     unset($_COOKIE[$name]);
@@ -86,11 +92,10 @@ class Cookie {
   
   
   
-  
-  
-  
-  
-  public static function get_instance() {
+  /**
+   * Return an instance of this class.
+   */
+  public static function get_instance(): self {
   
     if (self::$instance === null):
       
