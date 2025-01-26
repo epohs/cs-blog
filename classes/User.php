@@ -822,6 +822,9 @@ class User {
   
   /**
    * Check whether a given token exists and hasn't expired.
+   *
+   * @return User ID for user matching this reset token if not expired.
+   *         If no user matches, return false.
    */
   public function check_password_reset_token( string $token ): int|false {
 

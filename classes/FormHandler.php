@@ -65,7 +65,7 @@ class FormHandler {
 
 
   /**
-   * Decide which method in thie class handles this request. 
+   * Decide which method in this class handles this request. 
    * If the request is valid, use the serve() method to call 
    * the correct handler.
    */
@@ -208,6 +208,7 @@ class FormHandler {
       endif;
 
       
+      // Check whether the password entered was correct.
       if ( password_verify($this->post_vars['password'], $user_to_login['password']) ):
 
         // If the user isn't verified then we don't want to update 
@@ -297,7 +298,7 @@ class FormHandler {
     
     $passed_verify_code = ( isset($this->post_vars['verify_key']) ) ? $this->post_vars['verify_key'] : false;
     
-    $user_to_verify = $this->User->get_by('verify_key', $passed_verify_code);
+    $user_to_verify = ($passed_verify_code) ? $this->User->get_by('verify_key', $passed_verify_code) : false;
     
     
     // If there is a user with this verification key
@@ -338,7 +339,7 @@ class FormHandler {
 
 
   /**
-   * New user signup
+   * New user signup.
    */
   private function signup() {
         
@@ -460,9 +461,9 @@ class FormHandler {
 
 
 
-
-
-
+  /**
+   * Password reset.
+   */
   private function password_reset() {
 
 
@@ -476,8 +477,7 @@ class FormHandler {
 
 
     // If we have both a key and a new password
-    // then validate both and reset the password for this user
-    // @todo
+    // then validate both and reset the password for this user.
     if ( $reset_key && $keys_match && $new_pass ):
 
       $user_to_reset = $this->User->check_password_reset_token($reset_key);
@@ -518,7 +518,7 @@ class FormHandler {
       
     
     // Else if all we have is a reset key then validate it
-    // and redirect appropriately
+    // and redirect appropriately.
     elseif ( $reset_key ):
 
       // Is key the valid length, and does it contain only approved characters?
@@ -561,12 +561,15 @@ class FormHandler {
 
 
 
-
-
-
-
-
-  private function add_form(string $key, string $method_name) {
+  /**
+   * Add a form to be processed by this class.
+   *
+   * @param string $key The name of the form. Used for 
+   *                    reference and as the action URL.
+   * @param string $method_name Name of the method in this class
+   *                            that will handle this form.
+   */
+  private function add_form(string $key, string $method_name): void {
 
     // Initialize $map if it's null
     $this->map ??= [];
@@ -582,7 +585,10 @@ class FormHandler {
 
 
 
-
+  /**
+   * Determine with method will handle this form using our
+   * map as a reference.
+   */
   public function serve(string $key) {
 
     if (isset($this->map[$key]) && is_callable($this->map[$key])) {

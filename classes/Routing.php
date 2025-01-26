@@ -1,21 +1,27 @@
 <?php
 
-
-
 use League\HTMLToMarkdown\HtmlConverter;
 
+/**
+ * Logic to determine valid routes and handling which 
+ * classes should manage requests.
+ *
+ * Public routes are handled by Routes.
+ * Admin routes are handled by AdminRoutes.
+ * Forms are handled by FormHandler.
+ */
 class Routing {
 
   
   private static $instance = null;
   
-  private $page = null;
-  
-  private $path = null;
+  private $Page = null;
 
   private $Routes = null;
 
   private $AdminRoutes = null;
+  
+  private $path = null;
   
   private static $route_vars = null;
 
@@ -30,7 +36,6 @@ class Routing {
   
   private function __construct() {
     
-    $this->block_direct_access();
     
   } // __construct()
   
@@ -52,15 +57,15 @@ class Routing {
   public function serve_route( string $request_uri ): bool {
 
     
-    $this->page = Page::get_instance();
+    $this->Page = Page::get_instance();
 
     $this->path = $this->process_path( $request_uri );
     
     
     // Handle error codes passed in the query string
-    $this->page->process_page_alerts();
+    $this->Page->process_page_alerts();
 
-    $this->Routes = Routes::get_instance( $this->page, $this->path );
+    $this->Routes = Routes::get_instance( $this->Page, $this->path );
 
     $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
 
@@ -74,10 +79,10 @@ class Routing {
 
     
     // @todo Think of a more efficient way to find the current route
-    //        rather than looping through each of them.
+    //       rather than looping through each of them.
     // @internal I think I could parse the $path and then limit the $all_routes array
-    //              to only the keys that match the first segment, then loop through
-    //              those. I would need to handle the site root so that / matches.
+    //           to only the keys that match the first segment, then loop through
+    //           those. I would need to handle the site root so that / matches.
     foreach( $all_routes as $route_key => $handler ):
 
       if ( $this->is_route($route_key, $this->path) ):
@@ -111,10 +116,13 @@ class Routing {
 
 
 
-
-
-
-  private function first_run_check( array $path ) {
+  /**
+   * Handle the first time the application is run.
+   *
+   * Before an admin user is created every request
+   * redirects to the signup page.
+   */
+  private function first_run_check( array $path ): void {
 
 
     if ( !$this->is_route('signup', $path) &&
@@ -134,7 +142,7 @@ class Routing {
         // so we clear it out.
         $auth->logout();
         
-        self::redirect_to( $this->page->url_for('signup') );
+        self::redirect_to( $this->Page->url_for('signup') );
         
         
       endif;
@@ -152,8 +160,11 @@ class Routing {
   
   
   
-  
-  private function process_path( $request_uri ) {
+  /**
+   * Process the requested URI and return an array containing
+   * the URL segments and any querystring paramaters that may exist.
+   */
+  private function process_path( $request_uri ): array {
     
     $parsed_request = [
       'segments' => [],
@@ -165,7 +176,7 @@ class Routing {
     // page we need to serve so log an error and bail.
     if ( is_null($request_uri) ):
       
-      $this->page->add_alert('Bad REQUEST_URI.');
+      $this->Page->add_alert('Bad REQUEST_URI.');
       
       return $parsed_request;
       
@@ -215,10 +226,22 @@ class Routing {
   
   
   
-  
-  
-  
-  
+  /**
+   * Test whether the current URL is a specific route.
+   *
+   * Certain URL segments contain variables. They are marked
+   * in the route with surrounding curly brackets {}.
+   * They are called route vars in this application and they
+   * are parsed in this function.
+   *
+   * @internal It seems like route var parsing could be better
+   *           handled in process_path.
+   *
+   * @param string $url the URL that we are testing.
+   * @param array $path URL currently requested.
+   *
+   * @return True if 
+   */
   public static function is_route(string $url, array $path): bool {
     
     
@@ -293,7 +316,6 @@ class Routing {
       
       endforeach;
 
-      
 
       // If all segments matched, return true.
       return true;
@@ -311,6 +333,9 @@ class Routing {
   
   
   
+  /**
+   * Get a route variable by it's key.
+   */
   public static function get_route_vars( ?string $key = '' ) {
     
     
@@ -324,6 +349,8 @@ class Routing {
       
     else:
       
+      // @todo I don't think this condition will ever happen.
+      //       Test returning all route vars if $key is false.
       return self::$route_vars;
       
     endif;
@@ -338,6 +365,9 @@ class Routing {
 
 
 
+  /**
+   * Get the processed path from this class' property.
+   */
   public function get_path() {
 
     return $this->path;
@@ -350,6 +380,10 @@ class Routing {
   
   
   
+
+  /**
+   * Redirect to a given URL with an optional header status code.
+   */  
   public static function redirect_to(string $url, int $status_code = 302): void {
     
     
@@ -377,7 +411,10 @@ class Routing {
 
 
 
-
+  /**
+   * Redirect with an alert that will be shown to the user
+   * on the target page.
+   */
   public static function redirect_with_alert( string $url, array $alert_arr, ?int $status_code = 0 ): void {
 
 
@@ -414,7 +451,10 @@ class Routing {
   
   
   
-  
+  /**
+   * If the nonce given isn't valid, redirect to the given
+   * path with an alert.
+   */
   public static function nonce_redirect(string $nonce, string $action, ?string $redir_path = '', ?string $err = '001'): void {
     
     
@@ -422,12 +462,11 @@ class Routing {
       
       $redir_path = ( $redir_path !== '' ) ? $redir_path : $action;
       
-      $redir_path = $this->page->site_root() . '/' . $redir_path;
+      $redir_path = $this->Page->site_root() . '/' . $redir_path;
       
       self::redirect_with_alert( $redir_path, ['code' => rawurlencode($err)] );
       
-    endif;
-    
+    endif; 
     
     
   } // nonce_redirect()
@@ -439,7 +478,10 @@ class Routing {
   
   
   
-  
+  /**
+   * Loop through all variables in the $_POST array and 
+   * apply some basic sanitization.
+   */
   public static function clean_post_vars(array $post): array {
     
     $sanitized = [];
@@ -477,33 +519,10 @@ class Routing {
   
   
   
-  
-  /**
-   * If this class is instantiated outside the proper
-   * scope prevent further instantiation.
-   */
-  private function block_direct_access() {
-    
-    if ( !defined('ROOT_PATH') ):
-      
-      die('Class called incorrectly.');
-    
-    endif;
-    
-    
-  } // block_direct_access()
-  
-  
-  
-  
-  
-  
-  
-  
   /**
    * Return an instance of this class.
    */
-  public static function get_instance() {
+  public static function get_instance(): self {
   
     if (self::$instance === null):
       
