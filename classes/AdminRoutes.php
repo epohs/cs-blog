@@ -368,6 +368,12 @@ class AdminRoutes {
   
   /**
    * Return an instance of this class.
+   *
+   * @todo I don't think we need to pass $path. The only
+   *       thing it's being used for is validate_user_redirect
+   *       and the code that used it is commented out.
+   *       If it can be removed here, it can also likely be removed
+   *       from Routes as well.
    */
   public static function get_instance( $path ): self {
   
