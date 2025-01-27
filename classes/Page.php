@@ -231,7 +231,7 @@ class Page {
     if ( $partial_root === false ):
       
       
-      $file_base = "/themes/{$theme}/{$this->partial_root}/";
+      $file_base = "themes/{$theme}/{$this->partial_root}/";
 
       
     // If $partial_root is an empty string we're looking for
@@ -239,12 +239,12 @@ class Page {
     elseif( $partial_root === '' ):
       
       
-      $file_base = "/themes/{$theme}/";
+      $file_base = "themes/{$theme}/";
     
     
     // If $partial_root has any other value, build the path
     // using the string we passed.
-    // This is to accomodate admin pages being served from
+    // This is to accomodate pages being served from
     // outside the theme directory - primarily admin pages.
     else:
     
@@ -277,6 +277,8 @@ class Page {
     // it is found.
     if ( file_exists($partial_path) ):
    
+      
+      //debug_log("Partial: {$partial_path}");
       
       // Make the Page class available inside the included file.
       $page = Page::get_instance();
