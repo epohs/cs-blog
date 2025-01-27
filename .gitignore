@@ -7,6 +7,14 @@
 config.php
 
 
+# Ignore everything in the /themes/ directory
+/themes/*
+
+# Except the /themes/default directory and its contents
+!/themes/default/
+!/themes/default/**
+
+
 # Log Files
 /log/
 *.log
