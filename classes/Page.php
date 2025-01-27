@@ -222,9 +222,17 @@ class Page {
   public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
     
-    $config = Config::get_instance();
+    $Config = Config::get_instance();
     
-    $theme = $config->get('theme');
+    $Defaults = Defaults::get_instance();
+    
+    $theme = $Config->get('theme');
+    
+    $default_theme = $Defaults->get('theme');
+    
+    $fallback_path = false;
+    
+    $found_partial = false;
     
     
     
@@ -233,7 +241,7 @@ class Page {
     if ( $partial_root === false ):
       
       
-      $file_base = "themes/{$theme}/{$this->partial_root}/";
+      $file_base = "themes/%s/{$this->partial_root}/";
 
       
     // If $partial_root is an empty string we're looking for
@@ -241,7 +249,7 @@ class Page {
     elseif( $partial_root === '' ):
       
       
-      $file_base = "themes/{$theme}/";
+      $file_base = "themes/%s/";
     
     
     // If $partial_root has any other value, build the path
@@ -271,18 +279,45 @@ class Page {
     endif;  
     
     
-    $partial_path .= '.php';  
+    $partial_path .= '.php';
+    
+    
+    
+    // If the partial_root was empty, that means
+    // the partial is loaded from within a theme.
+    // Inject the theme name into our path and include
+    // a fallback to the default theme in case the partial
+    // in question isn't being overriden by the custom theme.
+    if ( empty($partial_root) ):
+      
+      $partial_path = sprintf($partial_path, $theme);
+      
+      $fallback_path = sprintf($partial_path, $theme);
+      
+    endif;
     
     
 
-    // Include the specified partial file only if
-    // it is found.
+    // Determine whether the partial file requested exists.
+    // If it doesn't, and the partial is a theme file, look
+    // in the default theme as a fallback.
     if ( file_exists($partial_path) ):
    
+      $found_partial = $partial_path;
+
+    elseif ( $fallback_path && file_exists($fallback_path) ):
       
-      //debug_log("Partial: {$partial_path}");
+      $found_partial = $fallback_path;
+      
+    endif;
+ 
+    
+    
+    // If the partial was found do some preparation and include it.
+    if ( $found_partial ):
       
       // Make the Page class available inside the included file.
+      // @todo Uppercase this, and update template files.
       $page = Page::get_instance();
 
       $User = $this->User;
@@ -304,15 +339,15 @@ class Page {
       
     else:
       
-      // @internal This error will never be been in any case where
+      // @internal This error will never be seen in any case where
       // the errors.php partial isn't included.
       $this->add_alert("Partial {$file} not found.", 'warn');
 
       return false;
+      
+    endif;
     
-    endif;  
-
-  
+    
   } // get_partial()
 
   
