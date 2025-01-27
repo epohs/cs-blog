@@ -148,14 +148,14 @@ class User {
     if ( $key == 'remember_me' ):
 
       $query = 'SELECT * 
-        FROM `Users` 
-        WHERE EXISTS ( 
-            SELECT 1 
-            FROM json_each(`remember_me`) 
-            WHERE json_valid(`remember_me`)
-               AND json_each.value->>"token" = :value 
-               AND date(json_each.value->>"created_at") >= date("now", "-30 days")
-        )';
+                FROM `Users` 
+                WHERE EXISTS ( 
+                  SELECT 1 
+                  FROM json_each(`remember_me`) 
+                  WHERE json_valid(`remember_me`)
+                   AND json_each.value->>"$.token" = :value 
+                   AND date(json_each.value->>"$.created_at") >= date("now", "-30 days")
+      )';
 
     else:
 
