@@ -216,6 +216,8 @@ class Page {
    * themes that customize only part of the default theme.
    * 
    * @todo add fallback to default theme.
+   *       Think about adding a $has_fallback variable for paths within a theme
+   *       and using sprintf() to check both the current theme and the default theme.
    */
   public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
