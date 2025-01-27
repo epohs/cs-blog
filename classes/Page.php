@@ -283,16 +283,18 @@ class Page {
     
     
     
-    // If the partial_root was empty, that means
-    // the partial is loaded from within a theme.
+    // If $partial_root was empty, that means this
+    // partial is loaded from within a theme.
     // Inject the theme name into our path and include
     // a fallback to the default theme in case the partial
     // in question isn't being overriden by the custom theme.
     if ( empty($partial_root) ):
       
-      $partial_path = sprintf($partial_path, $theme);
+      // Parse fallback path first to avoid overwriting
+      // the primary $partial_path variable.
+      $fallback_path = sprintf($partial_path, $default_theme);
       
-      $fallback_path = sprintf($partial_path, $theme);
+      $partial_path = sprintf($partial_path, $theme);
       
     endif;
     
@@ -324,7 +326,7 @@ class Page {
       
    
       // If we have args, extract them into variables
-      // for more readable code in the partial.
+      // for more readable code in the partial file.
       if ( is_array($args) && ! empty($args) ):
         
         extract($args);  
@@ -332,7 +334,7 @@ class Page {
       endif;
       
       
-      include( $partial_path );
+      include( $found_partial );
 
 
       return true;
