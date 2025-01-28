@@ -33,7 +33,7 @@
       <p>Your IP: <?php echo Utils::get_client_ip(); ?></p>
 
       <?php if ( !$User->is_verified() ): ?>
-        <p>You need to <a href="<?php echo $page->url_for('profile'); ?>">verify your email address</a>.</p>
+        <p>You need to <a href="<?php echo $page->url_for('verify'); ?>">verify your email address</a>.</p>
       <?php endif; ?>
 
       <details><summary>Session:</summary> <?php echo var_export($_SESSION, true); ?></details>
