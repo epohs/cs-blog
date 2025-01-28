@@ -54,16 +54,16 @@ class Defaults {
    */
   public function get( ?string $key = null ): mixed {
 
-      // Return the full array if no key is provided
-      if ( $key === null ):
+    // Return the full array if no key is provided
+    if ( $key === null ):
 
-        return $this->defaults;
-      
-      endif;
+      return $this->defaults;
+    
+    endif;
 
 
-      // Return the value if the key exists, or null otherwise
-      return array_key_exists($key, $this->defaults) ? $this->defaults[$key] : null;
+    // Return the value if the key exists, or null otherwise
+    return array_key_exists($key, $this->defaults) ? $this->defaults[$key] : null;
 
   } // get()
 
