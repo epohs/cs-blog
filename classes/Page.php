@@ -710,7 +710,7 @@ class Page {
 
           $has_alert = true;
 
-          $msg_text = $session_alert['text'] ?? 'Invalid email address';
+          $msg_text = $session_alert['text'] ?? 'Invalid email address.';
 
           $this->add_alert( $msg_text, $session_level );
 
@@ -720,7 +720,17 @@ class Page {
 
           $has_alert = true;
 
-          $msg_text = $session_alert['text'] ?? 'Invalid password reset key';
+          $msg_text = $session_alert['text'] ?? 'Invalid password reset key.';
+
+          $this->add_alert( $msg_text, $session_level );
+
+          break;
+
+        case '008':
+
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'At least one user must exist. The first user will be an Admin user.';
 
           $this->add_alert( $msg_text, $session_level );
 
