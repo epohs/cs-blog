@@ -422,8 +422,8 @@ class FormHandler {
 
 
     // If the email address entered is a valid looking email
-    // address then we move forward, otherwise we redirect back
-    // to the forgot password page with an error.
+    // address then move forward, otherwise redirect back to
+    // the forgot password page with an error.
     if ( filter_var($user_email, FILTER_VALIDATE_EMAIL) ):
       
 
@@ -438,7 +438,7 @@ class FormHandler {
       endif;
       
 
-      // Redirect to the password reset page regardless.
+      // Redirect to the password reset page without an error.
       // @todo Make sure there's a message to check your email for the reset key
       //        and make sure the email is correct.
       // @todo Make it clear during signup that it's important to remember your email
