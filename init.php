@@ -29,6 +29,7 @@ spl_autoload_register(function ($class) {
 
 
 
+
 // Include the config class.
 $config = Config::get_instance();
 

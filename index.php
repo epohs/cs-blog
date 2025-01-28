@@ -10,5 +10,5 @@
 include('init.php');
 
 
-$Routing->serve_route( $request_uri );
 
+$Routing->serve_route( $request_uri );
