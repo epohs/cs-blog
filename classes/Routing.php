@@ -133,6 +133,7 @@ class Routing {
       // Ensure that we have at least one admin user
       if ( !$Db->row_exists('Users', 'role', 'admin') ):
         
+        
         $auth = Auth::get_instance();
         
         // This really should never matter in real world
@@ -140,9 +141,10 @@ class Routing {
         // a user is logged in they could retain cookie and
         // session data and confuse the is_logged_in() function
         // so we clear it out.
-        $auth->logout();
-        
-        self::redirect_to( $this->Page->url_for('signup') );
+        // @todo test this.
+        Session::delete_key('user');
+
+        self::redirect_with_alert( $this->Page->url_for('signup'), ['code' => '008'] );
         
         
       endif;
@@ -426,7 +428,6 @@ class Routing {
 
     // Merge passed arguments with defaults
     $alert = array_merge($default_alert_arr, $alert_arr);
-
     
     Session::set_key('page_alert', $alert);
 
