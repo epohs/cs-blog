@@ -54,14 +54,6 @@ class Page {
     $this->User = User::get_instance();
 
     $this->Routing = Routing::get_instance();
-
-    
-
-    // @todo Think of a better way to handle this initial
-    // logged in check.
-    // @internal Maybe this could be a user_init() function
-    // instead of an explicit login check?
-    //$this->User->is_logged_in();
     
     
   } // __construct();
@@ -521,11 +513,38 @@ class Page {
    */
   public function has_alerts($level = false): bool {
     
-    // @todo add ability to only get alerts of a certain level
+    
+    // Make a copy of the alerts array to avoid
+    // manipulating it if we filter.
+    $alerts = $this->alerts;
+    
+    
+    // If a specific level was requested, take only alerts
+    // of that level into account.
+    if ( $level ):
+      
+      
+      $alerts = array_filter($alerts, function($item) use ($level) {
+    
+        return $item['level'] === $level;
+        
+      });
+      
+      
+    elseif ( !$this->Config->get('debug') ):
+      
 
-    // @todo ignore info and warn level msgs when not in debug mode
+      $alerts = array_filter($alerts, function($item) {
+    
+        return $item['level'] === 'error';
+        
+      });
+      
+      
+    endif;
+    
 
-    return ( is_array($this->alerts) && !empty($this->alerts) );
+    return ( is_array($alerts) && !empty($alerts) );
     
     
   } // has_alerts()
