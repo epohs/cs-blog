@@ -122,10 +122,6 @@ class AdminRoutes {
       Routing::redirect_to( $this->Page->url_for('profile') );
 
     else:
-        
-      // @todo Add a message to indicate it if the reason
-      // you were redirected to this page is because no users
-      // existed yet.
       
       $nonce = $this->Page->set_nonce('signup');
       
