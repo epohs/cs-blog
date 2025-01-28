@@ -27,6 +27,11 @@ class User {
     $this->pdo = $this->Db->get_pdo();
     
     
+    // Set crucial session variables
+    // for a logged in visitor.
+    $this->is_logged_in();
+    
+    
   } // __construct()
   
   

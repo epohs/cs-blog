@@ -61,7 +61,7 @@ class Page {
     // logged in check.
     // @internal Maybe this could be a user_init() function
     // instead of an explicit login check?
-    $this->User->is_logged_in();
+    //$this->User->is_logged_in();
     
     
   } // __construct();
@@ -214,10 +214,6 @@ class Page {
    * first in the active theme, and if the file isn't found it will look
    * in the 'default' theme directory for the same file. This allows for 
    * themes that customize only part of the default theme.
-   * 
-   * @todo add fallback to default theme.
-   *       Think about adding a $has_fallback variable for paths within a theme
-   *       and using sprintf() to check both the current theme and the default theme.
    */
   public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
