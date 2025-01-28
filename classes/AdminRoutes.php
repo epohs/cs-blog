@@ -15,8 +15,6 @@ class AdminRoutes {
   private static $instance = null;
   
   private $Page = null;
-  
-  private $path = null;
 
   private $auth = null;
 
@@ -25,11 +23,9 @@ class AdminRoutes {
 
 
   
-  private function __construct( $path ) {
+  private function __construct() {
 
     $this->Page = Page::get_instance();
-
-    $this->path = $path;
 
     $this->auth = Auth::get_instance();
 
@@ -49,7 +45,7 @@ class AdminRoutes {
   public function dashboard(): void {
 
 
-    $this->verified_user_redirect( $this->path );
+    $this->verified_user_redirect();
 
 
     // If the current user is an admin load the 
@@ -80,7 +76,7 @@ class AdminRoutes {
   public function login(): void {
 
 
-    $this->verified_user_redirect( $this->path );
+    $this->verified_user_redirect();
 
       
     if ( $this->user->is_logged_in() ):
@@ -113,7 +109,7 @@ class AdminRoutes {
   public function signup(): void {
 
 
-    $this->verified_user_redirect( $this->path );
+    $this->verified_user_redirect();
 
       
     // If the user is already logged in redirect to their profile
@@ -190,7 +186,7 @@ class AdminRoutes {
   public function forgot_password(): void {
 
 
-    $this->verified_user_redirect( $this->path );
+    $this->verified_user_redirect();
 
       
     // If the user is already logged in redirect to their profile.
@@ -231,7 +227,7 @@ class AdminRoutes {
   public function password_reset(): void {
 
 
-    $this->verified_user_redirect( $this->path );
+    $this->verified_user_redirect();
 
       
     // If the user is already logged in redirect to their profile
@@ -309,14 +305,7 @@ class AdminRoutes {
    */
   private function verified_user_redirect(): void {
 
-    if (
-        $this->user->is_logged_in() &&
-        /* @internal I don't think this is needed if I just don't include this function in those routes.
-        !( Routing::is_route('verify', $this->path) || 
-           Routing::is_route('form-handler', $this->path) ) &&  
-        */
-        !$this->user->is_verified()
-      ):
+    if ( $this->user->is_logged_in() && !$this->user->is_verified() ):
 
       Routing::redirect_to( $this->Page->url_for('verify') );
 
@@ -343,11 +332,7 @@ class AdminRoutes {
     
     $this->Page->get_partial($file, $suffix, $args, 'admin');
 
-
-    // @todo Reassess this.
-    //
-    // get_template() should never be called twice, so
-    // we can ditch the page_alert session here.
+    // Do this to avoid triggering an alert on a page refresh.
     Session::delete_key('page_alert');
     
     
@@ -364,18 +349,12 @@ class AdminRoutes {
   
   /**
    * Return an instance of this class.
-   *
-   * @todo I don't think we need to pass $path. The only
-   *       thing it's being used for is validate_user_redirect
-   *       and the code that used it is commented out.
-   *       If it can be removed here, it can also likely be removed
-   *       from Routes as well.
    */
-  public static function get_instance( $path ): self {
+  public static function get_instance(): self {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $path );
+      self::$instance = new self();
     
     endif;
     

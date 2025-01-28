@@ -30,14 +30,14 @@ class Routes {
   
   
   
-  private function __construct( $Page, $path ) {
+  private function __construct( $Page ) {
 
 
     $this->Page = $Page;
 
     $this->User = User::get_instance();
 
-    $this->AdminRoutes = AdminRoutes::get_instance($path);
+    $this->AdminRoutes = AdminRoutes::get_instance();
 
     $this->FormHandler = FormHandler::get_instance();
 
@@ -239,11 +239,11 @@ class Routes {
   /**
    * Return an instance of this class.
    */
-  public static function get_instance( $Page, $path ): self {
+  public static function get_instance( $Page ): self {
   
     if (self::$instance === null):
       
-      self::$instance = new self( $Page, $path );
+      self::$instance = new self( $Page );
     
     endif;
     

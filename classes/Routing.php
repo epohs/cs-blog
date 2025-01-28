@@ -65,9 +65,9 @@ class Routing {
     // Handle error codes passed in the query string
     $this->Page->process_page_alerts();
 
-    $this->Routes = Routes::get_instance( $this->Page, $this->path );
+    $this->Routes = Routes::get_instance( $this->Page );
 
-    $this->AdminRoutes = AdminRoutes::get_instance( $this->path );
+    $this->AdminRoutes = AdminRoutes::get_instance();
 
     
     $this->first_run_check( $this->path );
@@ -134,14 +134,11 @@ class Routing {
       if ( !$Db->row_exists('Users', 'role', 'admin') ):
         
         
-        $auth = Auth::get_instance();
-        
         // This really should never matter in real world
         // scenerios, but if the database is deleted while
         // a user is logged in they could retain cookie and
         // session data and confuse the is_logged_in() function
         // so we clear it out.
-        // @todo test this.
         Session::delete_key('user');
 
         self::redirect_with_alert( $this->Page->url_for('signup'), ['code' => '008'] );
