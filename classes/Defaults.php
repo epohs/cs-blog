@@ -23,22 +23,26 @@ class Defaults {
 
     $this->defaults = [
   
-      "debug" => true,
+      'debug' => true,
       
-      "public" => false,
+      'public' => false,
       
-      "site_name" => "My Blog",
+      'site_name' => 'My Blog',
         
-      "site_root" => $this->get_base_url(),
+      'site_root' => $this->get_base_url(),
         
-      "theme" => 'default',
+      'theme' => 'default',
+      
+      'timezone' => 'America/New_York',  
+      
+      'date_format' => 'F j, Y, g:i a',
       
       // Number of days the remember_me token should last.
-      "remember_me_length" => 30,
+      'remember_me_length' => 30,
         
-      "POSTMARK_SERVER_TOKEN" => null,
+      'POSTMARK_SERVER_TOKEN' => null,
       
-      "POSTMARK_SENDER_SIGNATURE" => null
+      'POSTMARK_SENDER_SIGNATURE' => null
     
     ];    
       

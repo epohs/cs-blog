@@ -157,11 +157,12 @@ class Utils {
   public static function format_date( $time_str = null, ?string $format = null, ?string $tz = null ): string {
     
     
-    // @todo move this to a config variable.
-    $default_format = 'F j, Y, g:i a';
+    $Config = Config::get_instance();
     
-    // @todo move this to a config variable.
-    $default_timezone = 'America/New_York';
+    
+    $default_format = $Config->get('date_format');
+    
+    $default_timezone = $Config->get('timezone');
     
     
     $format = ( $format ) ?? $default_format;
@@ -180,6 +181,7 @@ class Utils {
     
     // Format the date for display
     return $date->format( $format );
+    
     
   } // format_date()
   
