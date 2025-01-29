@@ -338,18 +338,16 @@ class Routing {
   public static function get_route_vars( ?string $key = '' ) {
     
     
-    if ( empty($key) || !array_key_exists($key, self::$route_vars) ):
-      
-      return false;
-      
-    elseif ( array_key_exists($key, self::$route_vars) ):
+    if ( array_key_exists($key, self::$route_vars) ):
       
       return self::$route_vars[$key];
       
+    elseif ( !empty($key) && !array_key_exists($key, self::$route_vars) ):
+      
+      return false;
+      
     else:
       
-      // @todo I don't think this condition will ever happen.
-      //       Test returning all route vars if $key is false.
       return self::$route_vars;
       
     endif;
