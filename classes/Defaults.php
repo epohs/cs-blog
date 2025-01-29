@@ -32,6 +32,9 @@ class Defaults {
       "site_root" => $this->get_base_url(),
         
       "theme" => 'default',
+      
+      // Number of days the remember_me token should last.
+      "remember_me_length" => 30,
         
       "POSTMARK_SERVER_TOKEN" => null,
       

@@ -9,11 +9,8 @@ class Auth {
     
   private static $instance = null;  
   
-
-  // @todo move this to a config setting
-  private $login_length_days = 30;
   
-  private $login_length;
+  private $remember_me_length;
   
   
     
@@ -24,7 +21,9 @@ class Auth {
   
   private function __construct() {
     
-    $this->login_length = $this->login_length_days * 24 * 60 * 60;
+    $Config = Config::get_instance();
+    
+    $this->remember_me_length = $Config->get('remember_me_length') * 24 * 60 * 60;
     
   } // __construct()
   
@@ -78,13 +77,11 @@ class Auth {
     
 
     if ( $remember_me ):
-
-      // Store the token in a cookie for 30 days
-      Cookie::set('remember_me', $token, $this->login_length);
+      
+      Cookie::set('remember_me', $token, $this->remember_me_length);
           
       
       // Store a hashed version of the token in the database
-      // @todo this function returns a bool, verify that it worked
       $user->set_remember_me( $user_to_login['id'], $token );
 
     endif;
