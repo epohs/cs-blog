@@ -138,7 +138,7 @@ class Routes {
 
     $auth = Auth::get_instance();
   
-    $auth->logout( Session::get_key(['user', 'id']) );
+    $auth->logout();
     
     Routing::redirect_to( $this->Page->url_for('/') );
 
