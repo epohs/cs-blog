@@ -122,6 +122,15 @@ class Auth {
   /**
    * Log out the given user, or the current user
    * if no $user_id is passed.
+   *
+   * @todo A better way to handle force_logout will be to 
+   * Create a login_token column that is a unique hash. Store that
+   * in a session variable, and compare against it at every
+   * is_logged_in() check.
+   * If the session var doesn't match what's in the database
+   * then we clear their remember_me and session and log them out.
+   * All this function would have to do with a user_id is change
+   * that column.
    */
   public function logout( ?int $user_id = null ): bool {
     
