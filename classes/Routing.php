@@ -456,9 +456,11 @@ class Routing {
     
     if ( !Page::validate_nonce($nonce, $action) ):
       
+      $Page = Page::get_instance();
+      
       $redir_path = ( $redir_path !== '' ) ? $redir_path : $action;
       
-      $redir_path = $this->Page->site_root() . '/' . $redir_path;
+      $redir_path = $Page->site_root() . '/' . $redir_path;
       
       self::redirect_with_alert( $redir_path, ['code' => rawurlencode($err)] );
       
