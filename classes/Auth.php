@@ -62,7 +62,10 @@ class Auth {
   
     
     // Check if user is already logged in
-    if ( Session::get_key(['user', 'id']) === $user_to_login['id'] ):
+    if (
+        Session::get_key(['user', 'id']) === $user_to_login['id'] &&
+        Session::get_key(['user', 'login_token']) === $user_to_login['login_token']
+       ):
       
       return true; // User already logged in
     
@@ -79,7 +82,6 @@ class Auth {
     if ( $remember_me ):
       
       Cookie::set('remember_me', $token, $this->remember_me_length);
-          
       
       // Store a hashed version of the token in the database
       $User->set_remember_me( $user_to_login['id'], $token );
@@ -94,6 +96,7 @@ class Auth {
     Session::set_key(['user', 'id'], $user_to_login['id']);
     Session::set_key(['user', 'selector'], $user_to_login['selector']);
     Session::set_key(['user', 'role'], $user_role);
+    Session::set_key(['user', 'login_token'], $user_to_login['login_token']);
   
     
     
@@ -103,9 +106,6 @@ class Auth {
       $User->update_last_login( $user_to_login['id'] );
     
     endif;
-    
-    
-    $User->set_force_logout($user_to_login['id'], 0);
     
   
     return true;
@@ -142,7 +142,7 @@ class Auth {
       
       $User = User::get_instance();
       
-      return $User->set_force_logout($user_id);
+      return $User->reset_login_token($user_id);
       
     else:
       

@@ -60,6 +60,8 @@ class User {
     
     $selector = $this->Db->get_unique_column_val('Users', 'selector');
     
+    $login_token = $this->Db->get_unique_column_val('Users', 'login_token');
+    
     
     try {
       
@@ -68,8 +70,8 @@ class User {
       $hashed_pass = password_hash($user_data['password'], PASSWORD_DEFAULT);
   
       // Prepare the SQL statement
-      $query = 'INSERT INTO Users (`email`, `password`, `selector`, `role`, `verify_key`) 
-                VALUES (:email, :password, :selector, :role, :verify_key)';
+      $query = 'INSERT INTO Users (`email`, `password`, `selector`, `role`, `verify_key`, `login_token`) 
+                VALUES (:email, :password, :selector, :role, :verify_key, :login_token)';
         
       $stmt = $this->pdo->prepare( $query );
   
@@ -78,6 +80,7 @@ class User {
       $stmt->bindValue(':selector', $selector, PDO::PARAM_STR);
       $stmt->bindValue(':role', $user_role, PDO::PARAM_STR);
       $stmt->bindValue(':verify_key', $verify_key, PDO::PARAM_STR);
+      $stmt->bindValue(':login_token', $login_token, PDO::PARAM_STR);
   
       
       if ( $stmt->execute() ):
@@ -475,14 +478,16 @@ class User {
     endif;
     
     
-    // Check whether the force_logout column is set for this user.
-    // If it is, clear all session and database rows related to 
+    // Check whether the login_token column matches the token in
+    // the session for the current user.
+    // If it doesn't, clear all session and database rows related to 
     // a logged in user and return false.
     if ( is_int($user_id) && $this->user_exists($user_id) ):
       
-      $force_logout = $this->get_column('force_logout', $user_id);
+      $login_token_db = $this->get_column('login_token', $user_id);
+      $login_token_session = Session::get_key(['user', 'login_token']);
       
-      if ( $force_logout ):
+      if ( $login_token_db !== $login_token_session ):
         
         $this->delete_remember_me($user_id);
         
@@ -798,12 +803,14 @@ class User {
   
   
   /**
-   * Set the force_logout column for the given user.
+   * Change the login_token column for the given user.
    *
-   * When this is set it will force a user to log in again.
-   * The column will be reset back to false after a successful login.
+   * The login_token value will be stored in the user's session.
+   *
+   * When this column doesn't match the value stored in the session
+   * value for a visitor it will force a user to log in again.
    */
-  public function set_force_logout( int $user_id, int $value = 1 ): bool {
+  public function reset_login_token( int $user_id ): bool {
 
     
     if ( !$this->user_exists($user_id) ):
@@ -812,12 +819,14 @@ class User {
       
     else:
       
-      return $this->set_column('force_logout', $value, $user_id);
+      $new_login_token = $this->Db->get_unique_column_val('Users', 'login_token');
+      
+      return $this->set_column('login_token', $new_login_token, $user_id);
       
     endif;
     
     
-  } // set_force_logout()
+  } // reset_login_token()
   
   
   
@@ -1159,7 +1168,7 @@ class User {
           `password_reset_token` VARCHAR(64),
           `password_reset_expires` DATETIME,
           `failed_login_attempts` INTEGER DEFAULT 0,
-          `force_logout` BOOLEAN DEFAULT 0,
+          `login_token`  VARCHAR(16) UNIQUE,
           `locked_until` DATETIME,
           `role` TEXT DEFAULT "user",
           CHECK (`role` IN ("user", "author", "admin"))
