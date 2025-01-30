@@ -46,12 +46,12 @@ class Auth {
   public function login( $identifier, bool $update_last_login = true, bool $remember_me = false ): bool {
     
     
-    $user = User::get_instance();
+    $User = User::get_instance();
     
     $user_identifier_key = ( is_numeric($identifier) ) ? 'id' : 'selector';
     
     // Fetch user based on identifier (user ID or selector)
-    $user_to_login = $user->get_by($user_identifier_key, $identifier);
+    $user_to_login = $User->get_by($user_identifier_key, $identifier);
     
   
     if ( !$user_to_login ):
@@ -82,7 +82,7 @@ class Auth {
           
       
       // Store a hashed version of the token in the database
-      $user->set_remember_me( $user_to_login['id'], $token );
+      $User->set_remember_me( $user_to_login['id'], $token );
 
     endif;
     
@@ -100,9 +100,12 @@ class Auth {
     // Optionally update the last login timestamp
     if ( $update_last_login ):
       
-      $user->update_last_login( $user_to_login['id'] );
+      $User->update_last_login( $user_to_login['id'] );
     
     endif;
+    
+    
+    $User->set_force_logout($user_to_login['id'], 0);
     
   
     return true;
@@ -117,39 +120,58 @@ class Auth {
   
   
   /**
-   * Log out the current user.
-   *
-   * @todo How do we log out a specific User by ID? (banned user logout)
+   * Log out the given user, or the current user
+   * if no $user_id is passed.
    */
-  public function logout(): void {
+  public function logout( ?int $user_id = null ): bool {
+    
+    
+    $return = false;
     
 
-    // If the visitor has a remember_me token
-    // remove it from their User row in the database.
-    if ( $remember_me = Cookie::get('remember_me') ):
-
-      // First we check whether the token even matches a 
-      // user in the database.
-      $hashed_token = hash('sha256',  $remember_me);
+    if ( $user_id ):
       
-      $user = User::get_instance();
+      $User = User::get_instance();
       
-      $user_to_logout = $user->get_by('remember_me', $hashed_token);
-
+      return $User->set_force_logout($user_id);
       
-      if ( isset($user_to_logout['id']) ):
-
-        // Found a valid User, so remove this token from their row
-        $user->delete_remember_me_token($user_to_logout['id'], $remember_me);
-
+    else:
+      
+      
+      // If the visitor has a remember_me token
+      // remove it from their User row in the database.
+      if ( $remember_me = Cookie::get('remember_me') ):
+  
+        // First we check whether the token even matches a 
+        // user in the database.
+        $hashed_token = hash('sha256',  $remember_me);
+        
+        $User = User::get_instance();
+        
+        $user_to_logout = $User->get_by('remember_me', $hashed_token);
+  
+        
+        if ( isset($user_to_logout['id']) ):
+  
+          // Found a valid User, so remove this token from their row
+          $User->delete_remember_me_token($user_to_logout['id'], $remember_me);
+  
+        endif;
+  
       endif;
-
+  
+  
+      // Clear session and delete the remember me cookie
+      Session::destroy();
+      Cookie::delete('remember_me');
+      
+      $return = true;
+      
+      
     endif;
-
-
-    // Clear session and delete the remember me cookie
-    Session::destroy();
-    Cookie::delete('remember_me');
+    
+    
+    return $return;
     
     
   } // logout()

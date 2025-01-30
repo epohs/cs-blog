@@ -433,12 +433,16 @@ class User {
     
     $return = false;
     
+    $user_id = null;
+    
     
     if ( Session::get_key(['user', 'id']) ):
       
       $this->update_last_active();
 
       Page::remove_expired_nonces();
+      
+      $user_id = Session::get_key(['user', 'id']);
       
       $return = true;
       
@@ -460,11 +464,34 @@ class User {
         Session::set_key(['user', 'role'], $user_to_check['role']);
         
         $this->update_last_active();
+      
+        $user_id = $user_to_check['id'];
         
         $return = true;
         
       endif;
       
+      
+    endif;
+    
+    
+    // Check whether the force_logout column is set for this user.
+    // If it is, clear all session and database rows related to 
+    // a logged in user and return false.
+    if ( is_int($user_id) && $this->user_exists($user_id) ):
+      
+      $force_logout = $this->get_column('force_logout', $user_id);
+      
+      if ( $force_logout ):
+        
+        $this->delete_remember_me($user_id);
+        
+        Session::destroy();
+        Cookie::delete('remember_me');
+        
+        $return = false;
+        
+      endif;
       
     endif;
 
@@ -697,12 +724,19 @@ class User {
    */
   public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
 
+    
+    if ( !$this->user_exists($user_id) ):
+      
+      return false;
+      
+    endif;
+    
 
     $existing_tokens = $this->get_column('remember_me', $user_id);
 
     $clean_tokens = $this->clean_remember_me_tokens( $existing_tokens );
     
-    $tokens_modified = false;
+    $new_tokens = null;
 
 
     if ( !empty($clean_tokens) ):
@@ -730,6 +764,61 @@ class User {
 
   } // delete_remember_me_token()
 
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Reset the entire remember_me column for the given user.
+   */
+  public function delete_remember_me( int $user_id ): bool {
+
+    
+    if ( !$this->user_exists($user_id) ):
+      
+      return false;
+      
+    else:
+      
+      return $this->set_column('remember_me', null, $user_id);
+      
+    endif;
+    
+    
+  } // delete_remember_me()
+
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Set the force_logout column for the given user.
+   *
+   * When this is set it will force a user to log in again.
+   * The column will be reset back to false after a successful login.
+   */
+  public function set_force_logout( int $user_id, int $value = 1 ): bool {
+
+    
+    if ( !$this->user_exists($user_id) ):
+      
+      return false;
+      
+    else:
+      
+      return $this->set_column('force_logout', $value, $user_id);
+      
+    endif;
+    
+    
+  } // set_force_logout()
+  
   
   
   
@@ -1070,6 +1159,7 @@ class User {
           `password_reset_token` VARCHAR(64),
           `password_reset_expires` DATETIME,
           `failed_login_attempts` INTEGER DEFAULT 0,
+          `force_logout` BOOLEAN DEFAULT 0,
           `locked_until` DATETIME,
           `role` TEXT DEFAULT "user",
           CHECK (`role` IN ("user", "author", "admin"))
