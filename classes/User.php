@@ -133,11 +133,6 @@ class User {
   
   /**
    * Get a user row by certain allowed keys.
-   * 
-   * @todo Audit code for any get_by() calls using id as key.
-   *       There ought to be a good reason to use this method
-   *       as opposed to get(). If there are none, remove id
-   *       from valid_keys.
    */
   public function get_by(string $key, $value): array|false {
     
@@ -153,7 +148,11 @@ class User {
     $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
     
     
-    if ( $key == 'remember_me' ):
+    if ( $key == 'id '):
+
+      return $this->get($value);
+
+    elseif ( $key == 'remember_me' ):
 
       $query = 'SELECT * 
                 FROM `Users` 

@@ -185,14 +185,12 @@ class Auth {
 
 
 
-  
+
   /**
    * Create a nonce with an action key, and an expiration time in seconds.
    * Save this nonce to the session.
    * 
    * Used for CSRF protection, and repeated form submissions.
-   * 
-   * @todo Move nonce related functions to the Auth class?
    */
   public static function set_nonce(string $action, int $ttl = 3600): string {
     
