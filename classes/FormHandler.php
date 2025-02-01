@@ -500,7 +500,13 @@ class FormHandler {
         // Reset the password for the user that matches and redirect to a confirmation page
         $pass_updated = $this->User->update_password($user_to_reset, $new_pass);
 
+
         if ( $pass_updated ):
+
+
+          // @todo NULL out the password reset token and started date columns
+
+
 
           Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '101'] );
 
