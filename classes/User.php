@@ -8,6 +8,8 @@ class User {
     
   private static $instance = null;
   
+  private $Config = null;
+
   private $Db = null;
 
   private $pdo = null;
@@ -21,6 +23,8 @@ class User {
   
   private function __construct() {
     
+
+    $this->Config = Config::get_instance();
 
     $this->Db = Database::get_instance();
 
@@ -608,7 +612,9 @@ class User {
   public function set_remember_me( int $user_id, string $token ): bool {
     
     
-    // @todo research whether this is secure enough
+    // @internal This could be more secure by using password_hash()
+    // but it makes it difficult to delete a given token from the database
+    // as password_hash() will generate a different string each time it's run.
     $hashed_token = hash('sha256', $token);
     
     $created_at = date('Y-m-d H:i:s');
@@ -843,8 +849,11 @@ class User {
    */
   public function set_password_reset_token( int $user_id ): string|false {
 
+    $now = new DateTime();
 
     $user_to_reset = $this->get( $user_id );
+
+    $password_reset_length = $this->Config->get('password_reset_length');
     
 
     // Is this a valid existing User ID?
@@ -854,20 +863,16 @@ class User {
       // Check whether we have an ongoing password reset request
       $reset_started = isset($user_to_reset['password_reset_started']) ?? null;
 
+
       if ( Utils::is_valid_datetime($reset_started) ):
 
         $reset_started_datetime = new DateTime($reset_started);
-        $now = new DateTime();
         
-        // Create a DateInterval of 30 minutes
-        // @todo This should be a setting in config
-        $interval = new DateInterval('PT30M');
-        
-        // Subtract 30 minutes from the current time
-        $threshold_time = $now->sub($interval);
+        // Add 30 minutes to the current time
+        $threshold_time = $now->modify("+{$password_reset_length} minutes");
         
         // Compare the two DateTime objects
-        if ( $created_at_datetime >= $threshold_time ):
+        if ( $reset_started_datetime <= $threshold_time ):
 
           // There has already been a password reset requested
           // too recently, just bail
@@ -882,22 +887,13 @@ class User {
       // eligible for a new password reset.
       $new_reset_token = $this->Db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
 
+      $reset_started_str = Utils::format_date($now, 'Y-m-d H:i:s');
 
-      $now = date('Y-m-d H:i:s');
-
-      // Create a DateTime object from the current time
-      $date = new DateTime($now);
-      
-      // Add 30 minutes
-      $date->modify('+30 minutes');
-      
-      // Get the updated datetime as a string
-      $new_reset_expires = $date->format('Y-m-d H:i:s');
 
       // @todo We should use a transaction 
       $is_good_token = $this->set_column('password_reset_token', $new_reset_token, $user_id);
     
-      $is_good_date = $this->set_column('password_reset_expires', $new_reset_expires, $user_id);
+      $is_good_date = $this->set_column('password_reset_started', $reset_started_str, $user_id);
 
       
       return ( $is_good_token && $is_good_date );
@@ -927,21 +923,31 @@ class User {
    */
   public function check_password_reset_token( string $token ): int|false {
 
+
     $stmt = $this->pdo->prepare('SELECT `id`
                                 FROM `Users`
                                 WHERE `password_reset_token` = :token
-                                AND `password_reset_expires` >= :now
+                                AND `password_reset_started` <= :token_expires
                                 LIMIT 1');
-                                      
+
+                            
+    $now = new DateTime();
+
+    $password_reset_length = $this->Config->get('password_reset_length');
+
+    $token_expires_datetime = $now->modify("+{$password_reset_length} minutes");
+
+    $token_expires = Utils::format_date($token_expires_datetime, 'Y-m-d H:i:s');
 
     $stmt->execute([
       ':token' => $token,
-      ':now' => date('Y-m-d H:i:s')
+      ':token_expires' => $token_expires
     ]);
 
 
     // Fetch the result (just the 'id')
     return $stmt->fetchColumn();
+
 
   } // check_password_reset_token()
 
@@ -1162,7 +1168,7 @@ class User {
           `is_verified` BOOLEAN DEFAULT 0,
           `verify_key` VARCHAR(16) UNIQUE,
           `password_reset_token` VARCHAR(64),
-          `password_reset_expires` DATETIME,
+          `password_reset_started` DATETIME,
           `failed_login_attempts` INTEGER DEFAULT 0,
           `login_token`  VARCHAR(16) UNIQUE,
           `locked_until` DATETIME,
