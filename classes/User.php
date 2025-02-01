@@ -678,7 +678,6 @@ class User {
         endif;
 
         // Check if 'created_at' is a valid date.
-        // @todo use Utils::is_valid_datetime() instead.
         $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
 
         // Skip if 'created_at' is not valid.
