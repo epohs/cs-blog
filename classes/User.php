@@ -281,10 +281,9 @@ class User {
 
     else:
 
-      // @todo Test whether it works the same to remove $user_id
-      // @todo get_role() could return false if the role key isn't set
-      //       in this case we shouldn't assume the user is verified.
-      $return = ( $this->get_role($user_id) !== 'null' );
+      $user_role = $this->get_role();
+
+      $return = ( $user_role && ($user_role !== 'null') );
 
     endif;
     
