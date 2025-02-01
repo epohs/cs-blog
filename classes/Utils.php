@@ -150,11 +150,11 @@ class Utils {
   * publically we need to convert those to, preferably, the user's local timezone.
   * This function should be used everywhere a date is displayed in a template.
   *
-  * @param $time_str string UTC formatted datetime string. Ctreate NOW string if null.
+  * @param $time string|DateTime. Create NOW string if null.
   * @param $format string Return datetime format.
   * @param $tz string Return datetime time zone.
   */
-  public static function format_date( $time_str = null, ?string $format = null, ?string $tz = null ): string {
+  public static function format_date( $time = null, ?string $format = null, ?string $tz = null ): string {
     
     
     $Config = Config::get_instance();
@@ -170,11 +170,26 @@ class Utils {
     $timezone = ( $tz ) ?? $default_timezone;
     
     
-    $date_utc = ( $time_str ) ?? date($format);
+    if ( is_null($time) ):
+
+      $date_utc = date($format);
+
+      // Create a DateTime object in UTC
+      $date = new DateTime( $date_utc, new DateTimeZone('UTC') );
+
+    elseif ( is_string($time) &&  self::is_valid_datetime($time) ):
+      
+      // Create a DateTime object in UTC
+      $date = new DateTime( $time, new DateTimeZone('UTC') );
+
+    elseif ( $time instanceof DateTime ):
+
+      $date = $time;
+
+    endif;
     
     
-    // Create a DateTime object in UTC
-    $date = new DateTime( $date_utc, new DateTimeZone('UTC') );
+
     
     // Set the timezone to NYC (Eastern Time)
     $date->setTimezone( new DateTimeZone($timezone) );
