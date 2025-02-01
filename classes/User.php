@@ -380,26 +380,27 @@ class User {
   /**
    * Does the given user exist?
    */
-  public function user_exists( $id_or_email ): bool {
+  public function user_exists( int|string $id_or_email ): bool {
     
     
     $user_key = null;
+
+    $user_key_type = null;
     
     
     // Check if the input is a valid integer
     if ( is_numeric($id_or_email) && intval($id_or_email) == $id_or_email ):
     
       $user_key = intval($id_or_email);
-      
-    endif;    
-    
 
+      $user_key_type = 'id';
+      
     // Check if the input is a valid email address
-    // @todo this check will always run even if we already know the key
-    // is an int.. don't do this.
-    if ( filter_var($id_or_email, FILTER_VALIDATE_EMAIL) ):
+    elseif ( filter_var($id_or_email, FILTER_VALIDATE_EMAIL) ):
       
       $user_key = trim($id_or_email);
+
+      $user_key_type = 'email';
         
     endif;  
     
@@ -409,8 +410,6 @@ class User {
       return false;
       
     else:
-      
-      $user_key_type = ( is_int($user_key) ) ? 'id' : 'email';
       
       return $this->Db->row_exists('Users', $user_key_type, $user_key);
       
