@@ -280,9 +280,9 @@ class Utils {
           
           $ip = trim($ip);
           
-          $config = Config::get_instance();
+          $Config = Config::get_instance();
           
-          if ( $config->get('debug') ):
+          if ( $Config->get('debug') ):
             
             $is_ip_valid = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE);
             

@@ -443,7 +443,7 @@ class User {
       
       $this->update_last_active();
 
-      Page::remove_expired_nonces();
+      Auth::remove_expired_nonces();
       
       $user_id = Session::get_key(['user', 'id']);
       

@@ -454,7 +454,7 @@ class Routing {
   public static function nonce_redirect(string $nonce, string $action, ?string $redir_path = '', ?string $err = '001'): void {
     
     
-    if ( !Page::validate_nonce($nonce, $action) ):
+    if ( !Auth::validate_nonce($nonce, $action) ):
       
       $Page = Page::get_instance();
       

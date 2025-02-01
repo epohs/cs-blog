@@ -55,10 +55,10 @@ class Config {
   public function init(): void {
     
 
-    $defaults = Defaults::get_instance();
+    $Defaults = Defaults::get_instance();
 
     // Start with defaults
-    $this->config_vars = $defaults->get();
+    $this->config_vars = $Defaults->get();
 
 
     $config_path = ROOT_PATH . '/config.php';

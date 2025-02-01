@@ -180,8 +180,132 @@ class Auth {
   } // logout()
   
   
+
+
+
+
+
+  
+  /**
+   * Create a nonce with an action key, and an expiration time in seconds.
+   * Save this nonce to the session.
+   * 
+   * Used for CSRF protection, and repeated form submissions.
+   * 
+   * @todo Move nonce related functions to the Auth class?
+   */
+  public static function set_nonce(string $action, int $ttl = 3600): string {
+    
+    $nonce = Utils::generate_random_string(32);
+    $expires = time() + $ttl;
+    
+    $nonce_data = [
+      'nonce' => $nonce,
+      'expires' => $expires
+    ];
+    
+    // Store nonce data in the session overriding any
+    // existing nonce with this action.
+    Session::set_key(['nonces', $action], $nonce_data);
+    
+    return $nonce;
+
+  } // set_nonce()
+
   
   
+  
+  
+  
+
+
+  /**
+   * Test whether a nonce for a given action is valid against
+   * the nonce saved in the session.
+   */
+  public static function validate_nonce(string $nonce, string $action): bool {
+
+
+    $return = false;
+    
+
+    if ( Session::key_isset(['nonces', $action]) ):
+      
+      
+      $nonceData = Session::get_key(['nonces', $action]);
+      
+      
+      if ( $nonceData['expires'] >= time() ):
+        
+        $return = true;
+        
+      endif;
+
+
+      // Remove the nonce after validation
+      Session::delete_key(['nonces', $action]);
+
+  
+    endif;
+
+    
+    return $return;
+
+  } // validate_nonce()
+
+
+
+
+
+
+
+
+  /**
+   * Remove any expired nonces from this session.
+   */
+  public static function remove_expired_nonces(): bool {
+
+
+    $nonces = Session::get_key('nonces');
+
+    $nonces_changed = false;
+
+
+    // First, check to see if we have any nonces.
+    // If we do, loop through them removing any
+    // where the expires timestamp has passed.
+    if ( is_array($nonces) && !empty($nonces) ):
+      
+      
+      foreach ($nonces as $action => $nonce_data):
+
+        if ( isset($nonce_data['expires']) && ( $nonce_data['expires'] <= time() ) ):
+        
+          unset( $nonces[$action] );
+
+          $nonces_changed = true;
+        
+        endif;
+      
+      endforeach;
+
+
+    endif;
+
+
+    // If the nonce array changed, save over our nonces
+    // stored in the session.
+    if ( $nonces_changed ):
+
+      Session::set_key('nonces', $nonces);
+
+    endif;
+
+
+    return $nonces_changed;
+
+  } // remove_expired_nonces()
+
   
   
   

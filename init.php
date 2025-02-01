@@ -31,14 +31,14 @@ spl_autoload_register(function ($class) {
 
 
 // Include the config class.
-$config = Config::get_instance();
+$Config = Config::get_instance();
 
 
 
 
 
 // If we're in debug mode display errors
-if ( $config->get('debug') ):
+if ( $Config->get('debug') ):
   
   ini_set('error_reporting', E_ALL);
   ini_set('display_errors', '1');
@@ -73,7 +73,7 @@ endif;
 
 
 
-$theme = $config->get('theme');
+$theme = $Config->get('theme');
 
 $theme_functions_file = ROOT_PATH . "themes/{$theme}/functions.php";
 
@@ -114,9 +114,9 @@ $Routing = Routing::get_instance();
  */
 function debug_log(string $message): void {
 
-  $config = Config::get_instance();
+  $Config = Config::get_instance();
 
-  if ( $config->get('debug') ):
+  if ( $Config->get('debug') ):
 
     $file = ROOT_PATH. 'debug.log';
 

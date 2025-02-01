@@ -16,9 +16,9 @@ class AdminRoutes {
   
   private $Page = null;
 
-  private $auth = null;
+  private $Auth = null;
 
-  private $user = null;
+  private $User = null;
 
 
 
@@ -27,9 +27,9 @@ class AdminRoutes {
 
     $this->Page = Page::get_instance();
 
-    $this->auth = Auth::get_instance();
+    $this->Auth = Auth::get_instance();
 
-    $this->user = User::get_instance();
+    $this->User = User::get_instance();
       
   } // __construct()
 
@@ -50,7 +50,7 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->user->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+    if ( $this->User->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
       
       $this->get_template( 'dashboard' );
     
@@ -79,15 +79,15 @@ class AdminRoutes {
     $this->verified_user_redirect();
 
       
-    if ( $this->user->is_logged_in() ):
+    if ( $this->User->is_logged_in() ):
   
-      $redirect_path = ( $this->user->is_admin() ) ? 'admin/dash' : '/';
+      $redirect_path = ( $this->User->is_admin() ) ? 'admin/dash' : '/';
 
       Routing::redirect_to( $this->Page->url_for($redirect_path) );
 
     else:
       
-      $nonce = $this->Page->set_nonce('login');
+      $nonce = $this->Auth::set_nonce('login');
       
       $this->get_template( 'login', null, ['nonce' => $nonce] );
 
@@ -119,7 +119,7 @@ class AdminRoutes {
 
     else:
       
-      $nonce = $this->Page->set_nonce('signup');
+      $nonce = $this->Auth::set_nonce('signup');
       
       $this->get_template( 'signup', null, ['nonce' => $nonce] );
 
@@ -146,7 +146,7 @@ class AdminRoutes {
     
     if ( $user_id ):
       
-      $cur_user = $this->user->get($user_id);
+      $cur_user = $this->User->get($user_id);
       
       // If user is already logged in redirect to their profile
       if ( intval($cur_user['is_verified']) == 1 ):
@@ -162,7 +162,7 @@ class AdminRoutes {
     endif;
     
     
-    $nonce = $this->Page->set_nonce('verify');
+    $nonce = $this->Auth::set_nonce('verify');
     
     $verify_key = $cur_user['verify_key'];
       
@@ -196,7 +196,7 @@ class AdminRoutes {
 
     else:
       
-      $nonce = $this->Page->set_nonce('forgot');
+      $nonce = $this->Auth::set_nonce('forgot');
       
       $this->get_template( 'forgot', null, ['nonce' => $nonce] );
 
@@ -264,7 +264,7 @@ class AdminRoutes {
 
 
       // @todo We will delete the key either when it expires or when it is used to reset the pass
-      $active_key_found = ( $key_valid ) ? $this->user->check_password_reset_token($reset_key) : false;
+      $active_key_found = ( $key_valid ) ? $this->User->check_password_reset_token($reset_key) : false;
 
 
       if ( $key_exists && !$active_key_found ):
@@ -274,7 +274,7 @@ class AdminRoutes {
       endif;
 
 
-      $nonce = $this->Page->set_nonce('password-reset');
+      $nonce = $this->Auth::set_nonce('password-reset');
       
       $tmpl_args = [
                     'nonce' => $nonce,
@@ -305,7 +305,7 @@ class AdminRoutes {
    */
   private function verified_user_redirect(): void {
 
-    if ( $this->user->is_logged_in() && !$this->user->is_verified() ):
+    if ( $this->User->is_logged_in() && !$this->User->is_verified() ):
 
       Routing::redirect_to( $this->Page->url_for('verify') );
 
