@@ -308,7 +308,7 @@ class Page {
       
       // Make the Page class available inside the included file.
       // @todo Uppercase this, and update template files.
-      $page = Page::get_instance();
+      $Page = Page::get_instance();
 
       $User = $this->User;
       

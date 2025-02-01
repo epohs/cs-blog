@@ -16,7 +16,7 @@ endif;
 <!DOCTYPE html>
 <html lang="en">
 
-<?php $page->get_partial('html-head', 'post'); ?>
+<?php $Page->get_partial('html-head', 'post'); ?>
 
 <body>
   
@@ -26,12 +26,12 @@ endif;
 <div class="page-wrap">
 
   
-  <?php $page->get_partial('page-header'); ?>
+  <?php $Page->get_partial('page-header'); ?>
   
 
   <main class="content">
     
-    <?php $page->get_partial('page-alerts'); ?>
+    <?php $Page->get_partial('page-alerts'); ?>
   
     <h1>Test post page</h1>
     

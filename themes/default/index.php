@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<?php $page->get_partial('html-head'); ?>
+<?php $Page->get_partial('html-head'); ?>
 
 <body>
   
 
   
-<?php $page->get_partial('page-header'); ?>
+<?php $Page->get_partial('page-header'); ?>
   
 
 <div class="page-wrap">
@@ -15,12 +15,12 @@
   <div class="page-body">
 
 
-    <?php $page->get_partial('sidebar/primary'); ?>
+    <?php $Page->get_partial('sidebar/primary'); ?>
 
 
     <main class="content">
       
-      <?php $page->get_partial('page-alerts'); ?>
+      <?php $Page->get_partial('page-alerts'); ?>
     
       <h1>Hello.</h1>
     
@@ -29,7 +29,7 @@
     </main> <!-- .content -->
 
 
-    <?php $page->get_partial('sidebar/secondary'); ?>
+    <?php $Page->get_partial('sidebar/secondary'); ?>
     
 
   </div> <!-- .page-body -->
@@ -38,7 +38,7 @@
 </div> <!-- .page-wrap -->
 
 
-<?php $page->get_partial('page-footer'); ?>
+<?php $Page->get_partial('page-footer'); ?>
 
 
 

@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 
-<?php $page->get_partial('html-head'); ?>
+<?php $Page->get_partial('html-head'); ?>
 
 <body>
   
-<?php $page->get_partial('page-alerts'); ?>
+<?php $Page->get_partial('page-alerts'); ?>
   
   
 <h1>Page not found</h1>

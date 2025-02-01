@@ -1,6 +1,6 @@
-<?php if ( $page->has_alerts() ): ?>
+<?php if ( $Page->has_alerts() ): ?>
   
-  <?php $alerts = $page->get_alerts(); ?>
+  <?php $alerts = $Page->get_alerts(); ?>
   
   <ol class="page-alerts">
   
