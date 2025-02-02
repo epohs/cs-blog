@@ -52,6 +52,7 @@ class FormHandler {
     $this->add_form('password-reset', 'password_reset');
     
     
+    //$this->Limits->set('new_user', 2, '5 minutes');
     $this->Limits->set('form_login', 5, '5 minutes');
 
     
