@@ -345,7 +345,7 @@ class Page {
   
   
   
-  
+
   /**
    * Add a page alert to be displayed when the page is rendered.
    */
@@ -358,7 +358,7 @@ class Page {
     // Only allow levels set in the alert_levels class property.
     // Default to 'error' if something else is passed.
     if ( !is_null($level) ):
-      
+
       $level = ( in_array($level, $this->alert_levels, true) ) ? $level : $default_level;
       
     else:
@@ -533,8 +533,6 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Timed out. Please try again.';
-        
-          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -543,8 +541,6 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'User already exists.';
-        
-          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -553,8 +549,6 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Password invalid.';
-        
-          $this->add_alert( $msg_text, $session_level );
           
           break;
       
@@ -562,9 +556,7 @@ class Page {
           
           $has_alert = true;
 
-          $msg_text = $session_alert['text'] ?? 'Incorrect verification code.' ;
-        
-          $this->add_alert( $msg_text, $session_level );
+          $msg_text = $session_alert['text'] ?? 'Incorrect verification code.';
           
           break;
       
@@ -573,8 +565,6 @@ class Page {
           $has_alert = true;
         
           $msg_text = $session_alert['text'] ?? 'Incorrect login info.';
-
-          $this->add_alert( $msg_text, $session_level );
           
           break;
 
@@ -584,8 +574,6 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'Invalid email address.';
 
-          $this->add_alert( $msg_text, $session_level );
-
           break;
 
         case '007':
@@ -593,8 +581,6 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Invalid password reset key.';
-
-          $this->add_alert( $msg_text, $session_level );
 
           break;
 
@@ -604,8 +590,6 @@ class Page {
 
           $msg_text = $session_alert['text'] ?? 'At least one user must exist. The first user will be an Admin user.';
 
-          $this->add_alert( $msg_text, $session_level );
-
           break;
       
         case '070':
@@ -613,9 +597,15 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Something went wrong.';
-        
-          $this->add_alert( $msg_text, $session_level );
           
+          break;
+      
+        case '101':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Password updated.';
+
           break;
           
         default:
@@ -625,6 +615,13 @@ class Page {
           break;
         
       endswitch;
+
+
+      if ( $has_alert ):
+
+        $this->add_alert( $msg_text, $session_level );
+
+      endif;
       
 
     endif;
