@@ -117,9 +117,8 @@ class Config {
       
     else:
       
-      // @todo this will cause an error of it's own because
-      // add_alert() does not accept a level param.
-      $this->add_alert(["Config key {$key} not found", 'warn']);
+
+      $this->add_alert(["Config key {$key} not found"]);
       
       return false;
       
@@ -156,8 +155,6 @@ class Config {
   
   /**
    * Add an alert to the temporary stash.
-   *
-   * @todo Add ability to set alert level.
    */
   public function add_alert( array|string $alert ): array {
     
