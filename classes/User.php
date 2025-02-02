@@ -1027,8 +1027,13 @@ class User {
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
-    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until'], new DateTimeZone('UTC')) : null;
     $now = new DateTime('now', new DateTimeZone('UTC'));
+    
+    
+    // @todo Unless the setting of locked_until is rock solid
+    // here is where I should add valid DateTime checks and set
+    // to null if not.
+    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until'], new DateTimeZone('UTC')) : null;
   
     
     if ( $increment ):
@@ -1051,15 +1056,15 @@ class User {
       
     elseif ($failed_login_attempts <= 10 ):
 
-      $new_locked_until = max($now, $locked_until ?: $now)->modify('+5 minutes');
+      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+5 minutes');
   
     elseif ( $failed_login_attempts <= 15 ):
 
-      $new_locked_until = max($now, $locked_until ?: $now)->modify('+30 minutes');
+      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+30 minutes');
   
     else:
 
-      $new_locked_until = max($now, $locked_until ?: $now)->modify('+1 hour');
+      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+1 hour');
   
     endif;
     
