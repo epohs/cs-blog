@@ -25,6 +25,8 @@ class Routing {
   
   private static $route_vars = null;
 
+  private $is_admin_route = null;
+
 
 
 
@@ -86,6 +88,10 @@ class Routing {
     foreach( $all_routes as $route_key => $handler ):
 
       if ( $this->is_route($route_key, $this->path) ):
+
+        $handler_class = $handler[0];
+
+        $this->is_admin_route = ( $handler_class instanceof AdminRoutes );
 
         $valid_route = $this->Routes->serve($route_key);
 
@@ -468,7 +474,25 @@ class Routing {
     
     
   } // nonce_redirect()
-  
+
+
+
+
+
+
+
+
+  /**
+   * Returns the is_admin_route class property.
+   * 
+   * This property is set to true by the serve_route method if the 
+   * handler class is AdminRoutes.
+   */
+  function get_is_admin_route() {
+
+    return $this->is_admin_route;
+
+  } // get_is_admin_route()
 
   
   

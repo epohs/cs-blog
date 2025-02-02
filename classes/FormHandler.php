@@ -539,7 +539,6 @@ class FormHandler {
       // Is key the valid length, and does it contain only approved characters?
       $key_valid = ( (strlen($reset_key) == 16) && Utils::is_alphanumeric($reset_key) );
 
-      // @todo We will delete the key either when it expires or when it is used to reset the pass
       $active_key_found = $this->User->check_password_reset_token($reset_key);
 
       if ( $key_valid && $active_key_found ):

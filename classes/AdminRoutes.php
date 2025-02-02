@@ -263,7 +263,6 @@ class AdminRoutes {
       endif;
 
 
-      // @todo We will delete the key either when it expires or when it is used to reset the pass
       $active_key_found = ( $key_valid ) ? $this->User->check_password_reset_token($reset_key) : false;
 
 

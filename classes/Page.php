@@ -67,13 +67,10 @@ class Page {
 
   /**
    * Is the page currently being viewed an admin level page?
-   * 
-   * @todo this needs to be rewritten to check whether the page is an
-   *        admin route.
    */
   public function is_admin(): bool {
 
-    return $this->User->is_admin();
+    return $this->Routing->get_is_admin_route();
 
   } // is_admin()
 
@@ -533,7 +530,7 @@ class Page {
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Timed out. Please try again.';
-          
+
           break;
       
         case '002':
