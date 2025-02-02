@@ -447,11 +447,14 @@ class User {
       Auth::remove_expired_nonces();
       
       $user_id = Session::get_key(['user', 'id']);
+
+      debug_log("Found a user id ({$user_id}) in the session.");
       
       $return = true;
       
     elseif ( $token = Cookie::get('remember_me') ):
       
+      debug_log("Found no user id but did find a remember me token: {$token}.");
       
       $hashed_token = hash('sha256', $token);
       
@@ -462,16 +465,23 @@ class User {
       // Set session variables for use throughout the page
       // load and update the last_active db column.
       if ( $user_to_check ):
+
+        debug_log("The token matched user id: {$user_to_check['id']}.");
         
         Session::set_key(['user', 'id'], $user_to_check['id']);
         Session::set_key(['user', 'selector'], $user_to_check['selector']);
         Session::set_key(['user', 'role'], $user_to_check['role']);
+        Session::set_key(['user', 'login_token'], $user_to_check['login_token']);
         
         $this->update_last_active();
       
         $user_id = $user_to_check['id'];
         
         $return = true;
+
+      else:
+
+        debug_log("The token did not match any user.");
         
       endif;
       
@@ -489,6 +499,8 @@ class User {
       $login_token_session = Session::get_key(['user', 'login_token']);
       
       if ( $login_token_db !== $login_token_session ):
+
+        debug_log("The login token in the session ({$login_token_session}) didn't match the DB ({$login_token_db}).");
         
         $this->delete_remember_me($user_id);
         
@@ -543,8 +555,27 @@ class User {
    */
   public function validate_pass( string $password ): bool {
     
+    // Minimum length requirement
+    if ( strlen($password) < $this->Config->get('password_min_length') ):
+
+      return false;
+
+    endif;
+
+    // Check against common passwords (optional: integrate with a leaked password API)
+    $common_passwords = [
+      'password', '123456', 'qwerty', 'letmein', 'admin', 'welcome', 'monkey', 
+      '12345678', 'abc123', 'password1'
+    ];
+
+    if ( in_array(strtolower($password), $common_passwords, true) ):
+
+      return false;
     
-    return ( strlen($password) >= 4 );
+    endif;
+
+
+    return true;
     
     
   } // validate_pass()
@@ -630,6 +661,10 @@ class User {
     $clean_tokens[] = $new_token;
 
     $clean_tokens = json_encode($clean_tokens);
+
+    debug_log("Unhashed token: {$token}.");
+    debug_log("Hashed token: {$hashed_token}.");
+    debug_log('New tokens going into the database: ' . PHP_EOL . var_export($clean_tokens, true));
 
     $new_col = $this->set_column('remember_me', $clean_tokens, $user_id);
 
@@ -843,8 +878,6 @@ class User {
    * Password reset tokens last for a set period of time so we store
    * both the token and the expiration.
    *
-   * @todo Switch to created_at instead of expiration for consistency.
-   * @todo use $return for return value and use only one return.
    * @internal Should this be JSON in a single column?
    */
   public function set_password_reset_token( int $user_id ): string|false {
@@ -890,7 +923,6 @@ class User {
       $reset_started_str = Utils::format_date($now, 'Y-m-d H:i:s');
 
 
-      // @todo We should use a transaction 
       $is_good_token = $this->set_column('password_reset_token', $new_reset_token, $user_id);
     
       $is_good_date = $this->set_column('password_reset_started', $reset_started_str, $user_id);
@@ -1016,10 +1048,6 @@ class User {
    * The length of the extension of the lockout depends on
    * the number of failed login attempts.
    *
-   * @todo Review everywhere `locked_until` is set.
-   *       As it is a malformed value will cause problems.
-   *       Consider better validation.
-   *
    * @todo Test this thoroughly.
    */
   function extend_lockout(array $user, ?bool $increment = true): string|false {
@@ -1030,10 +1058,15 @@ class User {
     $now = new DateTime('now', new DateTimeZone('UTC'));
     
     
-    // @todo Unless the setting of locked_until is rock solid
-    // here is where I should add valid DateTime checks and set
-    // to null if not.
-    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until'], new DateTimeZone('UTC')) : null;
+    if ( isset($user['locked_until']) && Utils::is_valid_datetime($user['locked_until']) ):
+
+      $locked_until = new DateTime($user['locked_until'], new DateTimeZone('UTC'));
+
+    else:
+
+      $locked_until = null;
+
+    endif;
   
     
     if ( $increment ):
@@ -1056,15 +1089,15 @@ class User {
       
     elseif ($failed_login_attempts <= 10 ):
 
-      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+5 minutes');
+      $new_locked_until = max($now, $locked_until)->modify('+5 minutes');
   
     elseif ( $failed_login_attempts <= 15 ):
 
-      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+30 minutes');
+      $new_locked_until = max($now, $locked_until)->modify('+30 minutes');
   
     else:
 
-      $new_locked_until = (max($now, $locked_until) ?: $now)->modify('+1 hour');
+      $new_locked_until = max($now, $locked_until)->modify('+1 hour');
   
     endif;
     

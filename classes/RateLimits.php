@@ -336,7 +336,7 @@ class RateLimits {
 
     $expires_at = !is_null($first_try) ? $first_try['expires_at'] : 'now';
 
-    $expires_at_date = new DateTime($expires_at);
+    $expires_at_date = new DateTime($expires_at, new DateTimeZone('UTC'));
       
     $retry_after = $expires_at_date->format('Y-m-d H:i:s');
     

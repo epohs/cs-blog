@@ -39,6 +39,8 @@ class Defaults {
       
       // Number of days the remember_me token should last.
       'remember_me_length' => 30,
+
+      'password_min_length' => 8,
       
       // Number of minutes a password reset request will remain active.
       'password_reset_length' => 30,

@@ -81,6 +81,8 @@ class Auth {
 
     if ( $remember_me ):
       
+      debug_log("Setting remember_me token: {$token}.");
+
       Cookie::set('remember_me', $token, $this->remember_me_length);
       
       // Store a hashed version of the token in the database

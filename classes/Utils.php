@@ -95,8 +95,8 @@ class Utils {
     
     try {
       
-      $date = new DateTime($datetime);
-      $now = new DateTime();
+      $date = new DateTime($datetime, new DateTimeZone('UTC'));
+      $now = new DateTime('now', new DateTimeZone('UTC'));
       
       return $date > $now; // Returns true if $datetime is in the future
       
@@ -122,8 +122,8 @@ class Utils {
     
     try {
       
-      $date = new DateTime($datetime);
-      $now = new DateTime();
+      $date = new DateTime($datetime, new DateTimeZone('UTC'));
+      $now = new DateTime('now', new DateTimeZone('UTC'));
       
       return $date < $now; // Returns true if $datetime is in the future
       
@@ -154,10 +154,6 @@ class Utils {
   *
   * This function will assume that all input times are UTC unless 
   * $time is a DateTime object.
-  *
-  * @todo Change this to format_time()
-  * @todo Look everywhere for new DateTime() and set timezone to UTC
-  * @todo Look everywhere for DateInterval() and see if it can be converted to ->modify() instead
   *
   * @param $time string|DateTime. Create NOW string if null.
   * @param $format string Return datetime format.
