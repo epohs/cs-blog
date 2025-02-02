@@ -34,11 +34,11 @@
         <input type="password" id="Password" name="password" required>
         <br>
         
-        <input type="checkbox" id="RememberMe" name="remember_me" value="1">
+        <input type="checkbox" id="RememberMe" name="remember_me" value="1" tabindex="0">
         <label for="RememberMe">Remember me</label>
 
         <br>
-        <button type="submit">Sign in</button>
+        <button type="submit" tabindex="0">Sign in</button>
 
         <p><a href ="<?php echo $Page->url_for('forgot'); ?>">I forgot my password</a>.</p>
 
