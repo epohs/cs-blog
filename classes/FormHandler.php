@@ -264,7 +264,7 @@ class FormHandler {
     else:
       
       // Login attempt failed. Redirect back with an error.
-      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '005'] );
+      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '005', 'level' => 'warn'] );
       
     endif;
 
@@ -497,18 +497,27 @@ class FormHandler {
 
         Session::delete_key('reset_key');
 
-        // Reset the password for the user that matches and redirect to a confirmation page
+        // Reset the password for the user that matches and redirect to a confirmation page.
         $pass_updated = $this->User->update_password($user_to_reset, $new_pass);
 
 
         if ( $pass_updated ):
 
 
-          // @todo NULL out the password reset token and started date columns
+          // NULL out the password reset token and started date columns
+          $this->User->clear_password_reset($user_to_reset);
 
+          // Reset the login token to force all currently logged in sessions 
+          // to re-log with the new password.
+          $this->User->reset_login_token($user_to_reset);
+
+          // Reset remember_me column so that users with a remember_me token
+          // are forced to re-log with new password.
+          $this->User->delete_remember_me($user_to_reset);
 
 
           Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '101'] );
+
 
         else:
 
