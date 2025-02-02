@@ -416,7 +416,7 @@ class Routing {
 
 
     $default_alert_arr = [
-      'level' => 'msg',
+      'level' => 'info',
       'code' => null,
       'text' => null
     ];

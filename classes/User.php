@@ -983,6 +983,32 @@ class User {
 
   } // check_password_reset_token()
 
+
+
+
+
+
+
+  /**
+   * 
+   */
+  function clear_password_reset( int $user_id ): bool {
+
+    $return = false;
+
+    if ( $this->user_exists($user_id) ):
+
+      $reset_token = $this->set_column('password_reset_token', null, $user_id);
+
+      $reset_timestamp = $this->set_column('password_reset_started', null, $user_id);
+
+      $return = ($reset_token && $reset_timestamp);
+
+    endif;
+    
+    return $return;
+
+  } // clear_password_reset()
   
   
   
