@@ -849,7 +849,7 @@ class User {
    */
   public function set_password_reset_token( int $user_id ): string|false {
 
-    $now = new DateTime();
+    $now = new DateTime('now', new DateTimeZone('UTC'));
 
     $user_to_reset = $this->get( $user_id );
 
@@ -866,7 +866,7 @@ class User {
 
       if ( Utils::is_valid_datetime($reset_started) ):
 
-        $reset_started_datetime = new DateTime($reset_started);
+        $reset_started_datetime = new DateTime($reset_started, new DateTimeZone('UTC'));
         
         // Add 30 minutes to the current time
         $threshold_time = $now->modify("+{$password_reset_length} minutes");
@@ -931,7 +931,7 @@ class User {
                                 LIMIT 1');
 
                             
-    $now = new DateTime();
+    $now = new DateTime('now', new DateTimeZone('UTC'));
 
     $password_reset_length = $this->Config->get('password_reset_length');
 
@@ -1019,18 +1019,16 @@ class User {
    * @todo Review everywhere `locked_until` is set.
    *       As it is a malformed value will cause problems.
    *       Consider better validation.
-   * @todo Consider using max() for all extensions other than
-   *       cases where locked_until is null. What if we allow
-   *       admins to lock an account for an extended period..
-   *       We don't want a failed login attempt to reduce the lockout.
+   *
+   * @todo Test this thoroughly.
    */
   function extend_lockout(array $user, ?bool $increment = true): string|false {
     
 
     $user_id = $user['id'];
     $failed_login_attempts = (int) $user['failed_login_attempts'];
-    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until']) : null;
-    $now = new DateTime();
+    $locked_until = $user['locked_until'] ? new DateTime($user['locked_until'], new DateTimeZone('UTC')) : null;
+    $now = new DateTime('now', new DateTimeZone('UTC'));
   
     
     if ( $increment ):
@@ -1049,19 +1047,19 @@ class User {
   
     if ( is_null($locked_until) ):
 
-      $new_locked_until = $now->add(new DateInterval('PT5M'));
+      $new_locked_until = $now->modify('+5 minutes');
       
     elseif ($failed_login_attempts <= 10 ):
 
-      $new_locked_until = max($now, $locked_until ?: $now)->add(new DateInterval('PT5M'));
+      $new_locked_until = max($now, $locked_until ?: $now)->modify('+5 minutes');
   
     elseif ( $failed_login_attempts <= 15 ):
 
-      $new_locked_until = $now->add(new DateInterval('PT30M'));
+      $new_locked_until = max($now, $locked_until ?: $now)->modify('+30 minutes');
   
     else:
 
-      $new_locked_until = $now->add(new DateInterval('PT1H'));
+      $new_locked_until = max($now, $locked_until ?: $now)->modify('+1 hour');
   
     endif;
     
