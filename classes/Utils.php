@@ -146,9 +146,14 @@ class Utils {
   /**
   * Return a formatted datetime string.
   *
-  * We use UTC for all internal datetimes, but anywhere dates or times are displayed
-  * publically we need to convert those to, preferably, the user's local timezone.
-  * This function should be used everywhere a date is displayed in a template.
+  * We use UTC for all internal datetimes, but anywhere dates or 
+  * times are displayed publically we need to convert those to, 
+  * preferably, the user's local timezone.
+  * This function should be used everywhere a date is displayed 
+  * in a template.
+  *
+  * This function will assume that all input times are UTC unless 
+  * $time is a DateTime object.
   *
   * @param $time string|DateTime. Create NOW string if null.
   * @param $format string Return datetime format.
@@ -172,14 +177,11 @@ class Utils {
     
     if ( is_null($time) ):
 
-      $date_utc = date($format);
-
       // Create a DateTime object in UTC
-      $date = new DateTime( $date_utc, new DateTimeZone('UTC') );
+      $date = new DateTime( 'now', new DateTimeZone('UTC') );
 
-    elseif ( is_string($time) &&  self::is_valid_datetime($time) ):
+    elseif ( is_string($time) && self::is_valid_datetime($time) ):
       
-      // Create a DateTime object in UTC
       $date = new DateTime( $time, new DateTimeZone('UTC') );
 
     elseif ( $time instanceof DateTime ):
