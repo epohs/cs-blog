@@ -155,6 +155,10 @@ class Utils {
   * This function will assume that all input times are UTC unless 
   * $time is a DateTime object.
   *
+  * @todo Change this to format_time()
+  * @todo Look everywhere for new DateTime() and set timezone to UTC
+  * @todo Look everywhere for DateInterval() and see if it can be converted to ->modify() instead
+  *
   * @param $time string|DateTime. Create NOW string if null.
   * @param $format string Return datetime format.
   * @param $tz string Return datetime time zone.
