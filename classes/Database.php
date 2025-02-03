@@ -12,6 +12,8 @@ class Database {
   
   private static $instance = null;
   
+  private $Alerts = null;
+  
   private $Config = null;
   
   private $pdo = null;
@@ -23,7 +25,8 @@ class Database {
   
   private function __construct() {
 
-    
+    $this->Alerts = Alerts::get_instance();
+
     $this->Config = Config::get_instance();
     
     $this->db_init();
@@ -288,7 +291,7 @@ class Database {
         
       } catch (PDOException $e) {
         
-        $this->Config->add_alert( "Failed to connect to the existing database: " . $e->getMessage() );
+        $this->Config->add( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
 
@@ -313,7 +316,7 @@ class Database {
           
       } catch (PDOException $e) {
       
-        $this->Config->add_alert( "Failed to create the database: " . $e->getMessage() );
+        $this->Config->add( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -347,7 +350,7 @@ class Database {
       
     else:
             
-      $this->Config->add_alert("can't find db connection");
+      $this->Config->add("can't find db connection");
       
     endif;
     

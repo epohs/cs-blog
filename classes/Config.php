@@ -6,17 +6,14 @@
  * Default values are defined in the Defaults class. User defined
  * values are set in the config.php file in the root of the application
  * and will take precedence over defaults.
- * 
- * This class also catches errors that occur during the early initialization
- * of the app, before the Page class is ready to take over alert handling.
- *
- * @internal Reconsider an Alerts class that loads early and handles all alerts.
  */
 class Config {
     
     
   private static $instance = null;  
   
+  private $Alerts = null;
+
   // Array to hold configuration variables.
   private $config_vars = [];  
   
@@ -34,6 +31,8 @@ class Config {
   
   
   private function __construct() {
+
+    $this->Alerts = Alerts::get_instance();
     
     $this->init();
     
@@ -80,14 +79,14 @@ class Config {
 
       else:
 
-        $this->add_alert('Config file does not return a valid array.');
+        $this->Alerts->add('Config file does not return a valid array.');
 
       endif;
       
 
     else:
 
-      $this->add_alert('No config file found.');
+      $this->Alerts->add('No config file found.');
 
     endif;
     
@@ -118,7 +117,7 @@ class Config {
     else:
       
 
-      $this->add_alert(["Config key {$key} not found"]);
+      $this->Alerts->add(["Config key {$key} not found"]);
       
       return false;
       
@@ -126,53 +125,8 @@ class Config {
     endif;  
 
     
-  } // get()
+  } // get()  
   
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * Get all stashed alerts.
-   */
-  public function get_alerts() {
-    
-    
-    return $this->config_alerts;
-    
-    
-  } // get_alerts()
-  
-  
-  
-  
-
-
-  
-  
-  /**
-   * Add an alert to the temporary stash.
-   */
-  public function add_alert( array|string $alert ): array {
-    
-
-    if ( is_string($alert) ):
-
-      $alert = [$alert, 'error'];
-
-    endif;
-    
-    
-    $this->config_alerts[] = $alert;
-    
-    return $this->config_alerts;
-    
-    
-  } // add_alert()
-
 
   
   

@@ -15,6 +15,8 @@ class Routing {
   
   private static $instance = null;
   
+  private $Alerts = null;
+  
   private $Page = null;
 
   private $Routes = null;
@@ -37,7 +39,8 @@ class Routing {
 
   
   private function __construct() {
-    
+
+    $this->Alerts = Alerts::get_instance();
     
   } // __construct()
   
@@ -65,7 +68,7 @@ class Routing {
     
     
     // Handle error codes passed in the query string
-    $this->Page->process_page_alerts();
+    $this->Alerts->process();
 
     $this->Routes = Routes::get_instance( $this->Page );
 
@@ -181,7 +184,7 @@ class Routing {
     // page we need to serve so log an error and bail.
     if ( is_null($request_uri) ):
       
-      $this->Page->add_alert('Bad REQUEST_URI.');
+      $this->Page->add('Bad REQUEST_URI.');
       
       return $parsed_request;
       
