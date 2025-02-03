@@ -79,14 +79,14 @@ class Config {
 
       else:
 
-        $this->Alerts->add('Config file does not return a valid array.');
+        $this->Alerts->add('Config file does not return a valid array.', ['level' => 'error']);
 
       endif;
       
 
     else:
 
-      $this->Alerts->add('No config file found.');
+      $this->Alerts->add('No config file found.', ['level' => 'error']);
 
     endif;
     
@@ -117,7 +117,7 @@ class Config {
     else:
       
 
-      $this->Alerts->add(["Config key {$key} not found"]);
+      $this->Alerts->add(["Config key {$key} not found"], ['level' => 'error']);
       
       return false;
       
