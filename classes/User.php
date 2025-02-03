@@ -846,6 +846,14 @@ class User {
    *
    * When this column doesn't match the value stored in the session
    * value for a visitor it will force a user to log in again.
+   *
+   * @internal If a user has a valid remember_me cookie but not an
+   * active session when they visit, the is_logged_in() function will
+   * rebuild their session with the current login_token, rendering
+   * this function useless to force them to log in again.
+   *
+   * @internal Always set the remember_me column to null if the intent
+   * is to boot a user.
    */
   public function reset_login_token( int $user_id ): bool {
 
