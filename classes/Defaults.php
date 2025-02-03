@@ -38,11 +38,13 @@ class Defaults {
       'date_format' => 'F j, Y, g:i a',
       
       // Number of days the remember_me token should last.
+      // @todo Change this to remember_me_age
       'remember_me_length' => 30,
 
       'password_min_length' => 8,
       
       // Number of minutes a password reset request will remain active.
+      // @todo Change this to password_reset_age
       'password_reset_length' => 30,
         
       'POSTMARK_SERVER_TOKEN' => null,

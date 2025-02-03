@@ -6,7 +6,9 @@
  *
  * User identification is handled both by IP address and session variables.
  * 
- * @todo this needs to check for Redis and use that if available
+ * @todo This needs to check for Redis and use that if available
+ * 
+ * @todo Review all date time functions and standardize
  */
 class RateLimits {
   
@@ -243,7 +245,13 @@ class RateLimits {
     
     $limit = ( $limit ) ? $limit : $this->limiters[$key]['limit'];
     
+    // @todo test whether these two lines function the same
+    // as the line below.
+    // $now = new DateTime('now', new DateTimeZone('UTC'));
+    // $current_time = Utils::format_date($now, 'Y-m-d H:i:s');
     $current_time = date('Y-m-d H:i:s');
+
+    
 
     $client_ip = Utils::get_client_ip();
     

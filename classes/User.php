@@ -715,15 +715,17 @@ class User {
 
         // Check that both 'token' and 'created_at' keys exist.
         if ( !isset($token_data['token'], $token_data['created_at']) ):
-            continue;
+          continue;
         endif;
 
         // Check if 'created_at' is a valid date.
+        // @todo Test assigning a timezone with this:
+        // $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at'], new DateTimeZone('UTC'));
         $created_at = DateTime::createFromFormat('Y-m-d H:i:s', $token_data['created_at']);
 
         // Skip if 'created_at' is not valid.
         if ( !$created_at ):
-            continue; 
+          continue; 
         endif;
 
         // Get difference between the current date and 'created_at'.
@@ -731,14 +733,14 @@ class User {
 
         // Skip tokens older than 30 days.
         if ( $interval->days > 30 ):
-            continue; 
+          continue; 
         endif;
         
 
         // If everything looks good add this token to the valid tokens array.
         $valid_tokens[] = [
-            'token' => $token_data['token'],
-            'created_at' => $token_data['created_at']
+          'token' => $token_data['token'],
+          'created_at' => $token_data['created_at']
         ];
         
 
@@ -763,6 +765,8 @@ class User {
   
   /**
    * Delete the given remember_me token for the given user.
+   *
+   * @todo I think I could merge this function with delete_remember_me()
    */
   public function delete_remember_me_token( int $user_id, string $token_to_remove ): bool {
 
@@ -847,13 +851,13 @@ class User {
    * When this column doesn't match the value stored in the session
    * value for a visitor it will force a user to log in again.
    *
+   * @internal Always set the remember_me column to null in addition
+   * to changing the login_token if the intent is to boot a user.
+   *
    * @internal If a user has a valid remember_me cookie but not an
    * active session when they visit, the is_logged_in() function will
    * rebuild their session with the current login_token, rendering
    * this function useless to force them to log in again.
-   *
-   * @internal Always set the remember_me column to null if the intent
-   * is to boot a user.
    */
   public function reset_login_token( int $user_id ): bool {
 
