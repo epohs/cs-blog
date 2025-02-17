@@ -898,7 +898,7 @@ class User {
 
     $user_to_reset = $this->get( $user_id );
 
-    $password_reset_length = $this->Config->get('password_reset_length');
+    $password_reset_age = $this->Config->get('password_reset_age');
     
 
     // Is this a valid existing User ID?
@@ -914,7 +914,7 @@ class User {
         $reset_started_datetime = new DateTime($reset_started, new DateTimeZone('UTC'));
         
         // Add 30 minutes to the current time
-        $threshold_time = $now->modify("+{$password_reset_length} minutes");
+        $threshold_time = $now->modify("+{$password_reset_age} minutes");
         
         // Compare the two DateTime objects
         if ( $reset_started_datetime <= $threshold_time ):
@@ -977,9 +977,9 @@ class User {
                             
     $now = new DateTime('now', new DateTimeZone('UTC'));
 
-    $password_reset_length = $this->Config->get('password_reset_length');
+    $password_reset_age = $this->Config->get('password_reset_age');
 
-    $token_expires_datetime = $now->modify("+{$password_reset_length} minutes");
+    $token_expires_datetime = $now->modify("+{$password_reset_age} minutes");
 
     $token_expires = Utils::format_date($token_expires_datetime, 'Y-m-d H:i:s');
 

@@ -10,7 +10,7 @@ class Auth {
   private static $instance = null;  
   
   
-  private $remember_me_length;
+  private $remember_me_age;
   
   
     
@@ -23,7 +23,7 @@ class Auth {
     
     $Config = Config::get_instance();
     
-    $this->remember_me_length = $Config->get('remember_me_length') * 24 * 60 * 60;
+    $this->remember_me_age = $Config->get('remember_me_age') * 24 * 60 * 60;
     
   } // __construct()
   
@@ -83,7 +83,7 @@ class Auth {
       
       debug_log("Setting remember_me token: {$token}.");
 
-      Cookie::set('remember_me', $token, $this->remember_me_length);
+      Cookie::set('remember_me', $token, $this->remember_me_age);
       
       // Store a hashed version of the token in the database
       $User->set_remember_me( $user_to_login['id'], $token );
