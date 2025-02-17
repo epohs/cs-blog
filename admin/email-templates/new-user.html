@@ -1,0 +1,13 @@
+<h1>Welcome to {{ site_name }}, {{ user_name }}!</h1>
+    
+<p>We’re excited to have you on board. Before you get started, we just need to verify your email.</p>
+
+<p>Your verification key is: <strong>{{ verification_key }}</strong></p>
+
+<p>Click the link below to complete your registration:</p>
+
+<p><a href="{{ site_url }}/verify?key={{ verification_key }}">Verify Your Account</a></p>
+
+<p>If you didn’t sign up for {{ site_name }}, you can safely ignore this email.</p>
+
+<p>See you soon!<br>The {{ site_name }} Team</p>
