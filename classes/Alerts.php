@@ -6,10 +6,8 @@
  * Any messages displayed to the user will be reffered to througout 
  * this app as a Page Alert.
  * 
- * 
- * 
- * @todo search for add_alert(), get_alerts(), process_page_alerts()
- *       to become  add(),       get(),        process()
+ * Alert HTML is handled in page-alerts.php for both admin templates
+ * and user themes.
  */
 class Alerts {
     
