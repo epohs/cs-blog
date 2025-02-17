@@ -215,7 +215,9 @@ class Alerts {
       // Redirect if the alert code in the querystring doesn't match the session code.
       if ( $session_code !== $querystring_code ):
 
-        Routing::redirect_to( $this->get_url() );
+        $Page = Page::get_instance();
+
+        Routing::redirect_to( $Page->get_url() );
 
       endif;
 
