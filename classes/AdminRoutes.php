@@ -164,7 +164,7 @@ class AdminRoutes {
     
     $nonce = $this->Auth::set_nonce('verify');
     
-    $verify_key = $cur_user['verify_key'];
+    $verify_key = ( isset($_GET['key']) ) ? trim($_GET['key']) : '';
       
     $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
 

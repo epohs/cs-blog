@@ -371,11 +371,34 @@ class FormHandler {
       // Test whether the user was successfully added.
       if ( $new_user_id ):
         
+        // @todo Add a pretty strict rate limit for this.
+        
         // Manually set logged in cookie and session but
         // do not set last login timestamp.            
         $this->Auth->login($new_user_id, false);
         
-        // @todo Add a pretty strict rate limit for this.
+        
+        // Get the verification key for the user we just
+        // created and send an email.
+        $new_user = $this->User->get($new_user_id);
+        
+        $verify_key = $new_user['verify_key'];
+        
+        $Config = Config::get_instance();
+        
+        $site_name = $Config->get('site_name');
+        
+        $site_url = $Config->get('site_root');
+        
+        $email_vars = [
+          'to' => $user_email,
+          'subject' => "Welcome to {$site_name}, verify your email.",
+          'site_name' => $site_name,
+          'site_url' => $site_url,
+          'verification_key' => $verify_key
+        ];
+        
+        Email::send('new-user', $email_vars);
         
         Routing::redirect_to( $this->Page->url_for('verify') );
         
