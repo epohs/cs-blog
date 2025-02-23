@@ -39,7 +39,7 @@ class Alerts {
   
 
   /**
-   * Add a page alert to be displayed when the page is rendered.
+   * Add a page alert that will be displayed when the page is rendered.
    */
   public function add(string $alert_text, ?string $level = null):void {
     

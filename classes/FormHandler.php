@@ -390,6 +390,14 @@ class FormHandler {
         
         $site_url = $Config->get('site_root');
         
+        // @todo $verify_key should be passed as a URL segment
+        // and automatically process the key.
+        // Right now it is passed in the querystring and simply
+        // prefills the form input.
+        // This will likely requre abstracting the key verification
+        // code out of FormHandler::verify() so that function and this
+        // one use the same code.
+        
         $email_vars = [
           'to' => $user_email,
           'subject' => "Welcome to {$site_name}, verify your email.",

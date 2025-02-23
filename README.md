@@ -5,18 +5,13 @@ Super basic blog, built for my dad.
 ## To-Do ✓list
 
 
-- Move page alerts to a new class Alerts.
-  - Put Alerts instantialization ahead of Config if possible.
-    - Move config alerts to use this new class.
-  - Add new debug level page alerts that get filtered out if not in debug.
-- Rough in Email class to actually send emails.
-  - Add email-templates folder to admin directory.
-    - Try to add curly bracket templating to these.
+
 - Document and clean everything.
   - Cast all method parameters and define return values where possible.
   - Class properties that are references to other classes should be uppercase.
   - Add phpdoc for every class and method explaining *why* it exists.
   - Inline document only tricky lines.
+- Setup password reset email.
 - Profile page to update display name.
 - Public templates with forms need a `show_form` arg.
   - When `show_form` is false we need a `form_denied_msg` arg.
