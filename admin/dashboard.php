@@ -7,7 +7,7 @@
   
 
   
-<?php $Page->get_partial('page-header', null, false, 'admin/partials'); ?>
+  <?php $Page->get_partial('page-header', null, false, 'admin/partials'); ?>
   
 
 <div class="page-wrap">

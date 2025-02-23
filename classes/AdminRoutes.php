@@ -1,14 +1,17 @@
 <?php
 
+
+
+use League\HTMLToMarkdown\HtmlConverter;
+
+
+
 /**
  * Admin related page routes have their own handlers and
  * their own templates that are not themeable.
  * 
  * This class handles all of those routes.
  */
-
-
-
 class AdminRoutes {
 
   
@@ -64,12 +67,29 @@ class AdminRoutes {
   } // dashboard()
   
   
+  
+  
+  
+  
+  
+  
+  public function new_post(): void {
+    
+    debug_log('in new_post()');
+      
+    $converter = new HtmlConverter(array('strip_tags' => true));
+    
+    $this->get_template( 'post/new', null, ['converter' => $converter] );
 
-
-
+  } // new_post()
 
   
 
+  
+  
+  
+  
+  
   /**
    * Login page.
    */

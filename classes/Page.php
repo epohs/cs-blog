@@ -319,7 +319,7 @@ class Page {
       
       // @internal This error will never be seen in any case where
       // the errors.php partial isn't included.
-      $this->add("Partial {$file} not found.", 'warn');
+      $this->Alerts->add("Partial {$file} not found.", 'warn');
 
       return false;
       

@@ -1,7 +1,5 @@
 <?php
 
-use League\HTMLToMarkdown\HtmlConverter;
-
 /**
  * Hande the logic for individual routes in the application.
  * 
@@ -51,6 +49,8 @@ class Routes {
 
     // Admin Routes
     $this->add_route('admin/dash', $this->AdminRoutes, 'dashboard');
+    $this->add_route('admin/post/new', $this->AdminRoutes, 'new_post');
+    
     $this->add_route('login', $this->AdminRoutes, 'login');
     $this->add_route('signup', $this->AdminRoutes, 'signup');
     $this->add_route('verify', $this->AdminRoutes, 'verify');
@@ -85,22 +85,7 @@ class Routes {
   
   
   
-  
-  
-  private function post(): void {
-      
-    $converter = new HtmlConverter(array('strip_tags' => true));
-    
-    $this->Page->get_template( 'post', null, ['converter' => $converter] );
 
-  } // post()
-
-  
-  
-  
-  
-  
-  
   
   /**
    * User profile.
