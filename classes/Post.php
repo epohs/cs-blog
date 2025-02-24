@@ -18,26 +18,25 @@ class Post {
     try {
       
       
-    $result = $pdo->exec('
-      CREATE TABLE IF NOT EXISTS `Posts` (
-        `id` INTEGER PRIMARY KEY AUTOINCREMENT,
-        `selector` VARCHAR(16) UNIQUE,
-        `author_id` INTEGER NOT NULL,
-        `title` VARCHAR(255) NOT NULL,
-        `slug` VARCHAR(255) UNIQUE NOT NULL,
-        `content` TEXT NOT NULL,
-        `categories` JSON DEFAULT NULL,
-        `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-        `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
-        `published_at` DATETIME DEFAULT NULL,
-        `is_published` BOOLEAN DEFAULT 0,
-        `comments_open` BOOLEAN DEFAULT 1,
-        `show_comments` BOOLEAN DEFAULT 1,
-        FOREIGN KEY (`author_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE
-      )
-    ');
+      $result = $pdo->exec('
+        CREATE TABLE IF NOT EXISTS `Posts` (
+          `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+          `selector` VARCHAR(16) UNIQUE,
+          `author_id` INTEGER NOT NULL,
+          `title` VARCHAR(255) NOT NULL,
+          `slug` VARCHAR(255) UNIQUE NOT NULL,
+          `content` TEXT NOT NULL,
+          `categories` JSON DEFAULT NULL,
+          `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+          `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
+          `published_at` DATETIME DEFAULT NULL,
+          `is_published` BOOLEAN DEFAULT 0,
+          `comments_open` BOOLEAN DEFAULT 1,
+          `show_comments` BOOLEAN DEFAULT 1,
+          FOREIGN KEY (`author_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE
+        )
+      ');
 
-      
       
       return $result;
       
