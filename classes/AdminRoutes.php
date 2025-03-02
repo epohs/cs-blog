@@ -74,12 +74,41 @@ class AdminRoutes {
   
   
   public function new_post(): void {
+
+
+    $this->verified_user_redirect();
     
     debug_log('in new_post()');
+    
+    
+
+      
+    $nonce = $this->Auth::set_nonce('new-post');
+    
+    $converter = new HtmlConverter(array('strip_tags' => true));
+    
+    $this->get_template( 'post/new', null, ['nonce' => $nonce, 'converter' => $converter] );
+
+  } // new_post()
+  
+  
+  
+  
+  
+  
+  
+  
+  public function edit_post(): void {
+    
+
+
+    $this->verified_user_redirect();
+    
+    debug_log('in edit_post()');
       
     $converter = new HtmlConverter(array('strip_tags' => true));
     
-    $this->get_template( 'post/new', null, ['converter' => $converter] );
+    $this->get_template( 'post/edit', null, ['converter' => $converter] );
 
   } // new_post()
 

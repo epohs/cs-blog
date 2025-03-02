@@ -1,5 +1,7 @@
 <?php
 
+
+
 if ( isset($_POST['content']) ):
 
   $pc = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
@@ -32,35 +34,42 @@ endif;
     <?php $Page->get_partial('primary', null, false, 'admin/partials/sidebar'); ?>
   
 
-  <main class="content">
-    
-    <?php $Page->get_partial('page-alerts', null, false, 'admin/partials'); ?>
-  
-    <h1>Test post page</h1>
-    
-    
-    
-    <form id="testForm" action="<?php echo $Page->url_for('admin/post/new'); ?>" method="post">
+    <main class="content">
       
-      <input id="testContent" value="<?php echo $pc; ?>" type="hidden" name="content">
-      <trix-editor input="testContent"></trix-editor>
+      <?php $Page->get_partial('page-alerts', null, false, 'admin/partials'); ?>
+    
+      <h1>New Post</h1>
       
-      <button type="submit">Submit</button>
-    </form>
-    
-    
-    
-    <h2>Submitted form</h2>
-    
-    <div class="output" style="white-space: pre-line;"><?php echo var_export($pc, true); ?></div>
-    
-    
-    
-    <h2>Markdown</h2>
-    
-    <div id="mdo" class="output" style="white-space: pre-line;"><?php echo var_export($mc, true); ?></div>
-    
-  </main>
+      
+      <form method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+      
+        <input type="hidden" name="form_name" value="new-post">
+        <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+        
+        
+        <label for="PostTitle">Title</label>
+        <input type="text" name="title" value="" id="PostTitle">
+        
+        <input id="PostContent" type="hidden" name="content" value="" id="PostContent">
+        <trix-editor input="testContent"></trix-editor>
+        
+        <button type="submit">Submit</button>
+        
+      </form>
+      
+      
+      
+      <h2>Submitted form</h2>
+      
+      <div class="output" style="white-space: pre-line;"><?php echo var_export($pc, true); ?></div>
+      
+      
+      
+      <h2>Markdown</h2>
+      
+      <div id="mdo" class="output" style="white-space: pre-line;"><?php echo var_export($mc, true); ?></div>
+      
+    </main>
 
 
     <?php $Page->get_partial('secondary', null, false, 'admin/partials/sidebar'); ?>

@@ -44,7 +44,12 @@ class FormHandler {
     
     $this->Limits = RateLimits::get_instance();
 
-
+    
+    
+    $this->add_form('new-post', 'new_post');
+    
+    
+    // User Auth
     $this->add_form('login', 'login');
     $this->add_form('verify', 'verify');
     $this->add_form('signup', 'signup');
@@ -126,6 +131,25 @@ class FormHandler {
     
 
   } // process()
+  
+  
+  
+  
+  
+  
+  
+  
+  private function new_post() {
+    
+    Routing::nonce_redirect($this->nonce, 'login');
+    
+    $post_title = $this->post_vars['title'];
+    
+    $post_content = $this->post_vars['content'];
+    
+    //$mc = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+    
+  } // new_post()
 
 
 
