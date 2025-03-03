@@ -71,6 +71,43 @@ class Utils {
   
   
   /**
+   * Take a string with any types of character and return
+   * a sanitized string for use as a URL segment.
+   */
+  public static function make_sluggy( string $string ): string {
+    
+    // Convert to lowercase
+    $string = mb_strtolower($string, 'UTF-8');
+  
+    // Replace spaces with a single hyphen
+    $string = preg_replace('/\s+/', '-', $string);
+  
+    // Convert special characters to ASCII equivalents if possible
+    if (function_exists('transliterator_transliterate'))
+      $string = transliterator_transliterate('Any-Latin; Latin-ASCII', $string);
+  
+    // Remove non-alphanumeric characters (keep hyphens)
+    $string = preg_replace('/[^a-z0-9-]/', '', $string);
+  
+    // Remove multiple consecutive hyphens
+    $string = preg_replace('/-+/', '-', $string);
+  
+    // Trim hyphens from start and end
+    $string = trim($string, '-');
+  
+    return $string;
+    
+  } // make_sluggy()
+
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
   * Test whether a string is is a valid datetime AND matches a specific format.
   */
   public static function is_valid_datetime(string $datetime, string $format = 'Y-m-d H:i:s'): bool {
