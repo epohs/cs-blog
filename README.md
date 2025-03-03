@@ -29,3 +29,4 @@ Super basic blog, built for my dad.
 ## Requirements
 
 - PHP 8
+- You'll get better URL slugs if you have the transliterator_transliterate PHP module.
