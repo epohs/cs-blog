@@ -83,8 +83,11 @@ class Utils {
     $string = preg_replace('/\s+/', '-', $string);
   
     // Convert special characters to ASCII equivalents if possible
-    if (function_exists('transliterator_transliterate'))
+    if ( function_exists('transliterator_transliterate') ):
+      
       $string = transliterator_transliterate('Any-Latin; Latin-ASCII', $string);
+      
+    endif;
   
     // Remove non-alphanumeric characters (keep hyphens)
     $string = preg_replace('/[^a-z0-9-]/', '', $string);
