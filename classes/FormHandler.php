@@ -1,13 +1,17 @@
 <?php
 
+
+
+use League\HTMLToMarkdown\HtmlConverter;
+
+
+
 /**
  * All forms post to the /form-handler/ URL.
  * 
  * The methods in this class handle processing each of
  * those forms.
  */
-
-
 class FormHandler {
 
   private static $instance = null;
@@ -138,14 +142,39 @@ class FormHandler {
   
   
   
-  
+  /**
+   * @todo Do some validation on post title and content.
+   * @todo When the abilit to edit authors is added, do basic
+   *        checks on that as well, but the majority of author
+   *        validation can happen in Post::new().
+   */
   private function new_post() {
     
-    Routing::nonce_redirect($this->nonce, 'login');
+    Routing::nonce_redirect($this->nonce, 'new-post');
+    
+    $converter = new HtmlConverter(array('strip_tags' => true));
+    
+    $Post = Post::get_instance();
     
     $post_title = $this->post_vars['title'];
     
-    $post_content = $this->post_vars['content'];
+    // @todo May need to do the htmlentities sanityzing after converting
+    // from Markdown to HTML.
+    //$post_content = $converter->convert($this->post_vars['content']);
+    $post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+    
+    $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
+    
+    if ( $new_post ):
+      
+      // @todo create Post::get_selector() and use selector instead of id
+      Routing::redirect_to( $this->Page->url_for("admin/post/edit/{$new_post}") );
+      
+    else:
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/post/new"), ['code' => '070'] );
+      
+    endif;
     
     //$mc = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
     

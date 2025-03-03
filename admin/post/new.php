@@ -51,7 +51,7 @@ endif;
         <input type="text" name="title" value="" id="PostTitle">
         
         <input id="PostContent" type="hidden" name="content" value="" id="PostContent">
-        <trix-editor input="testContent"></trix-editor>
+        <trix-editor input="PostContent"></trix-editor>
         
         <button type="submit">Submit</button>
         

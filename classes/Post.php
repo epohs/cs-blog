@@ -1,16 +1,144 @@
 <?php
 
+
+
+
+
+
 /**
  * Handle functionality related to blog posts.
  */
 class Post {
+
+  
+  private static $instance = null;
+  
+  private $Config = null;
+
+  private $Db = null;
+
+  private $pdo = null;
+  
+  
+  
+  
+  
+  
+  
+  
+  private function __construct() {
+    
+
+    $this->Config = Config::get_instance();
+
+    $this->Db = Database::get_instance();
+
+    $this->pdo = $this->Db->get_pdo();
     
     
+  } // __construct()
+  
   
   
   
   /**
+   * Create a new post.
+   *
+   * Return the ID of the newly created post if the post 
+   * creation succeeds. Otherwise, return false.
+   */
+  public function new( array $post_data ): int|false {
+    
+    
+    $result = false;
+    
+    $selector = $this->Db->get_unique_column_val('Posts', 'selector');
+    
+    
+    
+    // @todo User needs to be either Admin or Author
+    // @todo Probably should make a User function for can_author() or something
+    // If an author was passed, assign it as the author
+    // otherwise, make the current user the author.
+    if ( isset($post_data['author']) && is_int($post_data['author']) ):
+      
+      $User = User::get_instance();
+      
+      // @todo Do better checks.
+      
+      $author_id = $post_data['author'];
+      
+    else:
+      
+      $author_id = Session::get_key(['user', 'id']);
+      
+    endif;
+    
+    
+    $post_title = $post_data['title'];
+    $post_content = $post_data['content'];
+    
+    debug_log('Selector: ' . var_export($selector, true));
+    debug_log('Post Data: ' . var_export($post_data, true));
+    
+    
+    try {
+      
+  
+      // Prepare the SQL statement
+      $query = 'INSERT INTO `Posts` (`selector`, `author_id`, `slug`, `title`, `content`) 
+                VALUES (:selector, :author, :slug, :title, :content)';
+        
+      $stmt = $this->pdo->prepare( $query );
+  
+      $stmt->bindValue(':selector', $selector, PDO::PARAM_STR);
+      $stmt->bindValue(':author', $author_id, PDO::PARAM_INT);
+      $stmt->bindValue(':slug', $selector, PDO::PARAM_STR);
+      $stmt->bindValue(':title', $post_title, PDO::PARAM_STR);
+      $stmt->bindValue(':content', $post_content, PDO::PARAM_STR);
+  
+      
+      if ( $stmt->execute() ):
+        
+        debug_log('seems like it worked');
+        
+        $result = $this->pdo->lastInsertId();
+        
+      else:
+        
+        debug_log('failed.');
+        
+        $result = false;
+        
+      endif;
+      
+    
+    } catch (PDOException $e) {
+    
+      debug_log('New Post creation failed: ' . $e->getMessage());
+      
+      $result = false;
+      
+    }
+    
+    
+    return $result;
+    
+    
+  } // new()
+  
+  
+  
+  
+
+
+
+
+  /**
    * Create the database tables needed for users.
+   *
+   * @todo Should I index selector?
+   * @todo author_id should be author.
    */
   public static function make_tables( $pdo ): bool {
     
