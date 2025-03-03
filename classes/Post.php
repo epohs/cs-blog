@@ -77,9 +77,8 @@ class Post {
     
     $post_title = $post_data['title'];
     $post_content = $post_data['content'];
+    $slug = Utils::make_sluggy($post_title);
     
-    debug_log('Selector: ' . var_export($selector, true));
-    debug_log('Post Data: ' . var_export($post_data, true));
     
     
     try {
@@ -93,20 +92,16 @@ class Post {
   
       $stmt->bindValue(':selector', $selector, PDO::PARAM_STR);
       $stmt->bindValue(':author', $author_id, PDO::PARAM_INT);
-      $stmt->bindValue(':slug', $selector, PDO::PARAM_STR);
+      $stmt->bindValue(':slug', $slug, PDO::PARAM_STR);
       $stmt->bindValue(':title', $post_title, PDO::PARAM_STR);
       $stmt->bindValue(':content', $post_content, PDO::PARAM_STR);
   
       
       if ( $stmt->execute() ):
         
-        debug_log('seems like it worked');
-        
         $result = $this->pdo->lastInsertId();
         
       else:
-        
-        debug_log('failed.');
         
         $result = false;
         
