@@ -71,7 +71,7 @@ class Utils {
   
   
   /**
-   * Take a string with any types of character and return
+   * Take a string with any type of character and return
    * a sanitized string for use as a URL segment.
    */
   public static function make_sluggy( string $string ): string {
