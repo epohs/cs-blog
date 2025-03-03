@@ -77,6 +77,8 @@ class Post {
     
     $post_title = $post_data['title'];
     $post_content = $post_data['content'];
+    
+    // @todo Add ability to customize slug separately from post title.
     $slug = Utils::make_sluggy($post_title);
     
     
