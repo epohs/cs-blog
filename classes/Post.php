@@ -225,7 +225,67 @@ class Post {
    */
   public function update( int $post_id, array $post_data ): array|false {
     
+    // Define columns that should never be updated
+    $protected_columns = [
+        'id',
+        'selector',
+        'created_at'
+    ];
+
+    // Fetch column names from the Posts table
+    $stmt = $this->pdo->query("PRAGMA table_info(Posts)");
+    $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
+
+    // Filter out invalid or protected columns
+    $editable_columns = array_diff($columns, $protected_columns);
+    $valid_updates = array_intersect_key($post_data, array_flip($editable_columns));
+
+    // If there are no valid updates, return false
+    if ( empty($valid_updates) ):
+      
+      return false;
+      
+    endif;
+
+    // Generate SQL for updating the post
+    // @todo Change this to $columns_to_update?
+    $set_clauses = [];
     
+    foreach ($valid_updates as $column => $value):
+      
+      $set_clauses[] = "`$column` = :$column";
+      
+    endforeach;
+
+    // Always update the `updated_at` column
+    // @todo Should updated_at be a protected column?
+    $set_clauses[] = "`updated_at` = CURRENT_TIMESTAMP";
+
+    $query = "UPDATE `Posts` SET " . implode(", ", $set_clauses) . " WHERE `id` = :post_id";
+
+    $stmt = $this->pdo->prepare($query);
+    
+
+    // Bind valid parameters, casting as either INT or STR.
+    foreach ($valid_updates as $column => &$value):
+      
+      $param_type = ( is_numeric($value) && ctype_digit(strval($value)) ) ? PDO::PARAM_INT : PDO::PARAM_STR;
+      
+      $stmt->bindValue(":$column", $value, $param_type);
+      
+    endforeach;
+    
+
+    $stmt->bindParam(":post_id", $post_id, PDO::PARAM_INT);
+
+
+    if ( !$stmt->execute() ):
+      
+      return false;
+      
+    endif;
+    
+
     return $this->get($post_id);
     
     

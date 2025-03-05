@@ -162,8 +162,8 @@ class FormHandler {
     
     // @todo May need to do the htmlentities sanityzing after converting
     // from Markdown to HTML.
-    $post_content = $Converter->convert($this->post_vars['content']);
-    //$post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+    //$post_content = $Converter->convert($this->post_vars['content']);
+    $post_content = htmlspecialchars($Converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
     
     $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
     

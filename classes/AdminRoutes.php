@@ -126,12 +126,8 @@ class AdminRoutes {
     
     $Parsedown = new Parsedown();
     
-    debug_log("Post content before parsing: {$post_to_edit['content']}");
-    
     
     $post_to_edit['content'] = $Parsedown->text($post_to_edit['content']);
-    
-    debug_log("Post content after parsing: {$post_to_edit['content']}");
     
     $nonce = $this->Auth::set_nonce('edit-post');
     
