@@ -41,6 +41,10 @@ class Post {
   
   
   
+  
+  
+  
+  
   /**
    * Create a new post.
    *
@@ -123,6 +127,60 @@ class Post {
     
     
   } // new()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Private function to get a single user column.
+   */
+  private function get_column(string $column, int $user_id): mixed {
+    
+    
+    return $this->Db->get_column('Posts', $column, $user_id);
+    
+    
+  } // get_column()
+
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Private function to set a single user column.
+   */
+  private function set_column(string $column, $value, int $user_id): bool {
+    
+    
+    return $this->Db->set_column('Posts', $column, $value, $user_id);
+    
+    
+  } // set_column()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Get the selector for a post.
+   */
+  public function get_selector( int $post_id ): string|false {
+    
+    
+    return $this->get_column('selector', $post_id);
+    
+    
+  } // get_selector()
   
   
   
