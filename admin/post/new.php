@@ -1,20 +1,3 @@
-<?php
-
-
-
-if ( isset($_POST['content']) ):
-
-  $pc = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-  $mc = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
-  
-else:
-  
-  $pc = 'no posted data';
-  $mc = '';
-  
-endif;
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -56,18 +39,6 @@ endif;
         <button type="submit">Submit</button>
         
       </form>
-      
-      
-      
-      <h2>Submitted form</h2>
-      
-      <div class="output" style="white-space: pre-line;"><?php echo var_export($pc, true); ?></div>
-      
-      
-      
-      <h2>Markdown</h2>
-      
-      <div id="mdo" class="output" style="white-space: pre-line;"><?php echo var_export($mc, true); ?></div>
       
     </main>
 
