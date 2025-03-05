@@ -447,8 +447,6 @@ class User {
       Auth::remove_expired_nonces();
       
       $user_id = Session::get_key(['user', 'id']);
-
-      debug_log("Found a user id ({$user_id}) in the session.");
       
       $return = true;
       
