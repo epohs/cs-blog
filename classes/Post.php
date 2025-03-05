@@ -136,6 +136,72 @@ class Post {
   
   
   /**
+   * Get a post by it's ID.
+   *
+   * @todo I think I want to format the post content as HTML
+   * by default and add a parameter to disable formatting.
+   */
+  public function get( int $post_id ): array|false {
+
+    return $this->Db->get_row_by_id('Posts', $post_id);
+
+  } // get()
+
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Get a post by certain allowed keys.
+   */
+  public function get_by(string $key, $value): array|false {
+    
+    
+    $valid_keys = [
+      'id',
+      'selector'
+    ];
+    
+    $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
+    
+    
+    if ( $key == 'id' ):
+
+      return $this->get($value);
+
+    else:
+
+      $query = "SELECT * FROM `Posts` WHERE `{$key}` = :value";
+
+    endif;
+    
+    
+    $stmt = $this->pdo->prepare($query);
+
+    $param_type = is_numeric($value) ? PDO::PARAM_INT : PDO::PARAM_STR;
+    
+    $stmt->bindValue(':value', $value, $param_type);
+    
+    
+    $stmt->execute();
+    
+    
+    return $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    
+  } // get_by()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
    * Private function to get a single user column.
    */
   private function get_column(string $column, int $user_id): mixed {

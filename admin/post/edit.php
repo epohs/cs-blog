@@ -1,20 +1,3 @@
-<?php
-
-
-
-if ( isset($_POST['content']) ):
-
-  $pc = htmlspecialchars($_POST['content'], ENT_QUOTES, 'UTF-8');
-  $mc = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
-  
-else:
-  
-  $pc = 'no posted data';
-  $mc = '';
-  
-endif;
-
-?>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -43,31 +26,19 @@ endif;
       
       <form method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
       
-        <input type="hidden" name="form_name" value="new-post">
+        <input type="hidden" name="form_name" value="edit-post">
         <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
         
         
         <label for="PostTitle">Title</label>
-        <input type="text" name="title" value="" id="PostTitle">
+        <input type="text" name="title" value="<?php echo $post['title']; ?>" id="PostTitle">
         
-        <input id="PostContent" type="hidden" name="content" value="" id="PostContent">
-        <trix-editor input="testContent"></trix-editor>
+        <input id="PostContent" type="hidden" name="content" value="<?php echo $post['content']; ?>" id="PostContent">
+        <trix-editor input="PostContent"></trix-editor>
         
         <button type="submit">Submit</button>
         
       </form>
-      
-      
-      
-      <h2>Submitted form</h2>
-      
-      <div class="output" style="white-space: pre-line;"><?php echo var_export($pc, true); ?></div>
-      
-      
-      
-      <h2>Markdown</h2>
-      
-      <div id="mdo" class="output" style="white-space: pre-line;"><?php echo var_export($mc, true); ?></div>
       
     </main>
 

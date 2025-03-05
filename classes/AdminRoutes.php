@@ -77,10 +77,6 @@ class AdminRoutes {
 
 
     $this->verified_user_redirect();
-    
-    debug_log('in new_post()');
-    
-    
 
       
     $nonce = $this->Auth::set_nonce('new-post');
@@ -88,6 +84,7 @@ class AdminRoutes {
     $converter = new HtmlConverter(array('strip_tags' => true));
     
     $this->get_template( 'post/new', null, ['nonce' => $nonce, 'converter' => $converter] );
+    
 
   } // new_post()
   
@@ -101,16 +98,46 @@ class AdminRoutes {
   public function edit_post(): void {
     
 
-
     $this->verified_user_redirect();
     
-    debug_log('in edit_post()');
-      
-    $converter = new HtmlConverter(array('strip_tags' => true));
     
-    $this->get_template( 'post/edit', null, ['converter' => $converter] );
+    $selector = Routing::get_route_vars('selector');
+    
+    
+    if ( strlen($selector) >= 5 ):
+    
+      $Post = Post::get_instance();
+      
+      $post_to_edit = $Post->get_by('selector', $selector);
+      
+      if ( !$post_to_edit ):
+        
+        Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '200'] );
+        
+      endif;
+    
+    else:
+        
+      Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '200'] );
+      
+    endif;
+    
+    
+    $Parsedown = new Parsedown();
+    
+    debug_log("Post content before parsing: {$post_to_edit['content']}");
+    
+    
+    $post_to_edit['content'] = $Parsedown->text($post_to_edit['content']);
+    
+    debug_log("Post content after parsing: {$post_to_edit['content']}");
+    
+    $nonce = $this->Auth::set_nonce('new-post');
+    
+    $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'post' => $post_to_edit] );
+    
 
-  } // new_post()
+  } // edit_post()
 
   
 

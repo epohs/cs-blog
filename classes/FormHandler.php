@@ -150,6 +150,7 @@ class FormHandler {
    */
   private function new_post() {
     
+    
     Routing::nonce_redirect($this->nonce, 'new-post');
     
     $converter = new HtmlConverter(array('strip_tags' => true));
@@ -160,8 +161,8 @@ class FormHandler {
     
     // @todo May need to do the htmlentities sanityzing after converting
     // from Markdown to HTML.
-    //$post_content = $converter->convert($this->post_vars['content']);
-    $post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+    $post_content = $converter->convert($this->post_vars['content']);
+    //$post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
     
     $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
     
@@ -176,7 +177,6 @@ class FormHandler {
       
     endif;
     
-    //$mc = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
     
   } // new_post()
 
