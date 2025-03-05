@@ -49,8 +49,9 @@ class FormHandler {
     $this->Limits = RateLimits::get_instance();
 
     
-    
+    // Posts
     $this->add_form('new-post', 'new_post');
+    $this->add_form('edit-post', 'edit_post');
     
     
     // User Auth
@@ -151,9 +152,9 @@ class FormHandler {
   private function new_post() {
     
     
-    Routing::nonce_redirect($this->nonce, 'new-post');
+    Routing::nonce_redirect($this->nonce, 'new-post', 'admin/post/new');
     
-    $converter = new HtmlConverter(array('strip_tags' => true));
+    $Converter = new HtmlConverter(array('strip_tags' => true));
     
     $Post = Post::get_instance();
     
@@ -161,19 +162,80 @@ class FormHandler {
     
     // @todo May need to do the htmlentities sanityzing after converting
     // from Markdown to HTML.
-    $post_content = $converter->convert($this->post_vars['content']);
+    $post_content = $Converter->convert($this->post_vars['content']);
     //$post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
     
     $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
     
     if ( $new_post ):
       
+      $post_selector = $Post->get_selector('selector', $new_post);
+      
       // @todo create Post::get_selector() and use selector instead of id
-      Routing::redirect_to( $this->Page->url_for("admin/post/edit/{$new_post}") );
+      Routing::redirect_to( $this->Page->url_for("admin/post/edit/{$post_selector}") );
       
     else:
       
       Routing::redirect_with_alert( $this->Page->url_for("admin/post/new"), ['code' => '070'] );
+      
+    endif;
+    
+    
+  } // new_post()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Edit a post
+   */
+  private function edit_post() {
+    
+    
+    $posted_selector = $this->post_vars['selector'] ?? false;
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( !$posted_selector ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+      
+    endif;
+    
+    
+    Routing::nonce_redirect($this->nonce, 'edit-post', "admin/post/edit/{$posted_selector}");
+    
+    $Post = Post::get_instance();
+    
+    $post_to_edit = $Post->get_by('selector', $posted_selector);
+    
+    $Converter = new HtmlConverter(array('strip_tags' => true));
+    
+    $Post = Post::get_instance();
+    
+    $post_title = $this->post_vars['title'];
+    
+    // @todo May need to do the htmlentities sanityzing after converting
+    // from Markdown to HTML.
+    $post_content = $Converter->convert($this->post_vars['content']);
+    //$post_content = htmlspecialchars($converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+    
+    $new_post_data = ['title' => $post_title, 'content' => $post_content];
+    
+    $updated_post = $Post->update($post_to_edit['id'], $new_post_data);
+    
+    if ( $updated_post ):
+      
+      // @todo create Post::get_selector() and use selector instead of id
+      Routing::redirect_with_alert( $this->Page->url_for("admin/post/edit/{$updated_post['selector']}"), ['code' => '102'] );
+      
+    else:
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
       
     endif;
     

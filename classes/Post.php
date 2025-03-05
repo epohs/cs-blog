@@ -202,6 +202,43 @@ class Post {
   
   
   /**
+   * Get the selector for a post.
+   */
+  public function get_selector( int $post_id ): string|false {
+    
+    
+    return $this->get_column('selector', $post_id);
+    
+    
+  } // get_selector()
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Update a post.
+   *
+   * @todo Finish this.
+   */
+  public function update( int $post_id, array $post_data ): array|false {
+    
+    
+    return $this->get($post_id);
+    
+    
+  } // update()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
    * Private function to get a single user column.
    */
   private function get_column(string $column, int $user_id): mixed {
@@ -229,24 +266,6 @@ class Post {
     
     
   } // set_column()
-  
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * Get the selector for a post.
-   */
-  public function get_selector( int $post_id ): string|false {
-    
-    
-    return $this->get_column('selector', $post_id);
-    
-    
-  } // get_selector()
   
   
   

@@ -104,7 +104,8 @@ class AdminRoutes {
     $selector = Routing::get_route_vars('selector');
     
     
-    if ( strlen($selector) >= 5 ):
+    // @todo Add a function to apply basic validation to a selector
+    if ( $selector && strlen($selector) >= 5 ):
     
       $Post = Post::get_instance();
       
@@ -132,7 +133,7 @@ class AdminRoutes {
     
     debug_log("Post content after parsing: {$post_to_edit['content']}");
     
-    $nonce = $this->Auth::set_nonce('new-post');
+    $nonce = $this->Auth::set_nonce('edit-post');
     
     $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'post' => $post_to_edit] );
     
