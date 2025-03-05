@@ -306,6 +306,14 @@ class Alerts {
           $msg_text = $session_alert['text'] ?? 'Password updated.';
 
           break;
+          
+        case '102':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Post updated.';
+
+          break;
         
         // Alerts in the 200 range are related to Posts.
         case '200':
