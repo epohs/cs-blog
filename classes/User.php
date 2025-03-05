@@ -152,7 +152,7 @@ class User {
     $key = ( in_array($key, $valid_keys) ) ? $key : 'id';
     
     
-    if ( $key == 'id '):
+    if ( $key == 'id'):
 
       return $this->get($value);
 
