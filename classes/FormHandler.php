@@ -169,9 +169,9 @@ class FormHandler {
     
     if ( $new_post ):
       
-      $post_selector = $Post->get_selector('selector', $new_post);
+      $post_selector = $Post->get_selector($new_post);
       
-      // @todo create Post::get_selector() and use selector instead of id
+      // @todo Redirect with an alert that the post was added.
       Routing::redirect_to( $this->Page->url_for("admin/post/edit/{$post_selector}") );
       
     else:
