@@ -28,6 +28,7 @@
       
         <input type="hidden" name="form_name" value="edit-post">
         <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
+        <input type="hidden" name="selector" value="<?php echo $post['selector']; ?>">
         
         
         <label for="PostTitle">Title</label>
