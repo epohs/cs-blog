@@ -298,11 +298,21 @@ class Alerts {
           
           break;
       
+        // Alerts in the 100 range are successes.
         case '101':
           
           $has_alert = true;
 
           $msg_text = $session_alert['text'] ?? 'Password updated.';
+
+          break;
+        
+        // Alerts in the 200 range are related to Posts.
+        case '200':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Bad post selector.';
 
           break;
           
