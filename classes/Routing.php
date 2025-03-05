@@ -343,6 +343,8 @@ class Routing {
   
   /**
    * Get a route variable by it's key.
+   *
+   * @todo Should return value be 'mixed'?
    */
   public static function get_route_vars( ?string $key = '' ) {
     
