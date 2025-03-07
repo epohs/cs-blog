@@ -24,7 +24,7 @@
       <h1>Edit Post</h1>
       
       
-      <form method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+      <form id="EditPostForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
       
         <input type="hidden" name="form_name" value="edit-post">
         <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
@@ -34,8 +34,8 @@
         <label for="PostTitle">Title</label>
         <input type="text" name="title" value="<?php echo $post['title']; ?>" id="PostTitle">
         
-        <input id="PostContent" type="hidden" value="" name="content">
-        <trix-editor input="PostContent"></trix-editor>
+        <input type="hidden" name="content" id="PostContent">
+        <div id="editor"></div>
         
         <button type="submit">Submit</button>
         
@@ -43,17 +43,26 @@
     
       
       <script>
-        document.addEventListener("trix-initialize", function () {
-          
-          var Trix = document.querySelector("trix-editor");
-          
-          var content = `<?php echo addslashes($post['content']); ?>`;
-          
-          Trix.editor.setSelectedRange([0, 0]);
-        
-          Trix.editor.insertHTML(content);
-          
+
+        var content = `<?php echo addslashes($post['content']); ?>`;
+
+        var form = document.getElementById('EditPostForm');
+        var form_post_content = document.getElementById('PostContent');
+
+        const editor = new toastui.Editor({
+          el: document.querySelector('#editor'),
+          height: 'auto',
+          initialValue: content,
+          initialEditType: 'wysiwyg'
         });
+
+
+        form.addEventListener('submit', function() {
+
+          form_post_content.value = editor.getMarkdown();
+
+        });
+
       </script>
       
       <hr>

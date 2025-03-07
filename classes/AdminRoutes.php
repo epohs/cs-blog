@@ -126,9 +126,11 @@ class AdminRoutes {
     
     $Parsedown = new Parsedown();
     
-    $post_content_html = $Parsedown->text($post_to_edit['content']);
+    $content_html = $Parsedown->text($post_to_edit['content']);
     
-    $post_to_edit['content'] = $cleaned = str_replace(["\r\n", "\r", "\n"], '', $post_content_html);
+    //$content_html = str_replace(["<p>", "</p>"], ["", "<br><br>"], $content_html);
+    
+    $post_to_edit['content'] = $content_html;
     
     $nonce = $this->Auth::set_nonce('edit-post');
     
