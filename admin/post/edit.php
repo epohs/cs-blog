@@ -34,15 +34,34 @@
         <label for="PostTitle">Title</label>
         <input type="text" name="title" value="<?php echo $post['title']; ?>" id="PostTitle">
         
-        <input id="PostContent" type="hidden" name="content" value="<?php echo $post['content']; ?>" id="PostContent">
+        <input id="PostContent" type="hidden" value="" name="content">
         <trix-editor input="PostContent"></trix-editor>
         
         <button type="submit">Submit</button>
         
       </form>
+    
+      
+      <script>
+        document.addEventListener("trix-initialize", function () {
+          
+          var Trix = document.querySelector("trix-editor");
+          
+          var content = `<?php echo addslashes($post['content']); ?>`;
+          
+          Trix.editor.setSelectedRange([0, 0]);
+        
+          Trix.editor.insertHTML(content);
+          
+        });
+      </script>
+      
+      <hr>
+      RAW Content: <?php echo var_export($post['content'], true); ?>
+      <hr>
       
     </main>
-
+    
 
     <?php $Page->get_partial('secondary', null, false, 'admin/partials/sidebar'); ?>
     
