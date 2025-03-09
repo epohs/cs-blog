@@ -660,10 +660,6 @@ class User {
 
     $clean_tokens = json_encode($clean_tokens);
 
-    debug_log("Unhashed token: {$token}.");
-    debug_log("Hashed token: {$hashed_token}.");
-    debug_log('New tokens going into the database: ' . PHP_EOL . var_export($clean_tokens, true));
-
     $new_col = $this->set_column('remember_me', $clean_tokens, $user_id);
 
 

@@ -147,6 +147,22 @@ class Post {
 
   } // get()
 
+
+
+
+
+
+
+
+  /**
+   * Delete a post row by it's ID.
+   */
+  public function delete( int $post_id ): bool {
+
+    return $this->Db->delete_row('Posts', $post_id);
+
+  } // delete()
+
   
   
   
@@ -193,6 +209,61 @@ class Post {
     
     
   } // get_by()
+
+
+
+
+
+
+
+
+  /**
+   * 
+   */
+  function get_posts( array $args = [] ): array|false {
+    
+    $defaults = [
+      'html_content' => true,
+      'limit' => 10, // @todo This should be a setting
+      'offset' => 0
+    ];
+
+    // Merge default values with passed arguments
+    $args = array_merge($defaults, $args);
+
+
+    $query = "SELECT * FROM `Posts` ORDER BY `created_at` DESC LIMIT :limit OFFSET :offset";
+    $stmt = $this->pdo->prepare($query);
+
+    
+    $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
+    $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
+
+    $stmt->execute();
+
+
+    // Fetch all posts
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    // If html_content is true, parse the content with Parsedown
+    if ( $args['html_content'] ):
+      
+        $Parsedown = new Parsedown();
+
+        // Loop through each post and convert the content to HTML
+        foreach ($posts as &$post):
+
+          $post['content'] = $Parsedown->text($post['content']);
+        
+        endforeach;
+
+    endif;
+
+    
+    return $posts;
+
+  } // get_posts()
+
   
   
   

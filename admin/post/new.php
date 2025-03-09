@@ -33,12 +33,42 @@
         <label for="PostTitle">Title</label>
         <input type="text" name="title" value="" id="PostTitle">
         
-        <input id="PostContent" type="hidden" name="content" value="" id="PostContent">
-        <trix-editor input="PostContent"></trix-editor>
+        <textarea name="content" id="my-text-area"></textarea>
         
         <button type="submit">Submit</button>
         
       </form>
+
+      <script>
+
+        const easyMDE = new EasyMDE(
+          {
+            element: document.getElementById('my-text-area'),
+            toolbar: [
+                      'bold',
+                      'italic',
+                      'link',
+                      'heading-2',
+                      'heading-3',
+                      "|",
+                      "unordered-list",
+                      "ordered-list",
+                      "quote",
+                      "|",
+                      "upload-image",
+                      "|",
+                      "preview"
+                    ],
+            minHeight: '30em',
+            uploadImage: true,
+            imageAccept: 'image/png, image/jpeg',
+            imageMaxSize: (1024 * 1024 * 20),
+            spellChecker: false,
+            status: ["lines", "words"]
+          }
+        );
+
+      </script>
       
     </main>
 

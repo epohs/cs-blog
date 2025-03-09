@@ -158,6 +158,61 @@ class Database {
 
 
 
+
+
+
+
+
+  /**
+   * Delete a row from a given table by its ID.
+   */
+  public function delete_row(string $table, int $id): bool {
+    
+    // Define allowed table names
+    $valid_tables = ['Posts', 'Users', 'Comments'];
+
+    if ( !in_array($table, $valid_tables) ):
+      
+      throw new Exception("Invalid table name");
+
+    endif;
+    
+    
+    if ( $id <= 0 ):
+      
+      throw new Exception("Invalid ID");
+
+    endif;
+
+    
+    $stmt = $this->pdo->prepare("DELETE FROM `{$table}` WHERE `id` = :id");
+
+    $stmt->bindValue(':id', $id, PDO::PARAM_INT);
+
+    try {
+
+      if ( $stmt->execute() ):
+        
+        return true;
+
+      else:
+
+        throw new Exception("Failed to delete row.");
+
+      endif;
+
+    } catch (Exception $e) {
+
+        // Log the exception or handle it as needed
+        return false;
+
+    }
+
+  } // delete_row()
+
+
+
+
   
 
 

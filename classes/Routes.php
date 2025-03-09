@@ -51,6 +51,7 @@ class Routes {
     $this->add_route('admin/dash', $this->AdminRoutes, 'dashboard');
     $this->add_route('admin/post/new', $this->AdminRoutes, 'new_post');
     $this->add_route('admin/post/edit/{selector}', $this->AdminRoutes, 'edit_post');
+    $this->add_route('admin/post/list', $this->AdminRoutes, 'list_posts');
     
     $this->add_route('login', $this->AdminRoutes, 'login');
     $this->add_route('signup', $this->AdminRoutes, 'signup');

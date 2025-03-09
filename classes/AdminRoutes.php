@@ -81,9 +81,7 @@ class AdminRoutes {
       
     $nonce = $this->Auth::set_nonce('new-post');
     
-    $converter = new HtmlConverter(array('strip_tags' => true));
-    
-    $this->get_template( 'post/new', null, ['nonce' => $nonce, 'converter' => $converter] );
+    $this->get_template( 'post/new', null, ['nonce' => $nonce] );
     
 
   } // new_post()
@@ -122,22 +120,36 @@ class AdminRoutes {
       Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '200'] );
       
     endif;
-    
-    
-    $Parsedown = new Parsedown();
-    
-    $content_html = $Parsedown->text($post_to_edit['content']);
-    
-    //$content_html = str_replace(["<p>", "</p>"], ["", "<br><br>"], $content_html);
-    
-    $post_to_edit['content'] = $content_html;
+
     
     $nonce = $this->Auth::set_nonce('edit-post');
+    $nonce_delete = $this->Auth::set_nonce('delete-post');
     
-    $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'post' => $post_to_edit] );
+    $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'post' => $post_to_edit] );
     
 
   } // edit_post()
+  
+  
+  
+  
+  
+  
+  
+  
+  public function list_posts(): void {
+
+
+    $this->verified_user_redirect();
+
+    $Post = Post::get_instance();
+
+    $posts = $Post->get_posts();
+    
+    $this->get_template( 'post/list', null, ['posts' => $posts] );
+    
+
+  } // list_posts()
 
   
 

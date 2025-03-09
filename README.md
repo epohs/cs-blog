@@ -20,7 +20,7 @@ Super basic blog, built for my dad.
 
 
 
-- Proceed with [HTML to Markdown](https://github.com/thephpleague/html-to-markdown) and [Parsedown](https://github.com/erusev/parsedown) and [Trix](https://github.com/basecamp/trix) to handle post formatting as HTML and saving as Markdown.
+- Proceed with [HTML to Markdown](https://github.com/thephpleague/html-to-markdown) and [Parsedown](https://github.com/erusev/parsedown) and [EasyMDE](https://github.com/Ionaru/easy-markdown-editor) to handle post formatting as HTML and saving as Markdown.
 - Revisit failed login process to remove cyclical functions and multiple db calls.
 - Add debug log entries to check for multiple class instantiation and multiple crucial function alls.
 

@@ -311,7 +311,23 @@ class Alerts {
           
           $has_alert = true;
 
+          $msg_text = $session_alert['text'] ?? 'New post added.';
+
+          break;
+          
+        case '103':
+          
+          $has_alert = true;
+
           $msg_text = $session_alert['text'] ?? 'Post updated.';
+
+          break;
+          
+        case '104':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Post deleted.';
 
           break;
         

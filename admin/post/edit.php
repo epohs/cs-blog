@@ -34,40 +34,55 @@
         <label for="PostTitle">Title</label>
         <input type="text" name="title" value="<?php echo $post['title']; ?>" id="PostTitle">
         
-        <input type="hidden" name="content" id="PostContent">
-        <div id="editor"></div>
+        <textarea name="content" id="my-text-area"><?php echo $post['content']; ?></textarea>
         
-        <button type="submit">Submit</button>
+        <button type="submit">Edit post</button>
         
       </form>
     
       
       <script>
 
-        var content = `<?php echo addslashes($post['content']); ?>`;
-
-        var form = document.getElementById('EditPostForm');
-        var form_post_content = document.getElementById('PostContent');
-
-        const editor = new toastui.Editor({
-          el: document.querySelector('#editor'),
-          height: 'auto',
-          initialValue: content,
-          initialEditType: 'wysiwyg'
-        });
-
-
-        form.addEventListener('submit', function() {
-
-          form_post_content.value = editor.getMarkdown();
-
-        });
+        const easyMDE = new EasyMDE(
+          {
+            element: document.getElementById('my-text-area'),
+            toolbar: [
+                      'bold',
+                      'italic',
+                      'link',
+                      'heading-2',
+                      'heading-3',
+                      "|",
+                      "unordered-list",
+                      "ordered-list",
+                      "quote",
+                      "|",
+                      "upload-image",
+                      "|",
+                      "preview"
+                    ],
+            minHeight: '30em',
+            uploadImage: true,
+            imageAccept: 'image/png, image/jpeg',
+            imageMaxSize: (1024 * 1024 * 20),
+            spellChecker: false,
+            status: ["lines", "words"]
+          }
+        );
 
       </script>
-      
+
       <hr>
-      RAW Content: <?php echo var_export($post['content'], true); ?>
-      <hr>
+
+
+      <form id="DeletePostForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+
+        <input type="hidden" name="form_name" value="delete-post">
+        <input type="hidden" name="selector" value="<?php echo $post['selector']; ?>">
+        <input type="hidden" name="nonce" value="<?php echo $nonce_delete; ?>">
+        <button type="submit">Delete post</button>
+
+      </form>
       
     </main>
     

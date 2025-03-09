@@ -52,6 +52,7 @@ class FormHandler {
     // Posts
     $this->add_form('new-post', 'new_post');
     $this->add_form('edit-post', 'edit_post');
+    $this->add_form('delete-post', 'delete_post');
     
     
     // User Auth
@@ -145,7 +146,7 @@ class FormHandler {
   
   /**
    * @todo Do some validation on post title and content.
-   * @todo When the abilit to edit authors is added, do basic
+   * @todo When the ability to edit authors is added, do basic
    *        checks on that as well, but the majority of author
    *        validation can happen in Post::new().
    */
@@ -154,16 +155,11 @@ class FormHandler {
     
     Routing::nonce_redirect($this->nonce, 'new-post', 'admin/post/new');
     
-    $Converter = new HtmlConverter(array('strip_tags' => true));
-    
     $Post = Post::get_instance();
     
     $post_title = $this->post_vars['title'];
-    
-    // @todo May need to do the htmlentities sanityzing after converting
-    // from Markdown to HTML.
-    //$post_content = $Converter->convert($this->post_vars['content']);
-    $post_content = htmlspecialchars($Converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
+
+    $post_content = $this->post_vars['content'];
     
     $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
     
@@ -172,7 +168,7 @@ class FormHandler {
       $post_selector = $Post->get_selector($new_post);
       
       // @todo Redirect with an alert that the post was added.
-      Routing::redirect_to( $this->Page->url_for("admin/post/edit/{$post_selector}") );
+      Routing::redirect_with_alert( $this->Page->url_for("admin/post/edit/{$post_selector}"), ['code' => '102'] );
       
     else:
       
@@ -212,28 +208,28 @@ class FormHandler {
     $Post = Post::get_instance();
     
     $post_to_edit = $Post->get_by('selector', $posted_selector);
-    
-    $Converter = new HtmlConverter(array('strip_tags' => true));
-    
-    $Post = Post::get_instance();
-    
-    $post_title = $this->post_vars['title'];
-    
-    // @todo May need to do the htmlentities sanityzing after converting
-    // from Markdown to HTML.
-    //$post_content = $Converter->convert($this->post_vars['content']);
-    // $post_content = htmlspecialchars($Converter->convert($_POST['content']), ENT_QUOTES, 'UTF-8');
-    
-    // $new_post_data = ['title' => $post_title, 'content' => $post_content];
 
-    $new_post_data = ['title' => $post_title, 'content' => $_POST['content']];
-    
-    $updated_post = $Post->update($post_to_edit['id'], $new_post_data);
+
+    if ( $post_to_edit ):
+
+      $post_title = $this->post_vars['title'];
+      
+      $post_content = $this->post_vars['content'];
+
+      $new_post_data = ['title' => $post_title, 'content' => $post_content];
+      
+      $updated_post = $Post->update($post_to_edit['id'], $new_post_data);
+
+    else:
+
+      $updated_post = false;
+
+    endif;
+
     
     if ( $updated_post ):
       
-      // @todo create Post::get_selector() and use selector instead of id
-      Routing::redirect_with_alert( $this->Page->url_for("admin/post/edit/{$updated_post['selector']}"), ['code' => '102'] );
+      Routing::redirect_with_alert( $this->Page->url_for("admin/post/edit/{$updated_post['selector']}"), ['code' => '103'] );
       
     else:
       
@@ -242,7 +238,64 @@ class FormHandler {
     endif;
     
     
-  } // new_post()
+  } // edit_post()
+
+
+
+
+
+
+
+
+  /**
+   * @todo Do some validation on post title and content.
+   * @todo When the abilit to edit authors is added, do basic
+   *        checks on that as well, but the majority of author
+   *        validation can happen in Post::new().
+   */
+  private function delete_post() {
+    
+    
+    $posted_selector = $this->post_vars['selector'] ?? false;
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( !$posted_selector ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+      
+    endif;
+    
+    
+    Routing::nonce_redirect($this->nonce, 'edit-post', "admin/post/edit/{$posted_selector}");
+    
+    $Post = Post::get_instance();
+    
+    $post_to_delete = $Post->get_by('selector', $posted_selector);
+
+
+    if ( $post_to_delete ):
+
+      $post_deleted = $Post->delete( $post_to_delete['id'] );
+
+      if ( $post_deleted ):
+
+        Routing::redirect_with_alert( $this->Page->url_for("admin/post/list"), ['code' => '104'] );
+
+      else:
+
+        Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+
+      endif;
+
+    else:
+
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+
+    endif;
+    
+    
+  } // delete_post()
 
 
 
