@@ -369,6 +369,95 @@ class Post {
   
   
   
+  public function get_pagination(array $args = []): array|string {
+    
+    $defaults = [
+      'cur_page'             => $this->cur_page,
+      'pagination_base'      => '/posts',
+      'return'               => 'array',
+      'items_per_page'       => 10,
+      'num_pagination_items' => 6,
+      'total_items'          => $this->total_posts,
+    ];
+  
+    $args = array_merge($defaults, $args);
+  
+    $total_pages = max(1, ceil($args['total_items'] / $args['items_per_page']));
+    $cur_page = max(1, min($args['cur_page'], $total_pages));
+    $pagination = [];
+  
+    if ( $total_pages <= $args['num_pagination_items'] ):
+      
+      for ( $i = 1; $i <= $total_pages; $i++ ):
+        
+        $pagination[] = [
+          'page' => $i,
+          'link' => $args['pagination_base'] . '?page=' . $i
+        ];
+        
+      endfor;
+      
+    else:
+      
+      $half = floor($args['num_pagination_items'] / 2);
+      $start = max(1, $cur_page - $half);
+      $end = min($total_pages, $start + $args['num_pagination_items'] - 1);
+  
+      
+      if ( $end - $start + 1 < $args['num_pagination_items'] ):
+        
+        $start = max(1, $end - $args['num_pagination_items'] + 1);
+        
+      endif;
+      
+  
+      if ( $start > 1 ):
+        
+        $pagination[] = ['page' => 1, 'link' => $args['pagination_base'] . '?page=1'];
+  
+        if ( $start > 2 ):
+          
+          $pagination[] = ['page' => '…', 'link' => null];
+          
+        endif;
+        
+      endif;
+  
+      for ( $i = $start; $i <= $end; $i++ ):
+        
+        $pagination[] = [
+          'page' => $i,
+          'link' => $args['pagination_base'] . '?page=' . $i
+        ];
+        
+      endfor;
+  
+      if ( $end < $total_pages ):
+        
+        if ( $end < $total_pages - 1 ):
+          
+          $pagination[] = ['page' => '…', 'link' => null];
+          
+        endif;
+  
+        $pagination[] = ['page' => $total_pages, 'link' => $args['pagination_base'] . '?page=' . $total_pages];
+        
+      endif;
+      
+    endif;
+  
+    return ($args['return'] === 'json') ? json_encode($pagination, JSON_PRETTY_PRINT) : $pagination;
+
+  } // get_pagination()
+
+  
+  
+  
+  
+  
+  
+  
+  
   /**
    * Private function to get a single user column.
    */
