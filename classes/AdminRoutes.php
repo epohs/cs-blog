@@ -53,7 +53,7 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->User->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+    if ( $this->User->is_admin() ):
       
       $this->get_template( ['dashboard'] );
     
@@ -78,7 +78,14 @@ class AdminRoutes {
 
     $this->verified_user_redirect();
 
+    
+    if ( !$this->User->is_admin() ):
       
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+      
+    
     $nonce = $this->Auth::set_nonce('new-post');
     
     $this->get_template( 'post/new', null, ['nonce' => $nonce] );
@@ -97,6 +104,13 @@ class AdminRoutes {
     
 
     $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
     
     
     $selector = Routing::get_route_vars('selector');
@@ -142,6 +156,14 @@ class AdminRoutes {
 
     $this->verified_user_redirect();
 
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+
     $Post = Post::get_instance();
 
     $posts = $Post->get_posts();
@@ -177,7 +199,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('login');
       
-      $this->get_template( 'login', null, ['nonce' => $nonce] );
+      $this->get_template( ['login'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -209,7 +231,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('signup');
       
-      $this->get_template( 'signup', null, ['nonce' => $nonce] );
+      $this->get_template( ['signup'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -254,7 +276,7 @@ class AdminRoutes {
     
     $verify_key = ( isset($_GET['key']) ) ? trim($_GET['key']) : '';
       
-    $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
+    $this->get_template( ['verify'], null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
 
 
   } // verify()
@@ -286,7 +308,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('forgot');
       
-      $this->get_template( 'forgot', null, ['nonce' => $nonce] );
+      $this->get_template( ['forgot'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -370,7 +392,7 @@ class AdminRoutes {
                     'reset_key' => $reset_key
                   ];
       
-      $this->get_template( 'password-reset', null, $tmpl_args );
+      $this->get_template( ['password-reset'], null, $tmpl_args );
 
 
     endif;
