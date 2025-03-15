@@ -530,6 +530,8 @@ class User {
    * This will govern which routes a user is able to visit
    * and what functionality they have access to.
    *
+   * @todo Add user_id param to test a given user.
+   *
    * @internal Is this thorough enough?
    */
   public function is_admin(): bool {
