@@ -195,6 +195,9 @@ class Page {
    * first in the active theme, and if the file isn't found it will look
    * in the 'default' theme directory for the same file. This allows for 
    * themes that customize only part of the default theme.
+   * 
+   * @todo Re-document this, and test more thoroughly after change to $file_opts
+   * 
    */
   public function get_partial(string|array $file_opts, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
@@ -250,7 +253,9 @@ class Page {
     // If $file_opts is an array we look for the 'base' and 'content' keys
     // If 'base' is unset or null we assume the default index.php as 
     // the html base.
-    // 'content' is never assumed, and is passed as an arg named 'template_content'.
+    // 'content' is never assumed, and is passed as an arg named 
+    // 'template_content'. If the array has no keys, we assume that the
+    // first item is the content file, passed as a string.
     if ( is_string($file_opts) ):
       
       $file = $file_opts;
