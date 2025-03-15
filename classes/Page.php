@@ -196,7 +196,7 @@ class Page {
    * in the 'default' theme directory for the same file. This allows for 
    * themes that customize only part of the default theme.
    */
-  public function get_partial(string $file, ?string $suffix = null, $args = false, $partial_root = false): bool {
+  public function get_partial(string|array $file_opts, ?string $suffix = null, $args = false, $partial_root = false): bool {
     
     
     $Config = Config::get_instance();
@@ -243,10 +243,64 @@ class Page {
     
     
     
+    
+    
+    // Determine the file that we are looking for using $file_opts.
+    // If $file_opts is a string we assume it is a true partial.
+    // If $file_opts is an array we look for the 'base' and 'content' keys
+    // If 'base' is unset or null we assume the default index.php as 
+    // the html base.
+    // 'content' is never assumed, and is passed as an arg named 'template_content'.
+    if ( is_string($file_opts) ):
+      
+      $file = $file_opts;
+      
+    else:
+      
+      
+      if ( isset($file_opts['base']) ):
+        
+        $file = $file_opts['base'];
+       
+      else:
+        
+        $file = 'index';
+       
+      endif; 
+      
+      
+      if ( isset($file_opts['content']) ):
+        
+        if ( !is_array($args) ):
+          
+          $args = [];
+          
+        endif;
+        
+        $args['template_content'] = $file_opts['content'];
+        
+      elseif ( isset($file_opts[0]) && is_string($file_opts[0]) ):
+        
+        if ( !is_array($args) ):
+          
+          $args = [];
+          
+        endif;
+        
+        $args['template_content'] = $file_opts[0];
+        
+      else:
+        
+        $this->Alerts->add("Partial content {$file} not found.", 'warn');
+        
+      endif;
+      
+    endif;
+    
+    
     // Build the full path to the partial based 
     // on what was passed.
-    $partial_path = ROOT_PATH . $file_base . $file;  
-    
+    $partial_path = ROOT_PATH . $file_base . $file;
     
     
     if ( !is_null($suffix) ):
@@ -303,7 +357,7 @@ class Page {
    
       // If we have args, extract them into variables
       // for more readable code in the partial file.
-      if ( is_array($args) && ! empty($args) ):
+      if ( is_array($args) && !empty($args) ):
         
         extract($args);  
       

@@ -55,7 +55,7 @@ class AdminRoutes {
     // admin dashboard, otherwise redirect home.
     if ( $this->User->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
       
-      $this->get_template( 'dashboard' );
+      $this->get_template( ['dashboard'] );
     
     else:
       
@@ -414,10 +414,10 @@ class AdminRoutes {
    * wrapper around the get_partial() function, but we
    * change the root directory.
    */
-  public function get_template(string $file, ?string $suffix = null, $args = false): void {
+  public function get_template(string|array $file_opts, ?string $suffix = null, $args = false): void {
     
     
-    $this->Page->get_partial($file, $suffix, $args, 'admin');
+    $this->Page->get_partial($file_opts, $suffix, $args, 'admin');
 
     // Do this to avoid triggering an alert on a page refresh.
     Session::delete_key('page_alert');
