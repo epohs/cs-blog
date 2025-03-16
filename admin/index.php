@@ -21,7 +21,7 @@
       
       <?php $Page->get_partial('page-alerts', null, false, 'admin/partials'); ?>
     
-      <?php $Page->get_partial($template_content, null, false, 'admin/content'); ?>
+      <?php $Page->get_partial($template_content, null, $args, 'admin/content'); ?>
       
     </main> <!-- .content -->
 

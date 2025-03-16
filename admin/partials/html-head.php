@@ -7,7 +7,6 @@
 
 <link rel="stylesheet" href="<?php echo $Page->site_root(); ?>/css/main.css" type="text/css">
 
-
 <?php Actions::do_action('html-head'); ?>
 
 </head>

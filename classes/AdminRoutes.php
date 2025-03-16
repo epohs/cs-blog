@@ -88,7 +88,7 @@ class AdminRoutes {
     
     $nonce = $this->Auth::set_nonce('new-post');
     
-    $this->get_template( 'post/new', null, ['nonce' => $nonce] );
+    $this->get_template( ['post/new'], null, ['nonce' => $nonce] );
     
 
   } // new_post()
@@ -139,7 +139,7 @@ class AdminRoutes {
     $nonce = $this->Auth::set_nonce('edit-post');
     $nonce_delete = $this->Auth::set_nonce('delete-post');
     
-    $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'post' => $post_to_edit] );
+    $this->get_template( ['post/edit'], null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'post' => $post_to_edit] );
     
 
   } // edit_post()
@@ -168,7 +168,7 @@ class AdminRoutes {
 
     $posts = $Post->get_posts();
     
-    $this->get_template( 'post/list', null, ['posts' => $posts] );
+    $this->get_template( ['post/list'], null, ['posts' => $posts] );
     
 
   } // list_posts()
