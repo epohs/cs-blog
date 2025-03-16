@@ -195,15 +195,35 @@ class Routes {
   /**
    * Call the appropriate route handler function
    * as registered in the route map.
+   *
+   * @todo Is this the best place to call admin functions?
    */
   public function serve(string $key): bool {
     
 
     if ( isset($this->map[$key]) && is_callable($this->map[$key]) ):
+      
+      
+      $this->Page->set_prop('cur_page', $key);
+      
+      
+      if ( $this->Page->is_admin() ):
+        
+        $admin_functions_file = ROOT_PATH . "admin/functions.php";
+        
+        if ( file_exists($admin_functions_file) ):
+          
+          require_once( $admin_functions_file );
+        
+        endif;
+        
+      endif;
+      
 
       call_user_func($this->map[$key]);
       
       return true;
+      
 
     else:
 

@@ -12,6 +12,8 @@ class Page {
 
   
   private static $instance = null;
+  
+  private array $cur_page_props = [];
 
   private $Alerts = null;
   
@@ -152,6 +154,53 @@ class Page {
     
   } // get_page_title()
   
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * @todo this need to be thought about and fleshed out
+   * a lot.
+   */
+  public function get_prop( ?string $key = null ): mixed {
+    
+    
+    if ( array_key_exists($key, $this->cur_page_props) ):
+      
+      return $this->cur_page_props[$key];
+      
+    elseif ( is_null($key) ):
+      
+      return $this->cur_page_props;
+      
+    else:
+      
+      return false;
+      
+    endif;
+    
+    
+  } // get_prop()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * @todo this need to be thought about and fleshed out
+   * a lot.
+   */
+  public function set_prop( string $key, mixed $value ): void {
+    
+    $this->cur_page_props[$key] = $value;
+    
+  } // set_prop()
   
   
   
