@@ -22,9 +22,7 @@
       
       <?php $Page->get_partial('page-alerts'); ?>
     
-      <h1>Hello.</h1>
-    
-      <p><?= Utils::format_date(); ?></p>
+      <?php $Page->get_partial("content/$template_content", null, $args, ''); ?>
       
     </main> <!-- .content -->
 

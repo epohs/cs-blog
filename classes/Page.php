@@ -216,10 +216,10 @@ class Page {
    * of the theme root. This function is a thin wrapper around the 
    * get_partial() function, but we change the serving directory.
    */
-  public function get_template(string $file, ?string $suffix = null, $args = false): void {
+  public function get_template(string|array $file_opts, ?string $suffix = null, $args = false): void {
     
 
-    $this->get_partial($file, $suffix, $args, '');
+    $this->get_partial($file_opts, $suffix, $args, '');
 
 
     // After the page has been viewed, remove page alerts to avoid a
@@ -340,6 +340,7 @@ class Page {
           $args = [];
           
         endif;
+        
         
         $args['template_content'] = $file_opts[0];
         

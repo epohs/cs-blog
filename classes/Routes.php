@@ -78,7 +78,7 @@ class Routes {
    */
   private function home(): void {
 
-    $this->Page->get_template( 'index' );
+    $this->Page->get_template( ['index'] );
 
   } // home()
 
@@ -99,7 +99,7 @@ class Routes {
 
       $cur_user = $this->User->get( Session::get_key(['user', 'id']) );
     
-      $this->Page->get_template( 'profile', null, ['cur_user' => $cur_user] );
+      $this->Page->get_template( ['profile'], null, ['cur_user' => $cur_user] );
 
     else:
 
