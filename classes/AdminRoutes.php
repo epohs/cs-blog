@@ -53,9 +53,9 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->User->is_logged_in() && Session::get_key(['user', 'role']) == 'admin' ):
+    if ( $this->User->is_admin() ):
       
-      $this->get_template( 'dashboard' );
+      $this->get_template( ['dashboard'] );
     
     else:
       
@@ -78,10 +78,17 @@ class AdminRoutes {
 
     $this->verified_user_redirect();
 
+    
+    if ( !$this->User->is_admin() ):
       
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+      
+    
     $nonce = $this->Auth::set_nonce('new-post');
     
-    $this->get_template( 'post/new', null, ['nonce' => $nonce] );
+    $this->get_template( ['post/new'], null, ['nonce' => $nonce] );
     
 
   } // new_post()
@@ -97,6 +104,13 @@ class AdminRoutes {
     
 
     $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
     
     
     $selector = Routing::get_route_vars('selector');
@@ -125,7 +139,7 @@ class AdminRoutes {
     $nonce = $this->Auth::set_nonce('edit-post');
     $nonce_delete = $this->Auth::set_nonce('delete-post');
     
-    $this->get_template( 'post/edit', null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'post' => $post_to_edit] );
+    $this->get_template( ['post/edit'], null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'post' => $post_to_edit] );
     
 
   } // edit_post()
@@ -142,11 +156,19 @@ class AdminRoutes {
 
     $this->verified_user_redirect();
 
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+
     $Post = Post::get_instance();
 
     $posts = $Post->get_posts();
     
-    $this->get_template( 'post/list', null, ['posts' => $posts] );
+    $this->get_template( ['post/list'], null, ['posts' => $posts] );
     
 
   } // list_posts()
@@ -177,7 +199,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('login');
       
-      $this->get_template( 'login', null, ['nonce' => $nonce] );
+      $this->get_template( ['login'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -209,7 +231,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('signup');
       
-      $this->get_template( 'signup', null, ['nonce' => $nonce] );
+      $this->get_template( ['signup'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -254,7 +276,7 @@ class AdminRoutes {
     
     $verify_key = ( isset($_GET['key']) ) ? trim($_GET['key']) : '';
       
-    $this->get_template( 'verify', null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
+    $this->get_template( ['verify'], null, ['nonce' => $nonce, 'verify_key' => $verify_key] );
 
 
   } // verify()
@@ -286,7 +308,7 @@ class AdminRoutes {
       
       $nonce = $this->Auth::set_nonce('forgot');
       
-      $this->get_template( 'forgot', null, ['nonce' => $nonce] );
+      $this->get_template( ['forgot'], null, ['nonce' => $nonce] );
 
     endif;
 
@@ -370,7 +392,7 @@ class AdminRoutes {
                     'reset_key' => $reset_key
                   ];
       
-      $this->get_template( 'password-reset', null, $tmpl_args );
+      $this->get_template( ['password-reset'], null, $tmpl_args );
 
 
     endif;
@@ -414,10 +436,10 @@ class AdminRoutes {
    * wrapper around the get_partial() function, but we
    * change the root directory.
    */
-  public function get_template(string $file, ?string $suffix = null, $args = false): void {
+  public function get_template(string|array $file_opts, ?string $suffix = null, $args = false): void {
     
     
-    $this->Page->get_partial($file, $suffix, $args, 'admin');
+    $this->Page->get_partial($file_opts, $suffix, $args, 'admin');
 
     // Do this to avoid triggering an alert on a page refresh.
     Session::delete_key('page_alert');

@@ -95,6 +95,8 @@ class Routing {
         $handler_class = $handler[0];
 
         $this->is_admin_route = ( $handler_class instanceof AdminRoutes );
+        
+        debug_log('shouldve set admin route to: ' . var_export($this->is_admin_route, true));
 
         $valid_route = $this->Routes->serve($route_key);
 
@@ -493,7 +495,7 @@ class Routing {
    * This property is set to true by the serve_route method if the 
    * handler class is AdminRoutes.
    */
-  function get_is_admin_route() {
+  function get_is_admin_route(): bool|null {
 
     return $this->is_admin_route;
 

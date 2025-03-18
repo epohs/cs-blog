@@ -78,7 +78,7 @@ class Routes {
    */
   private function home(): void {
 
-    $this->Page->get_template( 'index' );
+    $this->Page->get_template( ['index'] );
 
   } // home()
 
@@ -99,7 +99,7 @@ class Routes {
 
       $cur_user = $this->User->get( Session::get_key(['user', 'id']) );
     
-      $this->Page->get_template( 'profile', null, ['cur_user' => $cur_user] );
+      $this->Page->get_template( ['profile'], null, ['cur_user' => $cur_user] );
 
     else:
 
@@ -144,7 +144,13 @@ class Routes {
    */
   private function _404(): void {
     
-    $this->Page->get_template( '404' );
+    http_response_code(404);
+    header("Cache-Control: no-store, no-cache, must-revalidate, max-age=0");
+    header("Pragma: no-cache");
+    header("Expires: Sat, 01 Jan 2000 00:00:00 GMT");
+    header("X-Robots-Tag: noindex, nofollow");
+    
+    $this->Page->get_template( ['404'] );
 
   } // 404()
   
@@ -195,15 +201,35 @@ class Routes {
   /**
    * Call the appropriate route handler function
    * as registered in the route map.
+   *
+   * @todo Is this the best place to call admin functions?
    */
   public function serve(string $key): bool {
     
 
     if ( isset($this->map[$key]) && is_callable($this->map[$key]) ):
+      
+      
+      $this->Page->set_prop('cur_page', $key);
+      
+      
+      if ( $this->Page->is_admin() ):
+        
+        $admin_functions_file = ROOT_PATH . "admin/functions.php";
+        
+        if ( file_exists($admin_functions_file) ):
+          
+          require_once( $admin_functions_file );
+        
+        endif;
+        
+      endif;
+      
 
       call_user_func($this->map[$key]);
       
       return true;
+      
 
     else:
 
