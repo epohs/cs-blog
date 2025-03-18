@@ -64,7 +64,7 @@ class Page {
    */
   public function is_admin(): bool {
 
-    return $this->Routing->get_is_admin_route();
+    return $this->Routing->get_is_admin_route() ?? false;
 
   } // is_admin()
 
