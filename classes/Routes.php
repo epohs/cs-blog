@@ -144,7 +144,7 @@ class Routes {
    */
   private function _404(): void {
     
-    $this->Page->get_template( '404' );
+    $this->Page->get_template( ['404'] );
 
   } // 404()
   
