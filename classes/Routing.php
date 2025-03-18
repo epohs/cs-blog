@@ -495,7 +495,7 @@ class Routing {
    * This property is set to true by the serve_route method if the 
    * handler class is AdminRoutes.
    */
-  function get_is_admin_route() {
+  function get_is_admin_route(): bool|null {
 
     return $this->is_admin_route;
 
