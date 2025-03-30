@@ -198,6 +198,68 @@ class User {
   
   
   /**
+   * 
+   */
+  function get_users( array $args = [] ): array|false {
+    
+    $defaults = [
+      'is_active' => true,
+      'is_verified' => true,
+      'is_locked_out' => false,
+      'limit' => 10, // @todo This should be a setting
+      'offset' => 0
+    ];
+
+    // Merge default values with passed arguments
+    $args = array_merge($defaults, $args);
+    
+    
+    if ( $args['is_locked_out'] ):
+      
+      // @todo Verify that this actually works
+      $locked_cond = 'AND `locked_until` IS NULL OR `locked_until` < DATETIME("now")';
+      
+    else:
+      
+      $locked_cond = '';
+      
+    endif;
+
+
+    $query = "SELECT * FROM `Users` 
+              WHERE `is_active` = :is_active
+                AND `is_verified` = :is_verified
+                {$locked_cond}
+              ORDER BY `created_at` 
+              DESC LIMIT :limit OFFSET :offset";
+    
+    $stmt = $this->pdo->prepare($query);
+
+    
+    $stmt->bindParam(':is_active', $args['is_active'], PDO::PARAM_BOOL);
+    $stmt->bindParam(':is_verified', $args['is_verified'], PDO::PARAM_BOOL);
+    $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
+    $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
+
+    $stmt->execute();
+
+
+    // Fetch all posts
+    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    
+    return $posts;
+
+  } // get_users()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
    * Private function to get a single user column.
    */
   private function get_column(string $column, int $user_id): mixed {

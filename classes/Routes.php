@@ -38,21 +38,28 @@ class Routes {
     $this->AdminRoutes = AdminRoutes::get_instance();
 
     $this->FormHandler = FormHandler::get_instance();
-
     
+
+    // ---- Public Routes
     $this->add_route('/', $this, 'home');
     $this->add_route('profile', $this, 'profile');
-    $this->add_route('post', $this, 'post');
     $this->add_route('logout', $this, 'logout');
+    //$this->add_route('post', $this, 'post');
     $this->add_route('404', $this, '_404');
 
 
-    // Admin Routes
+    // ---- Admin Routes
     $this->add_route('admin/dash', $this->AdminRoutes, 'dashboard');
+    
+    // Posts
     $this->add_route('admin/post/new', $this->AdminRoutes, 'new_post');
     $this->add_route('admin/post/edit/{selector}', $this->AdminRoutes, 'edit_post');
     $this->add_route('admin/post/list', $this->AdminRoutes, 'list_posts');
     
+    // Users
+    $this->add_route('admin/user/list', $this->AdminRoutes, 'list_users');
+    
+    // User Auth
     $this->add_route('login', $this->AdminRoutes, 'login');
     $this->add_route('signup', $this->AdminRoutes, 'signup');
     $this->add_route('verify', $this->AdminRoutes, 'verify');

@@ -151,6 +151,9 @@ class AdminRoutes {
   
   
   
+  /**
+   * List all posts
+   */
   public function list_posts(): void {
 
 
@@ -172,6 +175,36 @@ class AdminRoutes {
     
 
   } // list_posts()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * List All Users
+   */
+  public function list_users(): void {
+
+
+    $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+
+    $users = $this->User->get_users();
+    
+    $this->get_template( ['user/list'], null, ['users' => $users] );
+    
+
+  } // list_users()
 
   
 
