@@ -7,7 +7,7 @@
 
   <?php foreach ( $users as $user ): ?>
 
-    <li><a href="<?php echo $Page->url_for("admin/user/edit/{$user['selector']}") ?>"><?php echo $user['selector']; ?></a></li>
+    <li><a href="<?php echo $Page->url_for("admin/user/edit/{$user['selector']}") ?>"><?php echo $User->get_display_name($user['id']); ?></a></li>
 
   <?php endforeach; ?>
 
