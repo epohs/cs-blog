@@ -296,6 +296,43 @@ class User {
   
   
   /**
+   *
+   */
+  public function get_display_name( int|string $key): string {
+    
+    
+    if ( is_int($key) ):
+      
+      $user = $this->get($key);
+        
+    else:
+      
+      $user = $this->get_by('selector', $key);
+      
+    endif;
+
+    
+    if ( is_array($user) && !empty($user) ):
+      
+      // @todo 'User @' should be a config setting
+      return !empty($user['display_name']) ? $user['display_name'] : 'User @' . $user['selector'];
+      
+    endif;
+    
+
+    return 'BAD USER';
+      
+  } // get_display_name()
+
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
    * Mark a user account as having a verified email address.
    *
    * @internal instead of doing separate db calls, think
