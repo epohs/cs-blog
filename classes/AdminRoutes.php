@@ -205,6 +205,57 @@ class AdminRoutes {
     
 
   } // list_users()
+  
+  
+  
+  
+  
+  
+  
+  
+  public function edit_user(): void {
+    
+
+    $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+    
+    $selector = Routing::get_route_vars('selector');
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( $selector && strlen($selector) >= 5 ):
+    
+      $User = User::get_instance();
+      
+      $user_to_edit = $User->get_by('selector', $selector);
+      
+      if ( !$user_to_edit ):
+        
+        Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '300'] );
+        
+      endif;
+    
+    else:
+        
+      Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '300'] );
+      
+    endif;
+
+    
+    $nonce = $this->Auth::set_nonce('edit-user');
+    $nonce_delete = $this->Auth::set_nonce('delete-user');
+    
+    $this->get_template( ['user/edit'], null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'user' => $user_to_edit] );
+    
+
+  } // edit_user()
 
   
 

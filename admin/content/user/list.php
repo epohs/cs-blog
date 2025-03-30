@@ -7,7 +7,11 @@
 
   <?php foreach ( $users as $user ): ?>
 
-    <li><a href="<?php echo $Page->url_for("admin/user/edit/{$user['selector']}") ?>"><?php echo $User->get_display_name($user['id']); ?></a></li>
+    <li>
+      
+      <a href="<?php echo $Page->url_for("admin/user/edit/{$user['selector']}"); ?>"><?php echo $User->get_display_name($user['id']); ?></a> - Joined: <?php echo Utils::format_date($user['created_at'], 'M j, Y'); ?>
+      
+    </li>
 
   <?php endforeach; ?>
 
