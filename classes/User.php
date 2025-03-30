@@ -315,7 +315,7 @@ class User {
     if ( is_array($user) && !empty($user) ):
       
       // @todo 'User @' should be a config setting
-      return !empty($user['display_name']) ? $user['display_name'] : 'User @' . $user['selector'];
+      return !empty($user['display_name']) ? $user['display_name'] : '@' . $user['selector'];
       
     endif;
     
