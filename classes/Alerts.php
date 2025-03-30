@@ -339,6 +339,15 @@ class Alerts {
           $msg_text = $session_alert['text'] ?? 'Bad post selector.';
 
           break;
+        
+        // Alerts in the 300 range are related to Users.
+        case '300':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Bad user selector.';
+
+          break;
           
         default:
           
