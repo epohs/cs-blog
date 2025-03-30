@@ -369,6 +369,11 @@ class Post {
   
   
   
+  /**
+   * Handle Pagination for multiple data types.
+   * 
+   * @todo I think this will be more appropriate in the Page class.
+   */
   public function get_pagination(array $args = []): array|string {
     
     $defaults = [
