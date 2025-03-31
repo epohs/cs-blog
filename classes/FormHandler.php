@@ -636,6 +636,8 @@ class FormHandler {
 
         // A user with this email adress was found. Set the reset password token.
         $this->User->set_password_reset_token( $user_to_reset['id'] );
+        
+        // @todo Send password reset email if SEND_EMAIL config is true.
 
       endif;
       

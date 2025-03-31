@@ -1012,6 +1012,7 @@ class User {
         $threshold_time = $now->modify("+{$password_reset_age} minutes");
         
         // Compare the two DateTime objects
+        // @todo Use debug_log to double-check my logic here.
         if ( $reset_started_datetime <= $threshold_time ):
 
           // There has already been a password reset requested
