@@ -231,7 +231,7 @@ class User {
                 AND `is_verified` = :is_verified
                 {$locked_cond}
               ORDER BY `created_at` 
-              DESC LIMIT :limit OFFSET :offset";
+              ASC LIMIT :limit OFFSET :offset";
     
     $stmt = $this->pdo->prepare($query);
 
