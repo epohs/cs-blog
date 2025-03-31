@@ -1091,6 +1091,7 @@ class User {
 
   } // check_password_reset_token()
 
+  
 
 
 
@@ -1117,6 +1118,7 @@ class User {
     return $return;
 
   } // clear_password_reset()
+  
   
   
   

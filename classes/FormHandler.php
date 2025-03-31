@@ -55,6 +55,10 @@ class FormHandler {
     $this->add_form('delete-post', 'delete_post');
     
     
+    // Users
+    $this->add_form('delete-user', 'delete_user');
+    
+    
     // User Auth
     $this->add_form('login', 'login');
     $this->add_form('verify', 'verify');
@@ -146,7 +150,7 @@ class FormHandler {
   
   /**
    * @todo Do some validation on post title and content.
-   * @todo When the ability to edit authors is added, do basic
+   * @todo When the abilityy to edit authors is added, do basic
    *        checks on that as well, but the majority of author
    *        validation can happen in Post::new().
    */
@@ -248,10 +252,7 @@ class FormHandler {
 
 
   /**
-   * @todo Do some validation on post title and content.
-   * @todo When the abilit to edit authors is added, do basic
-   *        checks on that as well, but the majority of author
-   *        validation can happen in Post::new().
+   * Delete a post
    */
   private function delete_post() {
     
@@ -296,6 +297,83 @@ class FormHandler {
     
     
   } // delete_post()
+
+
+
+
+
+
+
+
+  /**
+   * Delete a user
+   */
+  private function delete_user() {
+    
+    
+    $posted_selector = $this->post_vars['selector'] ?? false;
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( !$posted_selector ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+    
+    
+    Routing::nonce_redirect($this->nonce, 'delete-user', "admin/user/edit/{$posted_selector}");
+    
+    $User = User::get_instance();
+    
+    
+    // @todo Add this check to all forms that need admin role.
+    if ( !$User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+    
+    
+    $user_to_delete = $User->get_by('selector', $posted_selector);
+
+
+    if ( $user_to_delete ):
+
+      
+      /*
+      - @todo
+      - Create user delete confirmation page
+      - Check whether the user is the current logged in user
+      - Check whether the user has posts
+      - Check whether the user has comments
+      */
+      
+      
+      
+      //$user_deleted = $User->delete( $user_to_delete['id'] );
+
+      /*
+      if ( $user_deleted ):
+
+        Routing::redirect_with_alert( $this->Page->url_for("admin/post/list"), ['code' => '104'] );
+
+      else:
+
+        Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+
+      endif;
+      */
+
+    else:
+
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+
+    endif;
+    
+    
+  } // delete_user()
 
 
 
