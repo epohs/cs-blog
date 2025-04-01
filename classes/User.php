@@ -122,9 +122,19 @@ class User {
   /**
    * Get a user row by it's ID.
    */
-  public function get( int $user_id ): array|false {
+  public function get( int $user_id, array $args = [] ): array|false {
+    
+    $defaults = [
+      'fields' => 'safe'
+    ];
 
-    return $this->Db->get_row_by_id('Users', $user_id);
+    $args = array_merge($defaults, $args);
+    
+    $user = $this->Db->get_row_by_id('Users', $user_id);
+    
+    $user = $this->sanitize_results($user, $args['fields']);
+
+    return $user;
 
   } // get()
 
@@ -138,7 +148,14 @@ class User {
   /**
    * Get a user row by certain allowed keys.
    */
-  public function get_by(string $key, $value): array|false {
+  public function get_by( string $key, $value, array $args = [] ): array|false {
+    
+    
+    $defaults = [
+      'fields' => 'safe'
+    ];
+
+    $args = array_merge($defaults, $args);
     
     
     $valid_keys = [
@@ -154,7 +171,7 @@ class User {
     
     if ( $key == 'id'):
 
-      return $this->get($value);
+      return $this->get($value, $args);
 
     elseif ( $key == 'remember_me' ):
 
@@ -185,7 +202,12 @@ class User {
     $stmt->execute();
     
     
-    return $stmt->fetch(PDO::FETCH_ASSOC);
+    $user = $stmt->fetch(PDO::FETCH_ASSOC);
+    
+    $user = $this->sanitize_results($user, $args['fields']);
+    
+    
+    return $user;
     
     
   } // get_by()
@@ -199,18 +221,20 @@ class User {
   
   /**
    * 
+   * @todo Expand fields arg to accept an array of columns, or a single field name
    */
   function get_users( array $args = [] ): array|false {
+    
     
     $defaults = [
       'is_active' => true,
       'is_verified' => true,
       'is_locked_out' => false,
+      'fields' => 'safe',
       'limit' => 10, // @todo This should be a setting
       'offset' => 0
     ];
 
-    // Merge default values with passed arguments
     $args = array_merge($defaults, $args);
     
     
@@ -244,11 +268,14 @@ class User {
     $stmt->execute();
 
 
-    // Fetch all posts
-    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    // Fetch Users
+    $users = $stmt->fetchAll(PDO::FETCH_ASSOC);
     
     
-    return $posts;
+    $users = $this->sanitize_results($users, $args['fields']);
+    
+    
+    return $users;
 
   } // get_users()
   
@@ -1308,6 +1335,71 @@ class User {
     
   } // remove_lockout()  
 
+  
+  
+  
+  
+  
+  
+  /**
+   * Remove sensitive columns from a results set for use
+   * in various contexts.
+   *
+   * @internal I have doubts that this is even necessary.
+   *           It may be entirely unneded, but I just don't
+   *           like seeing sensitive tokens in result sets
+   *           in which they have no valid use case.
+   **/
+  private function sanitize_results($results, $fields) {
+    
+
+    switch ( $fields ):
+    
+      case 'all':
+      
+        break;
+        
+      case 'safe':
+      default:
+      
+        $strip_columns = [
+                          'password',
+                          'remember_me',
+                          'login_token',
+                          'verify_key',
+                          'password_reset_token'
+                         ];
+        
+        
+        if ( is_array( $results ) && isset( $results[0] ) ):
+        
+          foreach ( $results as &$result ):
+            
+            foreach ( $strip_columns as $column ):
+              
+              unset( $result[$column] );
+              
+            endforeach;
+            
+          endforeach;
+          
+        elseif ( is_array( $results ) ):
+          
+          foreach ( $strip_columns as $column ):
+            
+            unset( $results[$column] );
+            
+          endforeach;
+          
+        endif;
+      
+    endswitch;
+    
+    
+    return $results;
+    
+    
+  } // sanitize_results()
   
   
   

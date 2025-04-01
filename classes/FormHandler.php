@@ -392,7 +392,7 @@ class FormHandler {
 
     Routing::nonce_redirect($this->nonce, 'login');
                
-    $user_to_login = $this->User->get_by('email', $this->post_vars['email']);
+    $user_to_login = $this->User->get_by('email', $this->post_vars['email'], ['fields' => 'all']);
     
     
     if ( $user_to_login ):
@@ -607,7 +607,7 @@ class FormHandler {
         
         // Get the verification key for the user we just
         // created and send an email.
-        $new_user = $this->User->get($new_user_id);
+        $new_user = $this->User->get($new_user_id, ['fields' => 'all']);
         
         $verify_key = $new_user['verify_key'];
         

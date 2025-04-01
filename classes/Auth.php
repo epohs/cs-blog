@@ -51,7 +51,7 @@ class Auth {
     $user_identifier_key = ( is_numeric($identifier) ) ? 'id' : 'selector';
     
     // Fetch user based on identifier (user ID or selector)
-    $user_to_login = $User->get_by($user_identifier_key, $identifier);
+    $user_to_login = $User->get_by($user_identifier_key, $identifier, ['fields' => 'all']);
     
   
     if ( !$user_to_login ):
