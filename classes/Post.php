@@ -217,52 +217,111 @@ class Post {
 
 
 
-  /**
-   * 
-   */
-  function get_posts( array $args = [] ): array|false {
+/**
+ * Retrieve posts from the database.
+ */
+function get_posts( array $args = [] ): array|int|false {
+  
+  
+  $defaults = [
+    'author_id'    => null,
+    'html_content' => true,
+    'count_only'   => false,
+    'limit'        => 10, // @todo This should be a setting
+    'offset'       => 0
+  ];  
+
+  
+  // Merge default values with passed arguments  
+  $args = array_merge( $defaults, $args );  
+  
+
+  // Base query  
+  $select = $args['count_only'] ? "COUNT(*) AS post_count" : "*";
+  
+  $query  = "SELECT {$select} FROM `Posts`";
+
+  
+  // Check if author filtering is needed
+  $where = [];
+  
+  
+  if ( is_int( $args['author_id'] ) ):
     
-    $defaults = [
-      'html_content' => true,
-      'limit' => 10, // @todo This should be a setting
-      'offset' => 0
-    ];
-
-    // Merge default values with passed arguments
-    $args = array_merge($defaults, $args);
-
-
-    $query = "SELECT * FROM `Posts` ORDER BY `created_at` DESC LIMIT :limit OFFSET :offset";
-    $stmt = $this->pdo->prepare($query);
-
+    $where[] = 'author_id = :author_id';
     
-    $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
-    $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
+  endif;
 
-    $stmt->execute();
+  // Append WHERE clause if applicable  
+  if ( !empty( $where ) ):
+    
+    $query .= ' WHERE ' . implode( ' AND ', $where );
+    
+  endif;
 
+  
+  // Apply ordering and pagination only if not counting  
+  if ( !$args['count_only'] ):
+  
+    $query .= ' ORDER BY `created_at` DESC LIMIT :limit OFFSET :offset';
+  
+  endif;
 
-    // Fetch all posts
-    $posts = $stmt->fetchAll(PDO::FETCH_ASSOC);
+  
+  $stmt = $this->pdo->prepare( $query );
+  
 
-    // If html_content is true, parse the content with Parsedown
-    if ( $args['html_content'] ):
+  // Bind author if filtering by author
+  if ( is_int( $args['author_id'] ) ):
+    
+    $stmt->bindParam( ':author_id', $args['author_id'], PDO::PARAM_INT );
+    
+  endif;
+
+  
+  // Bind limit and offset only if not counting
+  if ( !$args['count_only'] ):
+
+    $stmt->bindParam( ':limit', $args['limit'], PDO::PARAM_INT );
+    $stmt->bindParam( ':offset', $args['offset'], PDO::PARAM_INT );
+
+  endif;
+
+  
+  $stmt->execute();
+
+  
+  // Return count if counting only
+  if ( $args['count_only'] ):
+    
+    return $stmt->fetchColumn();
+    
+  endif;
+
+  
+  // Fetch all posts  
+  $posts = $stmt->fetchAll( PDO::FETCH_ASSOC );
+  
+
+  // If html_content is true, parse the content with Parsedown
+  if ( $args['html_content'] ):
+    
+    $Parsedown = new Parsedown();
+
+    foreach ( $posts as &$post ):
       
-        $Parsedown = new Parsedown();
-
-        // Loop through each post and convert the content to HTML
-        foreach ($posts as &$post):
-
-          $post['content'] = $Parsedown->text($post['content']);
-        
-        endforeach;
-
-    endif;
-
+      $post['content'] = $Parsedown->text( $post['content'] );
+      
+    endforeach;
     
-    return $posts;
+  endif;
 
-  } // get_posts()
+  
+  return $posts;
+
+  
+} // get_posts()
+
 
   
   

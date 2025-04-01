@@ -258,6 +258,70 @@ class AdminRoutes {
   } // edit_user()
 
   
+  
+  
+  
+  
+  
+  
+  /**
+   * Delete a User confirmation page.
+   */
+  public function delete_user(): void {
+
+
+    $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+    $selector = Routing::get_route_vars('selector');
+    
+    
+    if ( $selector ):
+      
+      $user = $this->User->get_by('selector', $selector);
+      
+      if ( $user ):
+        
+        $cur_user = Session::get_key(['user', 'id']);
+        
+        $deleting_myself = ( $user['id'] == $cur_user );
+        
+        $Post = Post::get_instance();
+    
+        $post_count = $Post->get_posts(['author_id' => $user['id'], 'count_only' => true]);
+        
+        
+        $template_args = [
+                          'user' => $user,
+                          'post_count' => $post_count,
+                          'deleting_myself' => $deleting_myself
+                        ];
+        
+      
+        $this->get_template( ['user/delete'], null, $template_args );
+        
+      else:
+        
+        Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+        
+      endif;
+      
+    else:
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+    
+
+  } // delete_user()
+  
+  
 
   
   

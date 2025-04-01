@@ -351,6 +351,8 @@ class FormHandler {
       */
       
       
+      Routing::redirect_to( $this->Page->url_for("admin/user/delete/{$user_to_delete['selector']}") );
+      
       
       //$user_deleted = $User->delete( $user_to_delete['id'] );
 
