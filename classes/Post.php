@@ -232,27 +232,27 @@ function get_posts( array $args = [] ): array|int|false {
   ];  
 
   
-  // Merge default values with passed arguments  
   $args = array_merge( $defaults, $args );  
   
 
-  // Base query  
+  // Build base query.
   $select = $args['count_only'] ? "COUNT(*) AS post_count" : "*";
   
   $query  = "SELECT {$select} FROM `Posts`";
 
   
-  // Check if author filtering is needed
+  // Where statements are added to this array.
   $where = [];
   
   
+  // Check if author filtering is needed.
   if ( is_int( $args['author_id'] ) ):
     
     $where[] = 'author_id = :author_id';
     
   endif;
 
-  // Append WHERE clause if applicable  
+  // Combine WHERE clauses.
   if ( !empty( $where ) ):
     
     $query .= ' WHERE ' . implode( ' AND ', $where );
@@ -260,7 +260,7 @@ function get_posts( array $args = [] ): array|int|false {
   endif;
 
   
-  // Apply ordering and pagination only if not counting  
+  // Apply ordering and pagination only if not counting. 
   if ( !$args['count_only'] ):
   
     $query .= ' ORDER BY `created_at` DESC LIMIT :limit OFFSET :offset';
@@ -271,7 +271,7 @@ function get_posts( array $args = [] ): array|int|false {
   $stmt = $this->pdo->prepare( $query );
   
 
-  // Bind author if filtering by author
+  // Bind author if filtering by author.
   if ( is_int( $args['author_id'] ) ):
     
     $stmt->bindParam( ':author_id', $args['author_id'], PDO::PARAM_INT );
@@ -279,7 +279,7 @@ function get_posts( array $args = [] ): array|int|false {
   endif;
 
   
-  // Bind limit and offset only if not counting
+  // Bind limit and offset only if not counting.
   if ( !$args['count_only'] ):
 
     $stmt->bindParam( ':limit', $args['limit'], PDO::PARAM_INT );
@@ -291,7 +291,7 @@ function get_posts( array $args = [] ): array|int|false {
   $stmt->execute();
 
   
-  // Return count if counting only
+  // Return count if counting only.
   if ( $args['count_only'] ):
     
     return $stmt->fetchColumn();
@@ -299,11 +299,11 @@ function get_posts( array $args = [] ): array|int|false {
   endif;
 
   
-  // Fetch all posts  
+  // Fetch all posts.
   $posts = $stmt->fetchAll( PDO::FETCH_ASSOC );
   
 
-  // If html_content is true, parse the content with Parsedown
+  // If html_content is true, parse the content with Parsedown.
   if ( $args['html_content'] ):
     
     $Parsedown = new Parsedown();
