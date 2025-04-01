@@ -307,6 +307,9 @@ class FormHandler {
 
   /**
    * Delete a user
+   *
+   * @todo Add an extra really-delete nonce on the delete confirmation page form.
+   *        Check for that nonce here, and if it verifies perform the delete.
    */
   private function delete_user() {
     
@@ -334,40 +337,14 @@ class FormHandler {
       
     endif;
     
-    
-    
+     
     $user_to_delete = $User->get_by('selector', $posted_selector);
 
 
     if ( $user_to_delete ):
-
-      
-      /*
-      - @todo
-      - Create user delete confirmation page
-      - Check whether the user is the current logged in user
-      - Check whether the user has posts
-      - Check whether the user has comments
-      */
-      
       
       Routing::redirect_to( $this->Page->url_for("admin/user/delete/{$user_to_delete['selector']}") );
       
-      
-      //$user_deleted = $User->delete( $user_to_delete['id'] );
-
-      /*
-      if ( $user_deleted ):
-
-        Routing::redirect_with_alert( $this->Page->url_for("admin/post/list"), ['code' => '104'] );
-
-      else:
-
-        Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
-
-      endif;
-      */
-
     else:
 
       Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
