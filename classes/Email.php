@@ -23,11 +23,26 @@ class Email {
     
     
     $Config = Config::get_instance();
+
     
     $server_token = $Config->get('POSTMARK_SERVER_TOKEN');
     
     $sender = $Config->get('POSTMARK_SENDER_SIGNATURE');
     
+
+
+
+
+
+    if (
+        !$Config->get('send_email') ||
+        !$server_token ||
+        !$sender
+       ):
+
+      return false;
+
+    endif;
     
     
     $template_path = ROOT_PATH . "admin/email-templates/{$email_template}.html";
