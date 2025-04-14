@@ -30,10 +30,8 @@ class Email {
     $sender = $Config->get('POSTMARK_SENDER_SIGNATURE');
     
 
-
-
-
-
+    // If any required config vars are unset we should just
+    // bail early, since emails are either disabled or unconfigured.
     if (
         !$Config->get('send_email') ||
         !$server_token ||
