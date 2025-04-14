@@ -22,4 +22,12 @@
 
 <h2>Really?</h2>
 
-<p>[Confirmation button here]</p>
+<form id="DeleteUserForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+
+  <input type="hidden" name="form_name" value="delete-user">
+  <input type="hidden" name="selector" value="<?php echo $user['selector']; ?>">
+  <input type="hidden" name="nonce" value="<?php echo $nonce_delete; ?>">
+  <input type="hidden" name="nonce_delete_confirm" value="<?php echo $confirm_delete; ?>">
+  <button type="submit">Permanently Delete User</button>
+
+</form>

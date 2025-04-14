@@ -296,11 +296,17 @@ class AdminRoutes {
     
         $post_count = $Post->get_posts(['author_id' => $user['id'], 'count_only' => true]);
         
+
+        $nonce_delete = $this->Auth::set_nonce('delete-user');
+        $confirm_delete = $this->Auth::set_nonce('confirm-delete-user');
+
         
         $template_args = [
                           'user' => $user,
                           'post_count' => $post_count,
-                          'deleting_myself' => $deleting_myself
+                          'deleting_myself' => $deleting_myself,
+                          'nonce_delete' => $nonce_delete,
+                          'nonce_delete_confirm' => $confirm_delete, 
                         ];
         
       
