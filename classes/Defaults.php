@@ -44,6 +44,8 @@ class Defaults {
       
       // Number of MINUTES a password reset request will remain active.
       'password_reset_age' => 30,
+
+      'send_email' => false,
         
       'POSTMARK_SERVER_TOKEN' => null,
       
