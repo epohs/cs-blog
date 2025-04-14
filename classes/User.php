@@ -582,7 +582,7 @@ class User {
       
       $hashed_token = hash('sha256', $token);
       
-      $user_to_check = $this->get_by('remember_me', $hashed_token);
+      $user_to_check = $this->get_by('remember_me', $hashed_token, ['fields' => 'all']);
       
       
       // We found a user with a matching remember_me token.
