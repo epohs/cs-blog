@@ -69,6 +69,7 @@ class Post {
       $User = User::get_instance();
       
       // @todo Do better checks.
+      // Check that user exists and is at least role: author.
       
       $author_id = $post_data['author'];
       

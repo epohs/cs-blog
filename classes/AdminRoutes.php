@@ -53,7 +53,7 @@ class AdminRoutes {
 
     // If the current user is an admin load the 
     // admin dashboard, otherwise redirect home.
-    if ( $this->User->is_admin() ):
+    if ( $this->User->is_admin() || $this->User->is_author() ):
       
       $this->get_template( ['dashboard'] );
     
@@ -79,7 +79,7 @@ class AdminRoutes {
     $this->verified_user_redirect();
 
     
-    if ( !$this->User->is_admin() ):
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
       
       Routing::redirect_to( $this->Page->url_for('/') );
       
@@ -106,7 +106,7 @@ class AdminRoutes {
     $this->verified_user_redirect();
 
     
-    if ( !$this->User->is_admin() ):
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
       
       Routing::redirect_to( $this->Page->url_for('/') );
       
@@ -128,6 +128,20 @@ class AdminRoutes {
         Routing::redirect_with_alert( $this->Page->url_for('admin/dash'), ['code' => '200'] );
         
       endif;
+
+
+      if ( $this->User->is_author() ):
+
+        $current_user_id = Session::get_key(['user', 'id']);
+
+        if ( $post_to_edit['author_id'] !== $current_user_id ):
+
+          Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+
+        endif;
+
+      endif;
+
     
     else:
         
@@ -160,7 +174,7 @@ class AdminRoutes {
     $this->verified_user_redirect();
 
     
-    if ( !$this->User->is_admin() ):
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
       
       Routing::redirect_to( $this->Page->url_for('/') );
       
@@ -169,7 +183,18 @@ class AdminRoutes {
 
     $Post = Post::get_instance();
 
-    $posts = $Post->get_posts();
+
+    if ( $this->User->is_admin() ):
+
+      $posts = $Post->get_posts();
+    
+    else:
+
+      $current_user_id = Session::get_key(['user', 'id']);
+
+      $posts = $Post->get_posts(['author_id' => $current_user_id]);
+
+    endif;
     
     $this->get_template( ['post/list'], null, ['posts' => $posts] );
     

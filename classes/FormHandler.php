@@ -158,14 +158,32 @@ class FormHandler {
     
     
     Routing::nonce_redirect($this->nonce, 'new-post', 'admin/post/new');
+
+
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+
     
     $Post = Post::get_instance();
     
     $post_title = $this->post_vars['title'];
 
     $post_content = $this->post_vars['content'];
+
+    if ( $this->User->is_admin() ):
+
+      $post_content = $this->post_vars['content'] ?? null;
+
+    else:
+
+      $post_author = Session::get_key(['user', 'id']);
+
+    endif;
     
-    $new_post = $Post->new(['title' => $post_title, 'content' => $post_content]);
+    $new_post = $Post->new(['title' => $post_title, 'content' => $post_content, 'author' => $post_author]);
     
     if ( $new_post ):
       
@@ -195,6 +213,13 @@ class FormHandler {
    */
   private function edit_post() {
     
+
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+
     
     $posted_selector = $this->post_vars['selector'] ?? false;
     
@@ -215,6 +240,20 @@ class FormHandler {
 
 
     if ( $post_to_edit ):
+
+      // Authors are only allowed to edit their own posts.
+      if ( $this->User->is_author() ):
+
+        $current_user_id = Session::get_key(['user', 'id']);
+
+        if ( $post_to_edit['author_id'] !== $current_user_id ):
+
+          Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+
+        endif;
+
+      endif;
+
 
       $post_title = $this->post_vars['title'];
       

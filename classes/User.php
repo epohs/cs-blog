@@ -665,6 +665,29 @@ class User {
     return ( $this->is_logged_in() && ($this->get_role() == 'admin') );
 
   } // is_admin()
+
+
+
+
+
+
+
+
+  /**
+   * Is the current user an author user?
+   *
+   * This will govern which routes a user is able to visit
+   * and what functionality they have access to.
+   *
+   * @todo Add user_id param to test a given user.
+   *
+   * @internal Is this thorough enough?
+   */
+  public function is_author(): bool {
+
+    return ( $this->is_logged_in() && ($this->get_role() == 'author') );
+
+  } // is_author()
   
   
   
