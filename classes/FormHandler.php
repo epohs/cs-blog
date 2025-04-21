@@ -294,6 +294,13 @@ class FormHandler {
    * Delete a post
    */
   private function delete_post() {
+
+
+    if ( !$this->User->is_admin() && !$this->User->is_author() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
     
     
     $posted_selector = $this->post_vars['selector'] ?? false;
@@ -315,6 +322,21 @@ class FormHandler {
 
 
     if ( $post_to_delete ):
+      
+      
+      // Authors are only allowed to delete their own posts.
+      if ( $this->User->is_author() ):
+
+        $current_user_id = Session::get_key(['user', 'id']);
+
+        if ( $post_to_delete['author_id'] !== $current_user_id ):
+
+          Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '200'] );
+
+        endif;
+
+      endif;
+
 
       $post_deleted = $Post->delete( $post_to_delete['id'] );
 
@@ -353,6 +375,15 @@ class FormHandler {
   private function delete_user() {
     
     
+    // @todo Add this check to all forms that need admin role.
+    // This should happen before any other checks
+    if ( !$User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+    
     $posted_selector = $this->post_vars['selector'] ?? false;
     
     
@@ -368,19 +399,17 @@ class FormHandler {
     
     $User = User::get_instance();
     
-    
-    // @todo Add this check to all forms that need admin role.
-    if ( !$User->is_admin() ):
-      
-      Routing::redirect_to( $this->Page->url_for('/') );
-      
-    endif;
-    
      
     $user_to_delete = $User->get_by('selector', $posted_selector);
 
 
     if ( $user_to_delete ):
+
+      // @todo Make this process robust and safe.
+      // - Check for 'confirm-delete-user' nonce.
+      //   - If no confirmation nonce is found redirect to the confirmation page.
+      //   - If there is a confirmation nonce delete the user.
+      //     - Redirect to user list page with appropriate message.
       
       Routing::redirect_to( $this->Page->url_for("admin/user/delete/{$user_to_delete['selector']}") );
       
