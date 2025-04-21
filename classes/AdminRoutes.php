@@ -323,7 +323,7 @@ class AdminRoutes {
         
 
         $nonce_delete = $this->Auth::set_nonce('delete-user');
-        $confirm_delete = $this->Auth::set_nonce('confirm-delete-user');
+        $nonce_delete_confirm = $this->Auth::set_nonce('delete-user-confirm');
 
         
         $template_args = [
@@ -331,7 +331,7 @@ class AdminRoutes {
                           'post_count' => $post_count,
                           'deleting_myself' => $deleting_myself,
                           'nonce_delete' => $nonce_delete,
-                          'nonce_delete_confirm' => $confirm_delete, 
+                          'nonce_delete_confirm' => $nonce_delete_confirm, 
                         ];
         
       

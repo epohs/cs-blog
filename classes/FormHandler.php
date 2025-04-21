@@ -406,7 +406,7 @@ class FormHandler {
     if ( $user_to_delete ):
 
       // @todo Make this process robust and safe.
-      // - Check for 'confirm-delete-user' nonce.
+      // - Check for 'delete-user-confirm' nonce.
       //   - If no confirmation nonce is found redirect to the confirmation page.
       //   - If there is a confirmation nonce delete the user.
       //     - Redirect to user list page with appropriate message.

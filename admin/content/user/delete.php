@@ -27,7 +27,7 @@
   <input type="hidden" name="form_name" value="delete-user">
   <input type="hidden" name="selector" value="<?php echo $user['selector']; ?>">
   <input type="hidden" name="nonce" value="<?php echo $nonce_delete; ?>">
-  <input type="hidden" name="nonce_delete_confirm" value="<?php echo $confirm_delete; ?>">
+  <input type="hidden" name="nonce_delete_confirm" value="<?php echo $nonce_delete_confirm; ?>">
   <button type="submit">Permanently Delete User</button>
 
 </form>
