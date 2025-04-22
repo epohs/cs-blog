@@ -220,8 +220,11 @@ class Auth {
   /**
    * Test whether a nonce for a given action is valid against
    * the nonce saved in the session.
+   * 
+   * @todo This DOES NOT actually validate the nonce value. FIX.
+   * @todo Add a get_nonce method.
    */
-  public static function validate_nonce(string $nonce, string $action): bool {
+  public static function validate_nonce(?string $nonce, string $action): bool {
 
 
     $return = false;
