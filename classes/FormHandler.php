@@ -377,7 +377,7 @@ class FormHandler {
     
     // @todo Add this check to all forms that need admin role.
     // This should happen before any other checks
-    if ( !$User->is_admin() ):
+    if ( !$this->User->is_admin() ):
       
       Routing::redirect_to( $this->Page->url_for('/') );
       
@@ -397,10 +397,8 @@ class FormHandler {
     
     Routing::nonce_redirect($this->nonce, 'delete-user', "admin/user/edit/{$posted_selector}");
     
-    $User = User::get_instance();
-    
      
-    $user_to_delete = $User->get_by('selector', $posted_selector);
+    $user_to_delete = $this->User->get_by('selector', $posted_selector);
 
 
     if ( $user_to_delete ):
@@ -410,8 +408,34 @@ class FormHandler {
       //   - If no confirmation nonce is found redirect to the confirmation page.
       //   - If there is a confirmation nonce delete the user.
       //     - Redirect to user list page with appropriate message.
+
+      $nonce_delete_confirm = $this->post_vars['nonce_delete_confirm'];
+
+      if ( $this->Auth->validate_nonce($nonce_delete_confirm, 'delete-user-confirm') ):
+
+        $user_deleted = $this->User->delete($user_to_delete['id']);
+
+        if ( $user_deleted ):
+
+          Routing::redirect_with_alert( $this->Page->url_for("admin/user/list"), ['code' => '304'] );
+
+        else:
+
+          Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+
+        endif;
+
+      else:
       
-      Routing::redirect_to( $this->Page->url_for("admin/user/delete/{$user_to_delete['selector']}") );
+        // @internal I don't want direct access to the delete confirmation page
+        // So I will create this nonce prior to the redirect and check it manually
+        // on the confirmation page. This should stop direct access, and page refreshes.
+        // @todo Test this more thoroughly.
+        $this->Auth->set_nonce('user-delete-confirmation-page');
+
+        Routing::redirect_to( $this->Page->url_for("admin/user/delete/{$user_to_delete['selector']}") );
+
+      endif;
       
     else:
 

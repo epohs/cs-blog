@@ -303,6 +303,7 @@ class AdminRoutes {
       Routing::redirect_to( $this->Page->url_for('/') );
       
     endif;
+
     
     $selector = Routing::get_route_vars('selector');
     
@@ -312,6 +313,15 @@ class AdminRoutes {
       $user = $this->User->get_by('selector', $selector);
       
       if ( $user ):
+
+        // @todo TEMP, until get_nonce() method is added to Auth.
+        $delete_confirm_nonce = Session::get_key(['nonces', 'user-delete-confirmation-page']);
+
+        if ( !$this->Auth->validate_nonce($delete_confirm_nonce['nonce'], 'user-delete-confirmation-page') ):
+
+          Routing::redirect_to( $this->Page->url_for("admin/user/edit/{$selector}") );
+
+        endif;
         
         $cur_user = Session::get_key(['user', 'id']);
         
