@@ -315,6 +315,11 @@ class AdminRoutes {
       if ( $user ):
 
         // @todo TEMP, until get_nonce() method is added to Auth.
+        // @todo IMPORTANT! - If a visitor clicks the delete user button
+        //       and then refreshes the confirmationpage, they are redirected back
+        //       to the edit user page, which is what I want. But then if they
+        //       click the delete user button again the user is deleted without
+        //       being presented with the confirmation page. This bad. FIX.
         $delete_confirm_nonce = Session::get_key(['nonces', 'user-delete-confirmation-page']);
 
         if ( !$this->Auth->validate_nonce($delete_confirm_nonce['nonce'], 'user-delete-confirmation-page') ):
