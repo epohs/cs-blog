@@ -138,6 +138,22 @@ class User {
 
   } // get()
 
+
+
+
+
+
+
+
+  /**
+   * Delete a User row by it's ID.
+   */
+  public function delete( int $user_id ): bool {
+
+    return $this->Db->delete_row('Users', $user_id);
+
+  } // delete()
+
   
   
   
