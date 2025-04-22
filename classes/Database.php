@@ -340,6 +340,8 @@ class Database {
         // Connect to the existing database.
         $pdo = new PDO('sqlite:' . $db_file);
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+
+        $pdo->exec('PRAGMA foreign_keys = ON');
         
         // Save database connection for use throught the application.
         $this->pdo = $pdo;
