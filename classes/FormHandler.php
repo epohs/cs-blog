@@ -282,6 +282,79 @@ class FormHandler {
     
     
   } // edit_post()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Edit a User
+   */
+  private function edit_user() {
+    
+
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+
+    
+    $posted_selector = $this->post_vars['selector'] ?? false;
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( !$posted_selector ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+    
+    
+    Routing::nonce_redirect($this->nonce, 'edit-user', "admin/user/edit/{$posted_selector}");
+    
+    $User = User::get_instance();
+    
+    $user_to_edit = $User->get_by('selector', $posted_selector);
+
+
+    if ( $user_to_edit ):
+      
+      // @todo This is where I left off 04/27. 
+      // Continue by adding an update() method to the User class
+      // and fleshing this logic out to check and sanitize the values
+      // from our HTML form.
+
+      $post_title = $this->post_vars['title'];
+      
+      $post_content = $this->post_vars['content'];
+
+      $new_user_data = ['title' => $post_title, 'content' => $post_content];
+      
+      $updated_user = $User->update($post_to_edit['id'], $new_post_data);
+
+    else:
+
+      $updated_post = false;
+
+    endif;
+
+    
+    if ( $updated_post ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$updated_post['selector']}"), ['code' => '103'] );
+      
+    else:
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+    
+    
+  } // edit_user()
 
 
 

@@ -24,32 +24,63 @@
     </li>
 </ul>
 
-<?php /*
 
-<form id="EditPostForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+<hr>
 
-  <input type="hidden" name="form_name" value="edit-post">
+
+<form id="EditUserForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+
+  <input type="hidden" name="form_name" value="edit-user">
   <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
   <input type="hidden" name="selector" value="<?php echo $post['selector']; ?>">
   
   
-  <label for="PostTitle">Title</label>
-  <input type="text" name="title" value="<?php echo $post['title']; ?>" id="PostTitle">
+  <div class="form-row">
+    <label for="DisplayName">Display name</label>
+    <input type="text" name="display_name" value="<?php echo $user['display_name']; ?>" placeholder="<?php echo $User->get_display_name($user['id']); ?>" id="DisplayName">
+  </div>
   
-  <textarea name="content" id="my-text-area"><?php echo $post['content']; ?></textarea>
   
-  <button type="submit">Edit post</button>
+  <div class="form-row">
+    <label for="EmailAddress">Email Address</label>
+    <input type="text" name="email" value="<?php echo $user['email']; ?>" id="EmailAddress">
+  </div>
+    
+  
+  <div class="form-row">
+    <label for="UserRole">User Role</label>
+    <select name="role" id="UserRole">
+      <option value="user" <?php echo Utils::is_selected('user', $user['role']); ?>>User</option>
+      <option value="author" <?php echo Utils::is_selected('author', $user['role']); ?>>Author</option>
+      <option value="admin" <?php echo Utils::is_selected('admin', $user['role']); ?>>Admin</option>
+    </select>
+  </div>
+  
+  
+  <div class="form-row">
+
+    <label for="LockOut">Temporary Time Out</label>    
+    <select name="lock_out" id="LockOut">
+      <option value="" selected class="placeholder">None</option>
+      <option value="3600">1 hour</option>
+      <option value="43200">12 hours</option>
+      <option value="86400">1 day</option>
+      <option value="604800">1 week</option>
+    </select>
+
+  </div>
+    
+  
+  <div class="form-row">
+    <input type="checkbox" name="is_banned" value="<?php echo $user['is_banned']; ?>" <?php echo Utils::is_checked($user['is_banned']); ?> id="IsBanned">
+    <label for="IsBanned">User Banned?</label>
+  </div>
+  
+  <div class="form-row">
+    <button type="submit">Update User</button>
+  </div>
   
 </form>
-
-*/ ?>
-
-<ol>
-  <li>Update: email, display name, role</li>
-  <li>Trigger password reset</li>
-  <li>Ban user</li>
-  <li>Time out: 1 hour, 12 hours, 1 day, 1 week, indefinite</li>
-</ol>
 
 
 <div style="white-space: pre-line;"><?php echo var_export($user, true); ?></div>

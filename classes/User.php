@@ -1467,7 +1467,6 @@ class User {
           `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
           `last_login` DATETIME,
           `last_active` DATETIME,
-          `is_active` BOOLEAN DEFAULT 1,
           `is_verified` BOOLEAN DEFAULT 0,
           `verify_key` VARCHAR(16) UNIQUE,
           `password_reset_token` VARCHAR(64),
@@ -1475,6 +1474,7 @@ class User {
           `failed_login_attempts` INTEGER DEFAULT 0,
           `login_token`  VARCHAR(16) UNIQUE,
           `locked_until` DATETIME,
+          `is_banned` BOOLEAN DEFAULT 0,
           `role` TEXT DEFAULT "user",
           CHECK (`role` IN ("user", "author", "admin"))
         )
