@@ -69,6 +69,40 @@ class Utils {
   
   
   
+  /**
+   * Handle the logic to determine whether an HTML
+   * form checkbox is checked or not.
+   */
+  public static function is_checked($value = null): string {
+      
+    return $value ? 'checked' : '';
+    
+  } // is_checked()
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Handle the logic to determine whether an HTML
+   * form select option is selected or not.
+   */
+  public static function is_selected($value, $current): string {
+    
+    return (string) $value === (string) $current ? 'selected' : '';
+    
+  } // is_selected()
+
+
+  
+  
+  
+  
+  
+  
+  
   
   /**
    * Take a string with any type of character and return
