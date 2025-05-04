@@ -137,6 +137,86 @@ class User {
     return $user;
 
   } // get()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Update a User.
+   *
+   * @todo Finish this.
+   */
+  public function update( int $user_id, array $user_data ): array|false {
+    
+    // Define columns that should never be updated
+    $protected_columns = [
+        'id',
+        'selector',
+        'created_at'
+    ];
+
+    // Fetch column names from the Users table
+    $stmt = $this->pdo->query("PRAGMA table_info(Users)");
+    $columns = $stmt->fetchAll(PDO::FETCH_COLUMN, 1);
+
+    // Filter out invalid or protected columns
+    $editable_columns = array_diff($columns, $protected_columns);
+    $valid_updates = array_intersect_key($post_data, array_flip($editable_columns));
+
+    // If there are no valid updates, return false
+    if ( empty($valid_updates) ):
+      
+      return false;
+      
+    endif;
+
+    // Generate SQL for updating the post
+    // @todo Change this to $columns_to_update?
+    $set_clauses = [];
+    
+    foreach ($valid_updates as $column => $value):
+      
+      $set_clauses[] = "`$column` = :$column";
+      
+    endforeach;
+
+    // Always update the `updated_at` column
+    // @todo Should updated_at be a protected column?
+    $set_clauses[] = "`updated_at` = CURRENT_TIMESTAMP";
+
+    $query = "UPDATE `Users` SET " . implode(", ", $set_clauses) . " WHERE `id` = :user_id";
+
+    $stmt = $this->pdo->prepare($query);
+    
+
+    // Bind valid parameters, casting as either INT or STR.
+    foreach ($valid_updates as $column => &$value):
+      
+      $param_type = ( is_numeric($value) && ctype_digit(strval($value)) ) ? PDO::PARAM_INT : PDO::PARAM_STR;
+      
+      $stmt->bindValue(":$column", $value, $param_type);
+      
+    endforeach;
+    
+
+    $stmt->bindParam(":user_id", $post_id, PDO::PARAM_INT);
+
+
+    if ( !$stmt->execute() ):
+      
+      return false;
+      
+    endif;
+    
+
+    return $this->get($user_id);
+    
+    
+  } // update()
 
 
 
@@ -243,9 +323,9 @@ class User {
     
     
     $defaults = [
-      'is_active' => true,
       'is_verified' => true,
       'is_locked_out' => false,
+      'is_banned' => false,
       'fields' => 'safe',
       'limit' => 10, // @todo This should be a setting
       'offset' => 0
@@ -267,8 +347,8 @@ class User {
 
 
     $query = "SELECT * FROM `Users` 
-              WHERE `is_active` = :is_active
-                AND `is_verified` = :is_verified
+              WHERE `is_verified` = :is_verified
+                AND `is_banned` = :is_banned
                 {$locked_cond}
               ORDER BY `created_at` 
               ASC LIMIT :limit OFFSET :offset";
@@ -276,8 +356,8 @@ class User {
     $stmt = $this->pdo->prepare($query);
 
     
-    $stmt->bindParam(':is_active', $args['is_active'], PDO::PARAM_BOOL);
     $stmt->bindParam(':is_verified', $args['is_verified'], PDO::PARAM_BOOL);
+    $stmt->bindParam(':is_banned', $args['is_banned'], PDO::PARAM_BOOL);
     $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
     $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
 

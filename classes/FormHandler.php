@@ -327,15 +327,41 @@ class FormHandler {
       // Continue by adding an update() method to the User class
       // and fleshing this logic out to check and sanitize the values
       // from our HTML form.
-
-      $post_title = $this->post_vars['title'];
+      // $todo Figure out a way to indicate multiple form errors.
       
-      $post_content = $this->post_vars['content'];
-
-      $new_user_data = ['title' => $post_title, 'content' => $post_content];
       
-      $updated_user = $User->update($post_to_edit['id'], $new_post_data);
-
+      $updated_user_data = [];
+      
+      
+      if ( $this->post_vars['display_name'] ):
+        
+        $updated_user_data['display_name'] = $this->post_vars['display_name'];
+        
+      endif;
+      
+      
+      if ( $this->post_vars['email'] ):
+        
+        $is_valid_email = filter_var($this->post_vars['email'], FILTER_VALIDATE_EMAIL);
+        
+        if ( $is_valid_email && !$this->User->user_exists($user_email) ):
+          
+          $updated_user_data['email'] = $this->post_vars['email'];
+          
+        endif;
+        
+      endif;
+      
+      
+      
+      
+      debug_log('UPDATE USER:');
+      debug_log( var_export($updated_user_data, true) );
+      
+      //$updated_user = $User->update($user_to_edit['id'], $updated_user_data);
+      $updated_user = true;
+      
+      
     else:
 
       $updated_post = false;
