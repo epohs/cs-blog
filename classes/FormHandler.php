@@ -427,7 +427,7 @@ class FormHandler {
       
     else:
       
-      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '301'] );
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
       
     endif;
     
