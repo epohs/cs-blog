@@ -330,6 +330,14 @@ class Alerts {
           $msg_text = $session_alert['text'] ?? 'Post deleted.';
 
           break;
+          
+        case '106':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'User updated.';
+
+          break;
         
         // Alerts in the 200 range are related to Posts.
         case '200':

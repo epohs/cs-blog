@@ -422,7 +422,8 @@ class FormHandler {
     
     if ( $updated_user ):
       
-      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$updated_user['selector']}"), ['code' => '103'] );
+      // @todo Change $user_to_edit to $updated_user.
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$user_to_edit['selector']}"), ['code' => '106'] );
       
     else:
       
