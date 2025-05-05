@@ -348,6 +348,14 @@ class Alerts {
           $msg_text = $session_alert['text'] ?? 'Bad user selector.';
 
           break;
+          
+        case '301':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Errors editing user.';
+
+          break;
         
         case '304':
           

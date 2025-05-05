@@ -56,6 +56,7 @@ class FormHandler {
     
     
     // Users
+    $this->add_form('edit-user', 'edit_user');
     $this->add_form('delete-user', 'delete_user');
     
     
@@ -318,7 +319,11 @@ class FormHandler {
     
     $User = User::get_instance();
     
+    debug_log('Posted user selector: ' . var_export($posted_selector, true));
+    
     $user_to_edit = $User->get_by('selector', $posted_selector);
+    
+    debug_log('user_to_edit: ' . var_export($user_to_edit, true));
 
 
     if ( $user_to_edit ):
@@ -333,22 +338,68 @@ class FormHandler {
       $updated_user_data = [];
       
       
-      if ( $this->post_vars['display_name'] ):
+      if ( isset($this->post_vars['display_name']) ):
         
+        // @todo Create a validate_display_name() function.
         $updated_user_data['display_name'] = $this->post_vars['display_name'];
         
       endif;
       
       
-      if ( $this->post_vars['email'] ):
+      if ( isset($this->post_vars['email']) ):
         
         $is_valid_email = filter_var($this->post_vars['email'], FILTER_VALIDATE_EMAIL);
         
-        if ( $is_valid_email && !$this->User->user_exists($user_email) ):
+        // @todo Invalid email, and email exists should be two separate errors.
+        if ( $is_valid_email && !$this->User->user_exists($this->post_vars['email']) ):
           
           $updated_user_data['email'] = $this->post_vars['email'];
           
         endif;
+        
+      endif;
+      
+      
+      
+      if ( isset($this->post_vars['role']) && ( $this->post_vars['role'] != $user_to_edit['role'] ) ):
+        
+        // @todo Create a validate_user_role() function.
+        $updated_user_data['role'] = $this->post_vars['role'];
+        
+      endif;
+      
+      
+      
+      if ( $this->post_vars['lock_out'] ):
+        
+        
+        $new_lockout = ( is_numeric($this->post_vars['lock_out']) ) ? int_val($this->post_vars['lock_out']) : false;
+        
+        
+        if ( $new_lockout && ( $new_lockout >= 3600 && $new_lockout <= 604800) ):
+          
+          $now = new DateTime('now', new DateTimeZone('UTC'));
+          
+          $new_locked_until = $now->modify("+{$new_lockout} seconds");
+    
+          // @todo Create a validate_user_role() function.
+          $updated_user_data['locked_until'] = $this->post_vars['locked_until'];
+          
+        endif;
+        
+        
+      endif;
+      
+      
+      
+      if ( isset($this->post_vars['is_banned']) ):
+        
+        $is_banned = ( 
+                      is_numeric($this->post_vars['is_banned']) &&
+                      $this->post_vars['is_banned']
+                     ) ? 1 : 0;
+          
+        $updated_user_data['is_banned'] = $this->post_vars['is_banned'];
         
       endif;
       
@@ -359,23 +410,23 @@ class FormHandler {
       debug_log( var_export($updated_user_data, true) );
       
       //$updated_user = $User->update($user_to_edit['id'], $updated_user_data);
-      $updated_user = true;
+      $updated_user = $user_to_edit['id'];
       
       
     else:
 
-      $updated_post = false;
+      $updated_user = false;
 
     endif;
 
     
-    if ( $updated_post ):
+    if ( $updated_user ):
       
-      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$updated_post['selector']}"), ['code' => '103'] );
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$updated_user['selector']}"), ['code' => '103'] );
       
     else:
       
-      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '301'] );
       
     endif;
     

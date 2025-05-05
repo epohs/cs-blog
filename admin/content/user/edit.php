@@ -32,7 +32,7 @@
 
   <input type="hidden" name="form_name" value="edit-user">
   <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
-  <input type="hidden" name="selector" value="<?php echo $post['selector']; ?>">
+  <input type="hidden" name="selector" value="<?php echo $user['selector']; ?>">
   
   
   <div class="form-row">
