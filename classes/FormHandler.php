@@ -370,11 +370,15 @@ class FormHandler {
       
       
       
+      // @todo Ensure that this logs the user out!
       if ( $this->post_vars['lock_out'] ):
         
         
-        $new_lockout = ( is_numeric($this->post_vars['lock_out']) ) ? int_val($this->post_vars['lock_out']) : false;
+        $new_lockout = ( is_numeric($this->post_vars['lock_out']) ) ? intval($this->post_vars['lock_out']) : false;
         
+
+        
+        debug_log('new_lockout:' . var_export($new_lockout, true) );        
         
         if ( $new_lockout && ( $new_lockout >= 3600 && $new_lockout <= 604800) ):
           
@@ -382,8 +386,9 @@ class FormHandler {
           
           $new_locked_until = $now->modify("+{$new_lockout} seconds");
     
-          // @todo Create a validate_user_role() function.
-          $updated_user_data['locked_until'] = $this->post_vars['locked_until'];
+          $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
+          
+          $updated_user_data['locked_until'] = $new_locked_until;
           
         endif;
         
@@ -409,8 +414,8 @@ class FormHandler {
       debug_log('UPDATE USER:');
       debug_log( var_export($updated_user_data, true) );
       
-      //$updated_user = $User->update($user_to_edit['id'], $updated_user_data);
-      $updated_user = $user_to_edit['id'];
+      $updated_user = $User->update($user_to_edit['id'], $updated_user_data);
+      //$updated_user = $user_to_edit['id'];
       
       
     else:
@@ -651,13 +656,16 @@ class FormHandler {
           ):
           
 
-        $locked_until = $this->User->extend_lockout($user_to_login);
+        $extended_locked_until = $this->User->extend_lockout($user_to_login);
+        
+        $locked_until = ( $extended_locked_until ) ? $extended_locked_until : $user_to_login['locked_until'];
+        
       
         $retry_after_str = Utils::format_date($locked_until);
       
         $retry_after_header = Utils::format_date($locked_until, 'D, d M Y H:i:s') . ' GMT';
         
-        $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
+        $err_msg = "You're timed out. Try again after {$retry_after_str}.";
       
       
         header("Retry-After: {$retry_after_header}");

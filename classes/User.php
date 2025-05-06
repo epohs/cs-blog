@@ -165,7 +165,7 @@ class User {
 
     // Filter out invalid or protected columns
     $editable_columns = array_diff($columns, $protected_columns);
-    $valid_updates = array_intersect_key($post_data, array_flip($editable_columns));
+    $valid_updates = array_intersect_key($user_data, array_flip($editable_columns));
 
     // If there are no valid updates, return false
     if ( empty($valid_updates) ):
@@ -189,7 +189,8 @@ class User {
     $set_clauses[] = "`updated_at` = CURRENT_TIMESTAMP";
 
     $query = "UPDATE `Users` SET " . implode(", ", $set_clauses) . " WHERE `id` = :user_id";
-
+    
+    
     $stmt = $this->pdo->prepare($query);
     
 
@@ -203,7 +204,7 @@ class User {
     endforeach;
     
 
-    $stmt->bindParam(":user_id", $post_id, PDO::PARAM_INT);
+    $stmt->bindParam(":user_id", $user_id, PDO::PARAM_INT);
 
 
     if ( !$stmt->execute() ):

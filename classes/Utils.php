@@ -233,7 +233,7 @@ class Utils {
   * @param $format string Return datetime format.
   * @param $tz string Return datetime time zone.
   */
-  public static function format_date( $time = null, ?string $format = null, ?string $tz = null ): string {
+  public static function format_date( $time = null, ?string $format = null, ?string $tz = null ): string|false {
     
     
     $Config = Config::get_instance();
@@ -261,6 +261,10 @@ class Utils {
     elseif ( $time instanceof DateTime ):
 
       $date = $time;
+      
+    else:
+      
+      return false;
 
     endif;
     
