@@ -61,6 +61,7 @@
 
     <label for="LockOut">Temporary Time Out</label>    
     <select name="lock_out" id="LockOut">
+      <option value="-1">Remove time out</option>
       <option value="" selected class="placeholder">None</option>
       <option value="3600">1 hour</option>
       <option value="43200">12 hours</option>
@@ -72,7 +73,7 @@
     
   
   <div class="form-row">
-    <input type="checkbox" name="is_banned" value="<?php echo $user['is_banned']; ?>" <?php echo Utils::is_checked($user['is_banned']); ?> id="IsBanned">
+    <input type="checkbox" name="is_banned" value="1" <?php echo Utils::is_checked($user['is_banned']); ?> id="IsBanned">
     <label for="IsBanned">User Banned?</label>
   </div>
   

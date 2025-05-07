@@ -328,10 +328,6 @@ class FormHandler {
 
     if ( $user_to_edit ):
       
-      // @todo This is where I left off 04/27. 
-      // Continue by adding an update() method to the User class
-      // and fleshing this logic out to check and sanitize the values
-      // from our HTML form.
       // $todo Figure out a way to indicate multiple form errors.
       
       
@@ -371,24 +367,31 @@ class FormHandler {
       
       
       // @todo Ensure that this logs the user out!
-      if ( $this->post_vars['lock_out'] ):
+      if ( isset($this->post_vars['lock_out']) ):
         
         
-        $new_lockout = ( is_numeric($this->post_vars['lock_out']) ) ? intval($this->post_vars['lock_out']) : false;
-        
-
-        
-        debug_log('new_lockout:' . var_export($new_lockout, true) );        
-        
-        if ( $new_lockout && ( $new_lockout >= 3600 && $new_lockout <= 604800) ):
+        if ( $this->post_vars['lock_out'] === "-1" ):
           
-          $now = new DateTime('now', new DateTimeZone('UTC'));
+          $updated_user_data['locked_until'] = null;
           
-          $new_locked_until = $now->modify("+{$new_lockout} seconds");
-    
-          $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
+        else:
           
-          $updated_user_data['locked_until'] = $new_locked_until;
+          
+          $new_lockout = ( is_numeric($this->post_vars['lock_out']) ) ? intval($this->post_vars['lock_out']) : false;
+          
+          
+          if ( $new_lockout && ( $new_lockout >= 3600 && $new_lockout <= 604800) ):
+            
+            $now = new DateTime('now', new DateTimeZone('UTC'));
+            
+            $new_locked_until = $now->modify("+{$new_lockout} seconds");
+      
+            $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
+            
+            $updated_user_data['locked_until'] = $new_locked_until;
+            
+          endif;
+          
           
         endif;
         
@@ -403,9 +406,35 @@ class FormHandler {
                       is_numeric($this->post_vars['is_banned']) &&
                       $this->post_vars['is_banned']
                      ) ? 1 : 0;
+                     
+                     
+        debug_log('is_banned:' . var_export($is_banned, true) );          
           
-        $updated_user_data['is_banned'] = $this->post_vars['is_banned'];
+        $updated_user_data['is_banned'] = $is_banned;
+      
+      // If the is_banned field is unset that means it is unchecked.
+      // If the user being edited is banned, and that field is unchecked
+      // we should unban this user.
+      // @todo Rethink this strategy. We don't want to accidentally unban.
+      elseif ( !isset($this->post_vars['is_banned']) && $user_to_edit['is_banned'] ):
         
+        $updated_user_data['is_banned'] = 0;
+        
+      endif;
+      
+      
+      
+      
+      // If the user is banned or locked out we should
+      // force them to be logged out.
+      if (
+          ( isset($updated_user_data['is_banned']) && $updated_user_data['is_banned'] ) ||
+          isset($updated_user_data['locked_until'])
+         ):
+         
+        $this->User->reset_login_token($user_to_edit['id']);
+        $this->User->delete_remember_me($user_to_edit['id']);
+         
       endif;
       
       
@@ -644,6 +673,17 @@ class FormHandler {
     
     
     if ( $user_to_login ):
+      
+      
+      // If the user is banned there are no other checks needed.
+      // Redirect with an error.
+      if ( isset($user_to_login['is_banned']) && $user_to_login['is_banned'] ):
+        
+        Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '000'] );
+        
+      endif;
+      
+      
 
       // Check whether the `locked_until` column is set to a 
       // date in the future for this user. If it is, this

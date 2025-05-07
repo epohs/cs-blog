@@ -226,6 +226,14 @@ class Alerts {
       // set of codes. If it doesn't match one of them it is an invalid message.
       switch ( $querystring_code ):
       
+        case '000':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'You are no longer welcome here.';
+
+          break;
+      
         case '001':
           
           $has_alert = true;
