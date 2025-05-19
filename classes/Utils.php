@@ -147,7 +147,7 @@ class Utils {
   /**
   * Test whether a string is is a valid datetime AND matches a specific format.
   */
-  public static function is_valid_datetime(string $datetime, string $format = 'Y-m-d H:i:s'): bool {
+  public static function is_valid_datetime(?string $datetime, string $format = 'Y-m-d H:i:s'): bool {
     
     $dt = DateTime::createFromFormat($format, $datetime);
     
