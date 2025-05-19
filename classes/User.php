@@ -1134,7 +1134,7 @@ class User {
    *
    * @internal Should this be JSON in a single column?
    */
-  public function set_password_reset_token( int $user_id ): string|false {
+  public function set_password_reset_token( int $user_id ): array|false {
 
     $now = new DateTime('now', new DateTimeZone('UTC'));
 
@@ -1175,7 +1175,7 @@ class User {
       // eligible for a new password reset.
       $new_reset_token = $this->Db->get_unique_column_val('Users', 'password_reset_token', ['min_len' => 16]);
 
-      $reset_started_str = Utils::format_date($now, 'Y-m-d H:i:s');
+      $reset_started_str = Utils::format_date($now, 'Y-m-d H:i:s', 'UTC');
 
 
       $is_good_token = $this->set_column('password_reset_token', $new_reset_token, $user_id);
@@ -1183,7 +1183,7 @@ class User {
       $is_good_date = $this->set_column('password_reset_started', $reset_started_str, $user_id);
 
       
-      return ( $is_good_token && $is_good_date );
+      return ( $is_good_token && $is_good_date ) ? ['token' => $new_reset_token, 'started' => $reset_started_str] : false;
       
 
     else:
