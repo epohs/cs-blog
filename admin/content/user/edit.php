@@ -61,7 +61,11 @@
 
     <label for="LockOut">Temporary Time Out</label>    
     <select name="lock_out" id="LockOut">
+      <?php if (
+          Utils::is_valid_datetime($user['locked_until']) &&
+          Utils::is_future_datetime($user['locked_until']) ): ?>
       <option value="-1">Remove time out</option>
+      <?php endif; ?>
       <option value="" selected class="placeholder">None</option>
       <option value="3600">1 hour</option>
       <option value="43200">12 hours</option>
