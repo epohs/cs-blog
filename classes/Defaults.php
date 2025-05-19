@@ -40,10 +40,11 @@ class Defaults {
       // Number of DAYS the remember_me token should last.
       'remember_me_age' => 30,
 
+      // Minimum character length required for a password.
       'password_min_length' => 8,
       
       // Number of MINUTES a password reset request will remain active.
-      'password_reset_age' => 30,
+      'password_reset_age' => 180,
 
       'send_email' => false,
         
