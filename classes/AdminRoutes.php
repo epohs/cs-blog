@@ -275,9 +275,10 @@ class AdminRoutes {
 
     
     $nonce = $this->Auth::set_nonce('edit-user');
+    $nonce_pass_reset = $this->Auth::set_nonce('user-pass-reset');
     $nonce_delete = $this->Auth::set_nonce('delete-user');
     
-    $this->get_template( ['user/edit'], null, ['nonce' => $nonce, 'nonce_delete' => $nonce_delete, 'user' => $user_to_edit] );
+    $this->get_template( ['user/edit'], null, ['nonce' => $nonce, 'nonce_pass_reset' => $nonce_pass_reset, 'nonce_delete' => $nonce_delete, 'user' => $user_to_edit] );
     
 
   } // edit_user()

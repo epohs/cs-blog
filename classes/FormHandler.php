@@ -58,6 +58,7 @@ class FormHandler {
     // Users
     $this->add_form('edit-user', 'edit_user');
     $this->add_form('delete-user', 'delete_user');
+    $this->add_form('trigger-pass-reset', 'reset_user_pass');
     
     
     // User Auth
@@ -472,9 +473,109 @@ class FormHandler {
 
 
 
+  
+  
+  
+  /**
+   * Trigger a password reset for a User.
+   */
+  private function reset_user_pass() {
+    
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+
+    $posted_selector = $this->post_vars['selector'] ?? false;
+    
+    
+    // @todo Add a function to apply basic validation to a selector
+    if ( !$posted_selector ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+    
+    
+    Routing::nonce_redirect($this->nonce, 'user-pass-reset', "admin/user/edit/{$posted_selector}");
+        
+        
+    $user_to_reset = $this->User->get_by('selector', $posted_selector);
+    
+    
+    if ( !$user_to_reset ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/dash"), ['code' => '300'] );
+      
+    endif;
+
+
+    // If the email address entered is a valid looking email
+    // address then move forward, otherwise redirect back to
+    // the forgot password page with an error.
+    if ( !filter_var($user_to_reset['email'], FILTER_VALIDATE_EMAIL) ):
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$user_to_reset['selector']}"), ['code' => '006'] );
+
+    endif;
+    
+    
+    
+    // A User with a valid email adress was found. Set the reset password token.
+    $new_pass_reset = $this->User->set_password_reset_token( $user_to_reset['id'] );
+    
+    
+    if ( is_array($new_pass_reset) ):
+      
+      $reset_started = new DateTime($new_pass_reset['started'], new DateTimeZone('UTC'));
+      
+      $Config = Config::get_instance();
+      
+      $password_reset_age = $Config->get('password_reset_age');
+      
+      $expiration_time = $reset_started->modify("+{$password_reset_age} minutes");
+      
+      $expiration_time = Utils::format_date($expiration_time);
+      
+      
+      // @todo Send password reset email if SEND_EMAIL config is true.
+      // @todo Continue on this til it's done.
+      $email_vars = [
+        'to' => $user_to_reset['email'],
+        'subject' => 'Password reset on ' . $Config->get('site_name'),
+        'user_name' => $this->User->get_display_name($user_to_reset['selector']),
+        'site_name' => $Config->get('site_name'),
+        'site_url' => $Config->get('site_root'),
+        'reset_key' => $new_pass_reset['token'],
+        'expiration_time' => $expiration_time
+      ];
+      
+      Email::send('password-reset', $email_vars);
+      
+    
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$user_to_reset['selector']}"), ['code' => '107'] );
+  
+    else:
+      
+      debug_log("Password reset on {$user_to_reset['id']} failed due to bad token creation.");
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$user_to_reset['selector']}"), ['code' => '070'] );
+      
+    endif;
+    
+    
+  } // reset_user_pass()
+  
+  
+  
+  
 
 
 
+  
   /**
    * Delete a post
    */

@@ -91,6 +91,16 @@
 <hr>
 
 
+<form id="TriggerPassReset" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
+
+  <input type="hidden" name="form_name" value="trigger-pass-reset">
+  <input type="hidden" name="selector" value="<?php echo $user['selector']; ?>">
+  <input type="hidden" name="nonce" value="<?php echo $nonce_pass_reset; ?>">
+  <button type="submit">Send password reset</button>
+
+</form>
+
+
 <form id="DeleteUserForm" method="POST" action="<?php echo $Page->url_for('form-handler'); ?>">
 
   <input type="hidden" name="form_name" value="delete-user">

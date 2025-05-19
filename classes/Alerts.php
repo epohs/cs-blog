@@ -346,6 +346,14 @@ class Alerts {
           $msg_text = $session_alert['text'] ?? 'User updated.';
 
           break;
+          
+        case '107':
+          
+          $has_alert = true;
+
+          $msg_text = $session_alert['text'] ?? 'Password reset started.';
+
+          break;
         
         // Alerts in the 200 range are related to Posts.
         case '200':
