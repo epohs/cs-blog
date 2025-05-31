@@ -35,6 +35,61 @@ class Category {
   } // __construct()
 
 
+  
+  
+  
+  
+  
+  
+  /*
+  
+  // Get posts by category ID
+  
+  SELECT DISTINCT Posts.*
+  FROM Posts, json_each(Posts.categories)
+  WHERE json_valid(Posts.categories)
+    AND CAST(json_each.value AS INTEGER) = 3;
+  
+  */
+  
+  
+  
+  
+  
+  
+  
+  
+  
+  /*
+  
+  // Get all posts that are uncategorized
+    
+    
+  SELECT DISTINCT Posts.*
+  FROM Posts
+  LEFT JOIN json_each(Posts.categories)
+    ON json_valid(Posts.categories)
+  WHERE NOT json_valid(Posts.categories)
+   OR json_array_length(Posts.categories) = 0
+   OR (
+     json_array_length(Posts.categories) > 0
+     AND Posts.id IN (
+       SELECT Posts.id
+       FROM Posts
+       JOIN json_each(Posts.categories)
+         ON json_valid(Posts.categories)
+       LEFT JOIN Categories
+         ON Categories.id = CAST(json_each.value AS INTEGER)
+       WHERE Categories.id IS NULL
+       GROUP BY Posts.id
+       HAVING COUNT(*) = json_array_length(Posts.categories)
+     )
+   );
+
+  */
+  
+  
+  
 
   
   
