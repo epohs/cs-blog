@@ -402,6 +402,10 @@ class Database {
     if ( $pdo ):
     
       User::make_tables( $pdo );
+    
+      Post::make_tables( $pdo );
+    
+      Category::make_tables( $pdo );
       
       RateLimits::make_tables( $pdo );
       

@@ -116,8 +116,7 @@ class AdminRoutes {
     $selector = Routing::get_route_vars('selector');
     
     
-    // @todo Add a function to apply basic validation to a selector
-    if ( $selector && strlen($selector) >= 5 ):
+    if ( Utils::is_valid_selector($selector) ):
     
       $Post = Post::get_instance();
       
@@ -254,8 +253,7 @@ class AdminRoutes {
     $selector = Routing::get_route_vars('selector');
     
     
-    // @todo Add a function to apply basic validation to a selector
-    if ( $selector && strlen($selector) >= 5 ):
+    if ( Utils::is_valid_selector($selector) ):
     
       $User = User::get_instance();
       
