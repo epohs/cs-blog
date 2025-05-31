@@ -135,6 +135,71 @@ class Utils {
     return $string;
     
   } // make_sluggy()
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Apply basic validation to a selector string.
+   */
+  public static function is_valid_selector(?string $str, array $args = []): bool {
+    
+    
+    $defaults = [
+      'min_len'        => 5,
+      'max_len'        => 128,
+      'allow_special'  => false,
+    ];
+  
+    $args = array_merge($defaults, $args);
+    
+    
+    if ( !is_string($str) ):
+      
+      return false;
+      
+    endif;
+    
+  
+    $length = mb_strlen($str);
+    
+  
+    if ($length < $args['min_len'] || $length > $args['max_len']):
+  
+      return false;
+  
+    endif;
+    
+  
+    if ($args['allow_special']):
+      
+      // Allow any non-whitespace characters (no spaces)
+      if (preg_match('/\s/', $str)):
+        
+        return false;
+        
+      endif;
+      
+    else:
+      
+      // Only allow alphanumeric characters, no spaces or special chars
+      if (!preg_match('/^[a-zA-Z0-9]+$/u', $str)):
+        
+        return false;
+        
+      endif;
+      
+    endif;
+  
+    
+    return true;
+    
+    
+  } // is_valid_selector()
+
 
   
   
