@@ -23,6 +23,7 @@ class Defaults {
 
     $this->defaults = [
   
+      // If true, error messages will be logged to a text file.
       'debug' => true,
       
       'public' => false,
@@ -36,6 +37,9 @@ class Defaults {
       'timezone' => 'America/New_York',  
       
       'date_format' => 'F j, Y, g:i a',
+        
+      // If true, Posts with no category will appear in blog roll.
+      'show_uncategorized_posts' => false,
       
       // Number of DAYS the remember_me token should last.
       'remember_me_age' => 30,

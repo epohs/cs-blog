@@ -367,6 +367,39 @@ class AdminRoutes {
   } // delete_user()
   
   
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * List All Categories
+   */
+  public function list_categories(): void {
+
+
+    $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+    
+    
+    $Category = Category::get_instance();
+
+    $categories = $Category->get_categories();
+    
+    $this->get_template( ['category/list'], null, ['categories' => $categories] );
+    
+
+  } // list_categories()
+  
+  
 
   
   

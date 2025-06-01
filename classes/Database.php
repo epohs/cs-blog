@@ -172,6 +172,7 @@ class Database {
   public function delete_row(string $table, int $id): bool {
     
     // Define allowed table names
+    // @todo Make this a shared class property
     $valid_tables = ['Posts', 'Users', 'Comments'];
 
     if ( !in_array($table, $valid_tables) ):

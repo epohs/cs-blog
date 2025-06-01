@@ -41,6 +41,50 @@ class Category {
   
   
   
+  /**
+   * 
+   */
+  function get_categories( array $args = [] ): array|false {
+    
+    
+    $defaults = [
+      'order_by' => 'name',
+      'limit' => 10, // @todo This should be a setting
+      'offset' => 0
+    ];
+
+    $args = array_merge($defaults, $args);
+    
+    
+
+
+    $query = "SELECT * FROM `Categories`
+              ORDER BY :order_by
+              ASC LIMIT :limit OFFSET :offset";
+    
+    $stmt = $this->pdo->prepare($query);
+
+    
+    $stmt->bindParam(':order_by', $args['order_by'], PDO::PARAM_STR);
+    $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
+    $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
+
+    $stmt->execute();
+
+
+    // Fetch Users
+    $categories = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    
+    return $categories;
+
+  } // get_categories()
+  
+  
+  
+  
+  
+  
   /*
   
   // Get posts by category ID

@@ -61,6 +61,11 @@ class FormHandler {
     $this->add_form('trigger-pass-reset', 'reset_user_pass');
     
     
+    // Categories
+    $this->add_form('new-category', 'new_category');
+    
+    
+    
     // User Auth
     $this->add_form('login', 'login');
     $this->add_form('verify', 'verify');
@@ -515,7 +520,7 @@ class FormHandler {
 
     // If the email address entered is a valid looking email
     // address then move forward, otherwise redirect back to
-    // the forgot password page with an error.
+    // the user edit page with an error.
     if ( !filter_var($user_to_reset['email'], FILTER_VALIDATE_EMAIL) ):
       
       Routing::redirect_with_alert( $this->Page->url_for("admin/user/edit/{$user_to_reset['selector']}"), ['code' => '006'] );
@@ -541,8 +546,6 @@ class FormHandler {
       $expiration_time = Utils::format_date($expiration_time);
       
       
-      // @todo Send password reset email if SEND_EMAIL config is true.
-      // @todo Continue on this til it's done.
       $email_vars = [
         'to' => $user_to_reset['email'],
         'subject' => 'Password reset on ' . $Config->get('site_name'),
@@ -568,6 +571,53 @@ class FormHandler {
     
     
   } // reset_user_pass()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * @todo Do some validation on name and description.
+   */
+  private function new_category(): void {
+    
+    
+    Routing::nonce_redirect($this->nonce, 'new-category', 'admin/category/new');
+
+
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+
+    
+    $Category = Category::get_instance();
+    
+    $cat_name = $this->post_vars['name'];
+
+    $cat_desc = $this->post_vars['description'];
+
+    
+    $new_category = $Category->new(['name' => $cat_name, 'description' => $cat_desc]);
+    
+    if ( $new_category ):
+      
+      $category_selector = $Category->get_selector($new_category);
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/category/edit/{$category_selector}"), ['code' => '108'] );
+      
+    else:
+      
+      Routing::redirect_with_alert( $this->Page->url_for("admin/category/new"), ['code' => '070'] );
+      
+    endif;
+    
+    
+  } // new_category()
   
   
   
