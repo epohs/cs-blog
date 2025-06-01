@@ -89,6 +89,9 @@ class Database {
   /**
    * Test whether a row exists by selecting a row that matches 
    * a selected column with a given value.
+   * 
+   * @todo We shouldn't cast $value as a string when the column type
+   *      is an INT. 
    */
   public function row_exists(string $table, string $column = 'id', $value = null): bool {
     
