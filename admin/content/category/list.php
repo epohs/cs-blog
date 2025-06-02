@@ -24,7 +24,7 @@
 
   <p>No categories to list.</p>
   
-  <p>By default Posts with no Category will not appear in the blog roll. If you don't want to use Categories, you can enable uncategorized Posts by setting the '<strong>show_uncategorized_posts</strong>' setting to true in your config.php.</p>
+  <p>By default Posts with no Category will not appear in the public blog roll. If you don't want to use Categories, you can enable displaying uncategorized Posts by setting the '<strong>show_uncategorized_posts</strong>' setting to true in your config.php.</p>
   
   <p>Otherwise, <a href="<?php echo $Page->url_for('admin/category/new') ?>">create a new Category</a> now.</p>
 

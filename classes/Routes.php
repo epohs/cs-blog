@@ -62,6 +62,7 @@ class Routes {
     $this->add_route('admin/user/delete/{selector}', $this->AdminRoutes, 'delete_user');
     
     // Categories
+    $this->add_route('admin/category/new', $this->AdminRoutes, 'new_category');
     $this->add_route('admin/category/list', $this->AdminRoutes, 'list_categories');
     
     // User Auth

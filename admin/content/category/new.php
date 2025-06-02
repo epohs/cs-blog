@@ -9,11 +9,11 @@
   <input type="hidden" name="nonce" value="<?php echo $nonce; ?>">
   
   
-  <label for="CategoryName">Name</label>
-  <input type="text" name="name" value="" id="CategoryName">
+  <label for="CategoryName">Name</label><br>
+  <input type="text" name="name" value="" id="CategoryName" style="width: 100%;">
   
   <label for="CategoryDescription">Brief description</label>
-  <textarea name="name" id="CategoryDescription"></textarea>
+  <textarea name="name" id="CategoryDescription" style="display: block; width: 100%;"></textarea>
   
   <button type="submit">Submit</button>
   

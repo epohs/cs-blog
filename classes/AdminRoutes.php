@@ -400,6 +400,36 @@ class AdminRoutes {
   } // list_categories()
   
   
+  
+  
+  
+  
+  
+  
+  /**
+   * Create a new Category.
+   */
+  public function new_category(): void {
+
+
+    $this->verified_user_redirect();
+
+    
+    if ( !$this->User->is_admin() ):
+      
+      Routing::redirect_to( $this->Page->url_for('/') );
+      
+    endif;
+      
+    
+    $nonce = $this->Auth::set_nonce('new-category');
+    
+    $this->get_template( ['category/new'], null, ['nonce' => $nonce] );
+    
+
+  } // new_category()
+  
+  
 
   
   
