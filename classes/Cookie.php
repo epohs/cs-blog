@@ -42,12 +42,20 @@ class Cookie {
         'domain' => '',
         'secure' => true,
         'http_only' => true,
+        'samesite' => 'Lax'
     ];
 
     // Merge passed arguments with defaults
     $args = array_merge($defaults, $args);
     
-    setcookie($name, $value, time() + $expiry, $args['path'], $args['domain'], $args['secure'], $args['http_only']);
+    setcookie($name, $value, [
+      'expires' => time() + $expiry,
+      'path' => $args['path'],
+      'domain' => $args['domain'],
+      'secure' => $args['secure'],
+      'httponly' => $args['http_only'],
+      'samesite' => $args['samesite']
+    ]);
   
     
   } // set()
