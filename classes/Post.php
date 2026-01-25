@@ -221,7 +221,7 @@ class Post {
 /**
  * Retrieve posts from the database.
  */
-function get_posts( array $args = [] ): array|int|false {
+public function get_posts( array $args = [] ): array|int|false {
   
   
   $defaults = [
