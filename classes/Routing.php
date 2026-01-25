@@ -522,7 +522,7 @@ class Routing {
       if (is_array($value)):
         
         // Recursively sanitize arrays
-        $sanitized[$key] = $this->clean_post_vars($value);
+        $sanitized[$key] = self::clean_post_vars($value);
         
       else:
         
