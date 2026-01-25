@@ -183,13 +183,11 @@ class RateLimits {
       
     endif;
     
-    
-    $now = date('Y-m-d H:i:s');
 
     $seconds = $this->limiters[$key]['interval'];
 
-    $date = new DateTime($now);
-
+    $date = new DateTime('now', new DateTimeZone('UTC'));
+  
     $date->modify("+{$seconds} seconds");
 
     $expires_at_str = $date->format('Y-m-d H:i:s');
@@ -470,7 +468,7 @@ class RateLimits {
     endif;
 
     
-    $current_time = date('Y-m-d H:i:s');
+    $current_time = gmdate('Y-m-d H:i:s');
 
 
     $query = 'DELETE FROM `RateLimits`
