@@ -7,8 +7,6 @@
  * User identification is handled both by IP address and session variables.
  * 
  * @todo This needs to check for Redis and use that if available
- * 
- * @todo Review all date time functions and standardize
  */
 class RateLimits {
   
@@ -24,7 +22,7 @@ class RateLimits {
   
   
   
-  public function __construct() {
+  private function __construct() {
     
     
     $Db = Database::get_instance();
@@ -244,6 +242,14 @@ class RateLimits {
    * @return int|false The ID of the hit added or false if adding failed.
    */
   private function add_hit_with_cap( string $key, int $cap ): int|false {
+
+
+    if ( !isset($this->limiters[$key]) ):
+      
+      return false;
+      
+    endif;
+    
     
     $client_ip = Utils::get_client_ip();
     
@@ -424,8 +430,6 @@ class RateLimits {
       
     endif;
 
-    
-    $seconds = $this->limiters[$key]['interval'];
    
     $limit = $this->limiters[$key]['limit'];
     
@@ -458,7 +462,7 @@ class RateLimits {
    *
    * @return int Number of rows deleted.
    */
-  function delete_expired(string $key): int {
+  public function delete_expired(string $key): int|false {
 
     
     if ( !isset($this->limiters[$key]) ):
