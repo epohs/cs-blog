@@ -516,6 +516,18 @@ class RateLimits {
         )'
       );
       
+
+      $pdo->exec(
+        'CREATE INDEX IF NOT EXISTS idx_ratelimits_lookup 
+          ON RateLimits(
+            `key`,
+            `client_ip`,
+            `session_id`, 
+            `expires_at`
+          )'
+      );
+
+      
       
       return $result;
       
