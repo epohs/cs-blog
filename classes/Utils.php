@@ -408,70 +408,58 @@ class Utils {
   
   
   
-  
-  
   /**
-  * Return the IP address of the current visitor.
-  */
+   * Get the real client IP address.
+   * 
+   * Supports direct connections and Cloudflare-proxied requests.
+   * Configure 'cloudflare_proxy' => true when behind Cloudflare's proxy (orange cloud).
+   * 
+   * @return string|false Client IP address or false if unavailable.
+   */
   public static function get_client_ip(): string|false {
     
+    $Config = Config::get_instance();
     
-    // Check the most reliable headers in order
-    $headers_to_check = [
-      'HTTP_CF_CONNECTING_IP',
-      'HTTP_CLIENT_IP',
-      'HTTP_X_FORWARDED_FOR',
-      'HTTP_X_FORWARDED',
-      'HTTP_X_CLUSTER_CLIENT_IP',
-      'HTTP_FORWARDED_FOR',
-      'HTTP_FORWARDED',
-      'REMOTE_ADDR'
-    ];
+    $remote_addr = $_SERVER['REMOTE_ADDR'] ?? null;
     
     
+    // In debug mode, allow private ranges for local network testing.
+    // In production, reject private ranges as they indicate spoofing or misconfiguration.
+    if ( $Config->get('debug') ):
+      $filter_flags = FILTER_FLAG_NO_RES_RANGE;
+    else:
+      $filter_flags = FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE;
+    endif;
     
-    foreach ($headers_to_check as $header) :
+    
+    // Cloudflare proxy mode — read real IP from header
+    if ( $Config->get('cloudflare_proxy') ):
       
-      if (isset($_SERVER[$header]) && !empty($_SERVER[$header])) :
-        
-        $ip_list = explode(',', $_SERVER[$header]);
-        
-        foreach ($ip_list as $ip) :
-          
-          $ip = trim($ip);
-          
-          $Config = Config::get_instance();
-          
-          if ( $Config->get('debug') ):
-            
-            $is_ip_valid = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_RES_RANGE);
-            
-          else:
-            
-            $is_ip_valid = filter_var($ip, FILTER_VALIDATE_IP, FILTER_FLAG_NO_PRIV_RANGE | FILTER_FLAG_NO_RES_RANGE);
-            
-          endif;
-          
-          if ( $is_ip_valid ) :
-            
-            return $ip;
-            
-          endif;
-          
-          
-          
-        endforeach;
-        
+      $cf_ip = $_SERVER['HTTP_CF_CONNECTING_IP'] ?? null;
+      
+      if ( $cf_ip && filter_var($cf_ip, FILTER_VALIDATE_IP, $filter_flags) ):
+        return $cf_ip;
       endif;
       
-    endforeach;
+      // Header missing or invalid — possible misconfiguration or direct access bypass
+      debug_log("Cloudflare proxy enabled but CF-Connecting-IP missing or invalid. REMOTE_ADDR: {$remote_addr}");
+      
+      // Fall through to REMOTE_ADDR as last resort
+      
+    endif;
     
     
+    // Direct connection or Cloudflare fallback
+    if ( $remote_addr && filter_var($remote_addr, FILTER_VALIDATE_IP, $filter_flags) ):
+      return $remote_addr;
+    endif;
     
-    // Return false if no valid IP is found
+    
     return false;
     
   } // get_client_ip()
+
+
   
   
   
