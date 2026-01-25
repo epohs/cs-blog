@@ -124,7 +124,19 @@ class RateLimits {
     
     if ( $increment ):
       
-      $new_id = $this->add_hit( $key );
+      if ( $return ):
+        
+        // Normal case: request allowed, just add the hit.
+        $this->add_hit( $key );
+        
+      else:
+        
+        // Rate limited: add hit but enforce cap at 2x limit.
+        $cap = $this->limiters[$key]['limit'] * 2;
+        
+        $this->add_hit_with_cap( $key, $cap );
+        
+      endif;
       
     endif;
     
@@ -216,6 +228,92 @@ class RateLimits {
     }
     
   } // add_hit()
+
+
+
+
+
+
+
+
+  /**
+   * Add a hit while enforcing a maximum row cap for this client.
+   * Deletes oldest rows (even if unexpired) to stay under the cap.
+   *
+   * @param string $key Identifier of the rate limiter.
+   * @param int $cap Maximum rows to keep for this client/key.
+   *
+   * @return int|false The ID of the hit added or false if adding failed.
+   */
+  private function add_hit_with_cap( string $key, int $cap ): int|false {
+    
+    $client_ip = Utils::get_client_ip();
+    
+    $session_id = Session::get_key('id');
+    
+    
+    if ( !$session_id && ($client_ip === false) ):
+      
+      return false;
+      
+    endif;
+    
+    
+    try {
+      
+      // Count current rows for this client/key
+      $count_query = 'SELECT COUNT(*) FROM `RateLimits`
+                      WHERE `key` = :key
+                        AND (`client_ip` = :client_ip OR `session_id` = :session_id)';
+      
+      $stmt = $this->pdo->prepare($count_query);
+      
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
+      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+      $stmt->execute();
+      
+      $current_count = (int) $stmt->fetchColumn();
+      
+      
+      // If at or above cap, delete oldest rows to make room
+      if ( $current_count >= $cap ):
+        
+        $rows_to_delete = $current_count - $cap + 1;
+        
+        $delete_query = 'DELETE FROM `RateLimits`
+                         WHERE `id` IN (
+                           SELECT `id` FROM `RateLimits`
+                           WHERE `key` = :key
+                             AND (`client_ip` = :client_ip OR `session_id` = :session_id)
+                           ORDER BY `expires_at` ASC
+                           LIMIT :rows_to_delete
+                         )';
+        
+        $stmt = $this->pdo->prepare($delete_query);
+        
+        $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+        $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
+        $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+        $stmt->bindValue(':rows_to_delete', $rows_to_delete, PDO::PARAM_INT);
+        
+        $stmt->execute();
+        
+      endif;
+      
+      
+    } catch (PDOException $e) {
+      
+      debug_log('add_hit_with_cap cleanup failed: ' . $e->getMessage());
+      
+    }
+    
+    
+    // Add the new hit using existing method
+    return $this->add_hit( $key );
+    
+    
+  } // add_hit_with_cap()
   
     
     
@@ -308,7 +406,7 @@ class RateLimits {
     
 
   } // get_tries_used()
-    
+  
     
     
     
