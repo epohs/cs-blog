@@ -56,16 +56,18 @@ class Category {
     $args = array_merge($defaults, $args);
     
     
-
-
+    $allowed_order = ['name', 'created_at', 'id'];
+    
+    $order_by = in_array($args['order_by'], $allowed_order) ? $args['order_by'] : 'name';
+    
     $query = "SELECT * FROM `Categories`
-              ORDER BY :order_by
-              ASC LIMIT :limit OFFSET :offset";
+              ORDER BY `{$order_by}` ASC
+              LIMIT :limit OFFSET :offset";
+
     
     $stmt = $this->pdo->prepare($query);
 
     
-    $stmt->bindParam(':order_by', $args['order_by'], PDO::PARAM_STR);
     $stmt->bindParam(':limit', $args['limit'], PDO::PARAM_INT);
     $stmt->bindParam(':offset', $args['offset'], PDO::PARAM_INT);
 
