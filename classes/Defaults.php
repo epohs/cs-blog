@@ -24,7 +24,7 @@ class Defaults {
     $this->defaults = [
   
       // If true, error messages will be logged to a text file.
-      'debug' => true,
+      'debug' => false,
       
       'public' => false,
       
