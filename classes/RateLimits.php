@@ -342,14 +342,10 @@ class RateLimits {
     
     
     $limit = ( $limit ) ? $limit : $this->limiters[$key]['limit'];
-    
-    // @todo test whether these two lines function the same
-    // as the line below.
-    // $now = new DateTime('now', new DateTimeZone('UTC'));
-    // $current_time = Utils::format_date($now, 'Y-m-d H:i:s');
-    $current_time = date('Y-m-d H:i:s');
 
     
+    // Always use UTC/GMT as our baseline.
+    $current_time = gmdate('Y-m-d H:i:s');
 
     $client_ip = Utils::get_client_ip();
     
