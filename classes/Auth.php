@@ -221,7 +221,6 @@ class Auth {
    * Test whether a nonce for a given action is valid against
    * the nonce saved in the session.
    * 
-   * @todo This DOES NOT actually validate the nonce value. FIX.
    * @todo Add a get_nonce method.
    */
   public static function validate_nonce(?string $nonce, string $action): bool {
@@ -236,7 +235,7 @@ class Auth {
       $nonceData = Session::get_key(['nonces', $action]);
       
       
-      if ( $nonceData['expires'] >= time() ):
+      if ( ( $nonceData['expires'] >= time() ) && hash_equals($nonceData['nonce'], $nonce) ):
         
         $return = true;
         
