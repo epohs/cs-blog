@@ -403,7 +403,11 @@ class Routing {
     
     else:
       
-      // Handle the case where headers have already been sent
+      // Handle the case where headers have already been sent.
+
+      // Escape characters to address XSS issues.
+      $url = htmlspecialchars($url, ENT_QUOTES, 'UTF-8');
+      
       echo "<script type='text/javascript'>window.location.href='{$url}';</script>";
       exit();
     
