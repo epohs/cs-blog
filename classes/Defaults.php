@@ -54,7 +54,11 @@ class Defaults {
         
       'POSTMARK_SERVER_TOKEN' => null,
       
-      'POSTMARK_SENDER_SIGNATURE' => null
+      'POSTMARK_SENDER_SIGNATURE' => null,
+      
+      // Set true if domain uses Cloudflare's proxy (orange cloud in DNS settings).
+      // When true, reads client IP from CF-Connecting-IP header instead of REMOTE_ADDR.
+      'cloudflare_proxy' => false
     
     ];    
       
