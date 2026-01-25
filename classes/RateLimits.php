@@ -345,7 +345,7 @@ class RateLimits {
     endif;
     
     
-    $limit = ( $limit ) ? $limit : $this->limiters[$key]['limit'];
+    limit = (int) ($limit ?: $this->limiters[$key]['limit']);
 
     
     // Always use UTC/GMT as our baseline.
@@ -354,17 +354,6 @@ class RateLimits {
     $client_ip = Utils::get_client_ip();
     
     $session_id = Session::get_key('id');
-    
-    
-    if ( is_numeric($limit) ):
-      
-      $limit = intval($limit);
-      
-    else:
-      
-      return false;
-      
-    endif;
     
     
     $query = 'SELECT *
