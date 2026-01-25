@@ -345,7 +345,7 @@ class RateLimits {
     endif;
     
     
-    limit = (int) ($limit ?: $this->limiters[$key]['limit']);
+    $limit = (int) ($limit ?: $this->limiters[$key]['limit']);
 
     
     // Always use UTC/GMT as our baseline.
