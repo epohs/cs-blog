@@ -449,7 +449,7 @@ class RateLimits {
   /**
    * Delete all expired hits for a given limiter.
    *
-   * @return int Number of rows deleted.
+   * @return int|false Number of rows deleted or false if no key.
    */
   public function delete_expired(string $key): int|false {
 
