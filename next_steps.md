@@ -6,33 +6,8 @@ This document outlines security vulnerabilities, code quality issues, and archit
 
 ## Critical Security Issues
 
-### 1. Nonce Validation is Broken
 
-**File:** `classes/Auth.php:227-255`
-
-The `validate_nonce()` method does not actually compare the nonce value:
-
-```php
-public static function validate_nonce(?string $nonce, string $action): bool {
-    // ...
-    if ( Session::key_isset(['nonces', $action]) ):
-      $nonceData = Session::get_key(['nonces', $action]);
-
-      if ( $nonceData['expires'] >= time() ):  // Only checks expiration!
-        $return = true;
-      endif;
-      // ...
-```
-
-The `$nonce` parameter is received but never compared against `$nonceData['nonce']`. Any value (even an empty string) passes validation as long as a nonce exists in the session and hasn't expired. CSRF protection is effectively non-functional.
-
-**Impact:** Any attacker who can get a user to visit their site can submit forms on behalf of that user.
-
-**Fix:** Add comparison: `$nonce === $nonceData['nonce']`
-
----
-
-### 2. SQL Injection via Dynamic Column/Table Names
+### 1. SQL Injection via Dynamic Column/Table Names
 
 **Files:** `classes/Database.php:66-80, 96-109, 121-134, 147-160`
 
@@ -50,7 +25,7 @@ Table names are validated in `delete_row()`, but this pattern is inconsistent ac
 
 ---
 
-### 3. Timing Attack Vulnerability in Remember-Me Token Lookup
+### 2. Timing Attack Vulnerability in Remember-Me Token Lookup
 
 **File:** `classes/User.php:275-283`
 
@@ -60,30 +35,7 @@ The `remember_me` token lookup uses a SQL query that searches JSON data. The dat
 
 ---
 
-## High-Priority Security Issues
-
-### 4. IP Header Spoofing
-
-**File:** `classes/Utils.php:416-474`
-
-The `get_client_ip()` function trusts headers like `HTTP_X_FORWARDED_FOR` and `HTTP_CLIENT_IP` which can be trivially spoofed:
-
-```php
-$headers_to_check = [
-    'HTTP_CF_CONNECTING_IP',
-    'HTTP_CLIENT_IP',
-    'HTTP_X_FORWARDED_FOR',
-    // ...
-];
-```
-
-This undermines rate limiting since attackers can bypass it by sending different `X-Forwarded-For` headers with each request.
-
-**Fix:** Only trust these headers if behind a known proxy (Cloudflare, nginx, etc.) and configure that explicitly in config. Add a `trusted_proxies` config option.
-
----
-
-### 5. Session Fixation Window
+### 3. Session Fixation Window
 
 **File:** `init.php:14`
 
@@ -93,7 +45,7 @@ This undermines rate limiting since attackers can bypass it by sending different
 
 ---
 
-### 6. Weak Password Validation
+### 4. Weak Password Validation
 
 **File:** `classes/User.php:802-827`
 
@@ -110,7 +62,7 @@ Common password lists should have thousands of entries.
 
 ---
 
-### 7. Password Reset Token Not Hashed
+### 5. Password Reset Token Not Hashed
 
 **File:** `classes/User.php:1176-1186`
 
@@ -128,29 +80,9 @@ If the database is compromised, attackers can reset any user's password.
 
 ---
 
-### 8. Missing SameSite Cookie Attribute
-
-**File:** `classes/Cookie.php:37-50`
-
-Cookie settings don't include the `SameSite` attribute:
-
-```php
-$defaults = [
-    'path' => '/',
-    'domain' => '',
-    'secure' => true,
-    'http_only' => true,
-    // Missing: 'samesite' => 'Lax' or 'Strict'
-];
-```
-
-**Fix:** Add `'samesite' => 'Lax'` to defaults. Use the array syntax for `setcookie()` (PHP 7.3+) to support SameSite.
-
----
-
 ## Medium-Priority Issues
 
-### 9. Static Method Bug
+### 6. Static Method Bug
 
 **File:** `classes/Routing.php:521`
 
@@ -169,7 +101,7 @@ public static function clean_post_vars(array $post): array {
 
 ---
 
-### 10. Verbose Debug Logging
+### 7. Verbose Debug Logging
 
 **Files:** `classes/FormHandler.php:328-332, 449-450`
 
@@ -186,7 +118,7 @@ Even in debug mode, logging full user records (which may include tokens) to a fi
 
 ---
 
-### 11. No Rate Limiting on Signup
+### 8. No Rate Limiting on Signup
 
 **File:** `classes/FormHandler.php:1014-1104`
 
@@ -203,7 +135,7 @@ This allows attackers to create unlimited accounts or enumerate valid email addr
 
 ---
 
-### 12. Remember-Me Token Accumulation
+### 9. Remember-Me Token Accumulation
 
 **File:** `classes/User.php:889-917`
 
