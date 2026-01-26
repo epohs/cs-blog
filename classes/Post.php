@@ -571,8 +571,8 @@ public function get_posts( array $args = [] ): array|int|false {
     try {
       
       
-      $result = $pdo->exec('
-        CREATE TABLE IF NOT EXISTS `Posts` (
+      $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS `Posts` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `selector` VARCHAR(16) UNIQUE,
           `author_id` INTEGER NOT NULL,
@@ -587,11 +587,12 @@ public function get_posts( array $args = [] ): array|int|false {
           `comments_open` BOOLEAN DEFAULT 1,
           `show_comments` BOOLEAN DEFAULT 1,
           FOREIGN KEY (`author_id`) REFERENCES `Users`(`id`) ON DELETE CASCADE
-        )
-      ');
+        )'
+      );
 
       
-      return $result;
+      return true;
+      
       
     } catch (PDOException $e) {
     

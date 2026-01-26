@@ -1535,9 +1535,9 @@ class User {
   
     try {
       
-      // Optionally, create tables or perform other setup tasks here
-      $result = $pdo->exec('
-         CREATE TABLE IF NOT EXISTS `Users` (
+      
+      $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS `Users` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `selector` VARCHAR(16) UNIQUE,
           `email` VARCHAR(255) NOT NULL UNIQUE,
@@ -1558,11 +1558,12 @@ class User {
           `is_banned` BOOLEAN DEFAULT 0,
           `role` TEXT DEFAULT "user",
           CHECK (`role` IN ("user", "author", "admin"))
-        )
-      ');
+        )'
+      );
       
       
-      return $result;
+      return true;
+      
       
     } catch (PDOException $e) {
     

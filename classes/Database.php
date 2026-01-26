@@ -18,6 +18,10 @@ class Database {
   
   private $pdo = null;
   
+  private $valid_tables = [];
+  
+  
+  
   
   
   
@@ -65,9 +69,18 @@ class Database {
    */  
   public function get_row_by_id( string $table, int $id, array $columns = ['*'] ) {
     
-    $columnList = implode(', ', $columns);
     
-    $stmt = $this->pdo->prepare("SELECT {$columnList} FROM `{$table}` WHERE `id` = :id LIMIT 1");
+    if ( !$this->is_valid_table($table) ):
+      
+      throw new Exception("Invalid table name {" . var_export($table, true).'}{'.var_export($this->valid_tables,true).'}');
+
+    endif;
+    
+    
+    $column_list = implode(', ', $columns);
+    
+    
+    $stmt = $this->pdo->prepare("SELECT {$column_list} FROM `{$table}` WHERE `id` = :id LIMIT 1");
     
     $stmt->bindValue(':id', $id, PDO::PARAM_INT);
     
@@ -75,7 +88,9 @@ class Database {
     
     $row = $stmt->fetch(PDO::FETCH_ASSOC);
     
+    
     return $row ?: null;
+    
     
   } // get_row_by_id()
   
@@ -94,6 +109,13 @@ class Database {
    *      is an INT. 
    */
   public function row_exists(string $table, string $column = 'id', $value = null): bool {
+    
+    
+    if ( !$this->is_valid_table($table) ):
+      
+      throw new Exception("Invalid table name.");
+
+    endif;
     
     
     $stmt = $this->pdo->prepare("SELECT 1 FROM `{$table}` WHERE `{$column}` = :value LIMIT 1");
@@ -119,6 +141,13 @@ class Database {
    * Get a single column by the row's ID.
    */
   public function get_column(string $table, string $column, int $id ): mixed {
+    
+    
+    if ( !$this->is_valid_table($table) ):
+      
+      throw new Exception("Invalid table name");
+
+    endif;
     
     
     $stmt = $this->pdo->prepare("SELECT `{$column}` FROM `{$table}` WHERE `id` = :id");
@@ -147,6 +176,13 @@ class Database {
   public function set_column(string $table, string $column, $value, int $id): bool {
     
     
+    if ( !$this->is_valid_table($table) ):
+      
+      throw new Exception("Invalid table name");
+
+    endif;
+    
+    
     $stmt = $this->pdo->prepare("UPDATE `{$table}` SET `{$column}` = :value WHERE `id` = :id");
     
     $stmt->bindValue(':value', $value);
@@ -171,11 +207,8 @@ class Database {
    */
   public function delete_row(string $table, int $id): bool {
     
-    // Define allowed table names
-    // @todo Make this a shared class property
-    $valid_tables = ['Posts', 'Users', 'Comments'];
 
-    if ( !in_array($table, $valid_tables) ):
+    if ( !$this->is_valid_table($table) ):
       
       throw new Exception("Invalid table name");
 
@@ -313,6 +346,23 @@ class Database {
 
 
   } // get_unique_column_val()
+  
+  
+  
+  
+  
+  
+  
+  
+  /**
+   * Determine whether a given table name is in the list of
+   * valid tables that were collected as the tables were created.
+   */
+  public function is_valid_table(string $table_name): bool {
+    
+    return in_array($table_name, $this->valid_tables, true);
+      
+  } // is_valid_table()
 
   
   
@@ -343,6 +393,7 @@ class Database {
         
         // Connect to the existing database.
         $pdo = new PDO('sqlite:' . $db_file);
+        
         $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
         $pdo->exec('PRAGMA foreign_keys = ON');
@@ -350,9 +401,17 @@ class Database {
         // Save database connection for use throught the application.
         $this->pdo = $pdo;
         
+        
+        // @todo Find a more dynamic way to loop through required tables
+        // checking whether they exist.
+        // Maybe we need to set these tables in the constructor, then have
+        // make_tables() unset them if their creation fails?
+        $this->valid_tables = [ 'Users', 'Posts', 'Categories', 'RateLimits'];
+        
+        
       } catch (PDOException $e) {
         
-        $this->Config->add( "Failed to connect to the existing database: " . $e->getMessage() );
+        $this->Alerts->add( "Failed to connect to the existing database: " . $e->getMessage() );
       
       }
 
@@ -377,7 +436,7 @@ class Database {
           
       } catch (PDOException $e) {
       
-        $this->Config->add( "Failed to create the database: " . $e->getMessage() );
+        $this->Alerts->add( "Failed to create the database: " . $e->getMessage() );
         
       }
       
@@ -404,18 +463,40 @@ class Database {
     
     
     if ( $pdo ):
-    
-      User::make_tables( $pdo );
-    
-      Post::make_tables( $pdo );
-    
-      Category::make_tables( $pdo );
       
-      RateLimits::make_tables( $pdo );
+    
+      if ( User::make_tables($pdo) ):
+        
+        $this->valid_tables[] = 'Users';
+        
+      endif;
+      
+    
+      if ( Post::make_tables($pdo) ):
+        
+        $this->valid_tables[] = 'Posts';
+        
+      endif;
+    
+    
+      if ( Category::make_tables($pdo) ):
+        
+        $this->valid_tables[] = 'Categories';
+        
+      endif;
+    
+      
+      
+      if ( RateLimits::make_tables($pdo) ):
+        
+        $this->valid_tables[] = 'RateLimits';
+        
+      endif;
+    
       
     else:
             
-      $this->Config->add("can't find db connection");
+      $this->Alerts->add("Can't find db connection");
       
     endif;
     

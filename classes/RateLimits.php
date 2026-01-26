@@ -506,7 +506,7 @@ class RateLimits {
     try {
       
       
-      $result = $pdo->exec(
+      $pdo->exec(
         'CREATE TABLE IF NOT EXISTS `RateLimits` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `key` VARCHAR(64) NOT NULL,
@@ -524,12 +524,12 @@ class RateLimits {
             `client_ip`,
             `session_id`, 
             `expires_at`
-          )'
+        )'
       );
 
       
+      return true;
       
-      return $result;
       
     } catch (PDOException $e) {
       

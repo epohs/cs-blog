@@ -153,8 +153,8 @@ class Category {
     try {
 
 
-      $result = $pdo->exec('
-        CREATE TABLE IF NOT EXISTS `Categories` (
+      $pdo->exec(
+        'CREATE TABLE IF NOT EXISTS `Categories` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `selector` VARCHAR(16) UNIQUE,
           `slug` VARCHAR(255) UNIQUE NOT NULL,
@@ -163,10 +163,12 @@ class Category {
           `order` VARCHAR(16) UNIQUE,
           `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP,
           `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-      ');
+        )'
+      );
+     
       
-     return $result;
+     return true;
+     
       
     } catch (PDOException $e) {
     
