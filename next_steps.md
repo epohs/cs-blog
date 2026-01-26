@@ -7,25 +7,7 @@ This document outlines security vulnerabilities, code quality issues, and archit
 ## Critical Security Issues
 
 
-### 1. SQL Injection via Dynamic Column/Table Names
-
-**Files:** `classes/Database.php:66-80, 96-109, 121-134, 147-160`
-
-The `Database` class methods accept table and column names as parameters and interpolate them directly into SQL:
-
-```php
-public function get_row_by_id( string $table, int $id, array $columns = ['*'] ) {
-    $columnList = implode(', ', $columns);
-    $stmt = $this->pdo->prepare("SELECT {$columnList} FROM `{$table}` WHERE `id` = :id LIMIT 1");
-```
-
-Table names are validated in `delete_row()`, but this pattern is inconsistent across methods. A compromised or careless caller could inject SQL through column names.
-
-**Fix:** Create a whitelist of allowed table/column names and validate consistently in all methods. Consider a shared class property for valid tables.
-
----
-
-### 2. Timing Attack Vulnerability in Remember-Me Token Lookup
+### 1. Timing Attack Vulnerability in Remember-Me Token Lookup
 
 **File:** `classes/User.php:275-283`
 
@@ -35,7 +17,7 @@ The `remember_me` token lookup uses a SQL query that searches JSON data. The dat
 
 ---
 
-### 3. Session Fixation Window
+### 2. Session Fixation Window
 
 **File:** `init.php:14`
 
@@ -45,7 +27,7 @@ The `remember_me` token lookup uses a SQL query that searches JSON data. The dat
 
 ---
 
-### 4. Weak Password Validation
+### 3. Weak Password Validation
 
 **File:** `classes/User.php:802-827`
 
@@ -62,7 +44,7 @@ Common password lists should have thousands of entries.
 
 ---
 
-### 5. Password Reset Token Not Hashed
+### 4. Password Reset Token Not Hashed
 
 **File:** `classes/User.php:1176-1186`
 
@@ -82,7 +64,7 @@ If the database is compromised, attackers can reset any user's password.
 
 ## Medium-Priority Issues
 
-### 6. Static Method Bug
+### 5. Static Method Bug
 
 **File:** `classes/Routing.php:521`
 
@@ -101,7 +83,7 @@ public static function clean_post_vars(array $post): array {
 
 ---
 
-### 7. Verbose Debug Logging
+### 6. Verbose Debug Logging
 
 **Files:** `classes/FormHandler.php:328-332, 449-450`
 
@@ -118,7 +100,7 @@ Even in debug mode, logging full user records (which may include tokens) to a fi
 
 ---
 
-### 8. No Rate Limiting on Signup
+### 7. No Rate Limiting on Signup
 
 **File:** `classes/FormHandler.php:1014-1104`
 
@@ -135,7 +117,7 @@ This allows attackers to create unlimited accounts or enumerate valid email addr
 
 ---
 
-### 9. Remember-Me Token Accumulation
+### 8. Remember-Me Token Accumulation
 
 **File:** `classes/User.php:889-917`
 
@@ -178,7 +160,7 @@ Classes like `Session`, `Auth`, and `Routing` inconsistently mix static and inst
 | Auth | `set_nonce`, `validate_nonce`, `remove_expired_nonces` | `login`, `logout` |
 | Routing | `is_route`, `redirect_to`, `redirect_with_alert`, `nonce_redirect`, `clean_post_vars` | `serve_route`, `get_path` |
 
-**Action:** Pick one paradigm per class for consistency.
+**Action:** Document your reasoning for doing this (If some methods of a class don't rely on an instant's state, and if another class's method only uses those stateless methods, then I think it is cleaner to be able to use static methods than to instantiate and reference a class variable). Also, though, audit your code to be more sure that you are using the methods the way you are saying you are.
 
 ---
 
@@ -240,13 +222,3 @@ set_exception_handler(function($e) {
 });
 ```
 
----
-
-## Priority Order
-
-1. **Immediate:** Fix nonce validation (#1)
-2. **Immediate:** Fix static method bug (#9)
-3. **Before Release:** Items #2-8
-4. **Before Release:** Items #10-12
-5. **Ongoing:** Code quality improvements
-6. **Ongoing:** Documentation tasks
