@@ -16,11 +16,12 @@ A blog, built for my dad.
 - Public templates with forms need a `show_form` arg.
   - When `show_form` is false we need a `form_denied_msg` arg.
 - Check all User db flags and datetimes are updated correctly.
+- [HTML to Markdown](https://github.com/thephpleague/html-to-markdown) and Symfony rate-limiter probably won't get used. remove them from composer.
 
 
 
 
-- Proceed with [HTML to Markdown](https://github.com/thephpleague/html-to-markdown) and [Parsedown](https://github.com/erusev/parsedown) and [EasyMDE](https://github.com/Ionaru/easy-markdown-editor) to handle post formatting as HTML and saving as Markdown.
+- Proceed with [Parsedown](https://github.com/erusev/parsedown) and [EasyMDE](https://github.com/Ionaru/easy-markdown-editor) to handle post formatting as HTML and saving as Markdown.
 - Revisit failed login process to remove cyclical functions and multiple db calls.
 - Add debug log entries to check for multiple class instantiation and multiple crucial function calls.
 
