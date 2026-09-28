@@ -791,8 +791,7 @@ class FormHandler {
   private function login(): void {
 
     
-    // Clients whose IP can't be determined share a single bucket.
-    $client_ip = Utils::get_client_ip() ?: 'unknown';
+    $client_ip = RateLimits::client_ip();
 
 
     // This form is rate limited. Redirect with an error

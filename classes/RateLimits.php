@@ -504,6 +504,23 @@ class RateLimits {
     
     
   /**
+   * The client IP to limit by. Clients whose IP can't be
+   * determined share a single bucket.
+   */
+  public static function client_ip(): string {
+    
+    return Utils::get_client_ip() ?: 'unknown';
+    
+  } // client_ip()
+    
+    
+    
+    
+    
+    
+    
+    
+  /**
    * Return an instance of this class.
    */   
   public static function get_instance(): self {
