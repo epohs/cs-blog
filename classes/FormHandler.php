@@ -813,19 +813,10 @@ class FormHandler {
     
     
     // Redirect with an error if either limit has been reached.
+    // The login page sends the 429 and Retry-After header.
     if ( $limited_by ):
 
-
-      $retry_after = $this->Limits->get_retry_after(...$limited_by);
-      
-      $retry_after_str = Utils::format_date($retry_after);
-
-      $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
-      
-      // Login attempt failed. Redirect back with an error.
-      // The login page sends the 429 and Retry-After header.
-      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
-
+      $this->rate_limited_redirect('login', ...$limited_by);
 
     endif;
 
@@ -1270,6 +1261,29 @@ class FormHandler {
 
 
 
+  /**
+   * Redirect back to a rate limited form with an error saying
+   * when the client can try again.
+   */
+  private function rate_limited_redirect(string $path, string $key, string $identity): void {
+    
+    
+    $retry_after_str = Utils::format_date( $this->Limits->get_retry_after($key, $identity) );
+    
+    $err_msg = "Too many attempts. Try again after {$retry_after_str}.";
+    
+    Routing::redirect_with_alert( $this->Page->url_for($path), ['code' => '001', 'text' => $err_msg] );
+    
+    
+  } // rate_limited_redirect()
+  
+  
+  
+  
+  
+  
+  
+  
   /**
    * Add a form to be processed by this class.
    *
