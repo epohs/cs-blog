@@ -792,14 +792,31 @@ class FormHandler {
 
     
     $client_ip = RateLimits::client_ip();
-
-
-    // This form is rate limited. Redirect with an error
-    // if the form has been submitted too many times.
+    
+    // Hash the email so addresses aren't stored in the RateLimits table.
+    $email_hash = hash('sha256', strtolower(trim($this->post_vars['email'] ?? '')));
+    
+    
+    // This form is rate limited per client IP, and per account so
+    // an attacker spread across many IPs can't hammer one account.
+    $limited_by = null;
+    
     if ( !$this->Limits->check('form_login', $client_ip) ):
+      
+      $limited_by = ['form_login', $client_ip];
+      
+    elseif ( !$this->Limits->check('form_login_account', $email_hash) ):
+      
+      $limited_by = ['form_login_account', $email_hash];
+      
+    endif;
+    
+    
+    // Redirect with an error if either limit has been reached.
+    if ( $limited_by ):
 
 
-      $retry_after = $this->Limits->get_retry_after('form_login', $client_ip);
+      $retry_after = $this->Limits->get_retry_after(...$limited_by);
       
       $retry_after_str = Utils::format_date($retry_after);
 
@@ -907,6 +924,8 @@ class FormHandler {
 
 
       $this->Limits->clear('form_login', $client_ip);
+      
+      $this->Limits->clear('form_login_account', $email_hash);
       
       $this->User->remove_lockout($user_to_login);
       
