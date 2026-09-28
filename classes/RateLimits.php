@@ -87,7 +87,7 @@ class RateLimits {
    *
    * @return bool True if the request is allowed, false otherwise.
    */
-  public function check(string $key, string $identity, ?bool $increment = true ): bool {
+  public function check(string $key, string $identity, bool $increment = true): bool {
     
     
     if ( !isset($this->limiters[$key]) ):
@@ -155,16 +155,9 @@ class RateLimits {
    * Add a new entry for this limiter. Set the expires_at
    * to the appropriate number of seconds in the future.
    * 
-   * @return int The ID of the hit added or false if adding failed.
+   * @return bool True if the hit was added.
    */
-  private function add_hit( string $key, string $identity ): int|false {
-    
-    
-    if ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
+  private function add_hit( string $key, string $identity ): bool {
     
 
     $seconds = $this->limiters[$key]['interval'];
@@ -190,16 +183,7 @@ class RateLimits {
       $stmt->bindValue(':expires_at', $expires_at_str, PDO::PARAM_STR);
       
       
-      // Execute the query
-      if ( $stmt->execute() ):
-        
-        return $this->pdo->lastInsertId();
-        
-      else:
-        
-        return false;
-        
-      endif;
+      return $stmt->execute();
       
     } catch (PDOException $e) {
       
