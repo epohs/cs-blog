@@ -795,12 +795,16 @@ class FormHandler {
   private function login(): void {
 
     
+    // Clients whose IP can't be determined share a single bucket.
+    $client_ip = Utils::get_client_ip() ?: 'unknown';
+
+
     // This form is rate limited. Redirect with an error
     // if the form has been submitted too many times.
-    if ( !$this->Limits->check('form_login') ):
+    if ( !$this->Limits->check('form_login', $client_ip) ):
 
-      
-      $retry_after = $this->Limits->get_retry_after('form_login');
+
+      $retry_after = $this->Limits->get_retry_after('form_login', $client_ip);
       
       $retry_after_str = Utils::format_date($retry_after);
       
