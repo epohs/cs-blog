@@ -80,7 +80,7 @@ class Email {
       // If the client is able to communicate with the API in a timely fashion,
       // but the message data is invalid, or there's a server error,
       // a PostmarkException can be thrown.
-      debug_log("Postmark exception on '{$email_template}': {$ex->postmarkApiErrorCode}.");
+      debug_log("Postmark exception on '{$email_template}': {$ex->PostmarkApiErrorCode}.");
       debug_log($ex->message);
       
       return false;
