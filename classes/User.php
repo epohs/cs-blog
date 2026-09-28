@@ -1274,40 +1274,15 @@ class User {
   
   
   /**
-   * Remove the lockout from a given user.
-   *
-   * Conditionally remove only the locked_until timestamp, or
-   * the failed_login_attempts. Defaults to removing both.
+   * Remove the time out from a given user.
    */
-  function remove_lockout(array|int $user, ?string $mode = 'all'): void {
+  function remove_lockout(array|int $user): void {
     
 
     $user_id = is_array($user) ? (int) $user['id'] : $user;
-
-  
-    if ( $mode == 'lockout-only' ):
-      
-      $query = 'UPDATE `Users` SET `locked_until` = NULL WHERE `id` = :id';
-      
-    elseif ( $mode == 'attempts-only' ):
-      
-      $query = 'UPDATE `Users` SET `failed_login_attempts` = 0 WHERE `id` = :id';
-      
-    elseif ( $mode == 'all' ):
-      
-      $query = 'UPDATE `Users`
-                SET `failed_login_attempts` = 0,
-                    `locked_until` = NULL
-                WHERE `id` = :id';
-      
-    else:
-      
-      return;
-      
-    endif;
     
     
-    $stmt = $this->pdo->prepare($query);
+    $stmt = $this->pdo->prepare('UPDATE `Users` SET `locked_until` = NULL WHERE `id` = :id');
     
     $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
     
@@ -1414,7 +1389,6 @@ class User {
           `verify_key` VARCHAR(16) UNIQUE,
           `password_reset_token` VARCHAR(64),
           `password_reset_started` DATETIME,
-          `failed_login_attempts` INTEGER DEFAULT 0,
           `login_token`  VARCHAR(16) UNIQUE,
           `locked_until` DATETIME,
           `is_banned` BOOLEAN DEFAULT 0,
