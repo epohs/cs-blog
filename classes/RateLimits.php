@@ -378,7 +378,7 @@ class RateLimits {
    *
    * @return int|false Number of rows deleted or false if no key.
    */
-  public function delete_expired(string $key): int|false {
+  private function delete_expired(string $key): int|false {
 
     
     if ( !isset($this->limiters[$key]) ):
