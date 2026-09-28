@@ -90,58 +90,55 @@ class RateLimits {
   public function check(string $key, string $identity, ?bool $increment = true ): bool {
     
     
-    $return = false;
-    
-    
     if ( !isset($this->limiters[$key]) ):
       
-      return $return;
+      return false;
       
     endif;
     
     
-    // Calculate the number of tries used
+    $limit = $this->limiters[$key]['limit'];
+    
+    
+    // Add the hit before counting. Each request then counts itself
+    // along with every hit added before it, so a burst of concurrent
+    // requests can't all read the same count and slip in together.
+    $hit_added = $increment && $this->add_hit( $key, $identity );
+    
     $tries_used = $this->count_tries_used($key, $identity);
-
-
-    // If the number of tries used has reached the number of tries
-    // allowed by this limiter, leave the return value false as
-    // this attempt failed, otherwise set return to true.
-    //
-    // We clear the expired tries during failed attempts to put
-    // the database burden on the offenders.
-    if ( ($tries_used !== false) && ($tries_used >= $this->limiters[$key]['limit']) ):
-
-      $del = $this->delete_expired($key);
+    
+    
+    if ( $tries_used === false ):
       
-    else:
-      
-      $return = true;
+      return true;
       
     endif;
     
-
+    
+    // Don't count the hit just added against this request.
+    $tries_before = ( $hit_added ) ? $tries_used - 1 : $tries_used;
+    
+    
+    if ( $tries_before < $limit ):
+      
+      return true;
+      
+    endif;
+    
+    
+    // Rate limited. We clear the expired tries during failed
+    // attempts to put the database burden on the offenders, and
+    // cap the hits kept for this client at 2x the limit.
+    $this->delete_expired($key);
     
     if ( $increment ):
       
-      if ( $return ):
-        
-        // Normal case: request allowed, just add the hit.
-        $this->add_hit( $key, $identity );
-        
-      else:
-        
-        // Rate limited: add hit but enforce cap at 2x limit.
-        $cap = $this->limiters[$key]['limit'] * 2;
-        
-        $this->add_hit_with_cap( $key, $identity, $cap );
-        
-      endif;
+      $this->trim_hits( $key, $identity, $limit * 2 );
       
     endif;
     
     
-    return $return;
+    return false;
     
 
   } // check()
@@ -219,78 +216,44 @@ class RateLimits {
 
 
   /**
-   * Add a hit while enforcing a maximum row cap for this client.
-   * Deletes oldest rows (even if unexpired) to stay under the cap.
+   * Delete all but the newest hits for this client, even if they
+   * haven't expired, so an offender can't grow the table forever.
    *
    * @param string $key Identifier of the rate limiter.
    * @param string $identity Who is being limited.
    * @param int $cap Maximum rows to keep for this client/key.
-   *
-   * @return int|false The ID of the hit added or false if adding failed.
    */
-  private function add_hit_with_cap( string $key, string $identity, int $cap ): int|false {
-
-
-    if ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
+  private function trim_hits( string $key, string $identity, int $cap ): void {
+    
+    
+    $query = 'DELETE FROM `RateLimits`
+              WHERE `id` IN (
+                SELECT `id` FROM `RateLimits`
+                WHERE `key` = :key
+                  AND `identity` = :identity
+                ORDER BY `id` DESC
+                LIMIT -1 OFFSET :cap
+              )';
     
     
     try {
       
-      // Count current rows for this client/key
-      $count_query = 'SELECT COUNT(*) FROM `RateLimits`
-                      WHERE `key` = :key
-                        AND `identity` = :identity';
-      
-      $stmt = $this->pdo->prepare($count_query);
+      $stmt = $this->pdo->prepare($query);
       
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
       $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':cap', $cap, PDO::PARAM_INT);
+      
       $stmt->execute();
-      
-      $current_count = (int) $stmt->fetchColumn();
-      
-      
-      // If at or above cap, delete oldest rows to make room
-      if ( $current_count >= $cap ):
-        
-        $rows_to_delete = $current_count - $cap + 1;
-        
-        $delete_query = 'DELETE FROM `RateLimits`
-                         WHERE `id` IN (
-                           SELECT `id` FROM `RateLimits`
-                           WHERE `key` = :key
-                             AND `identity` = :identity
-                           ORDER BY `expires_at` ASC
-                           LIMIT :rows_to_delete
-                         )';
-        
-        $stmt = $this->pdo->prepare($delete_query);
-        
-        $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-        $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
-        $stmt->bindValue(':rows_to_delete', $rows_to_delete, PDO::PARAM_INT);
-        
-        $stmt->execute();
-        
-      endif;
-      
       
     } catch (PDOException $e) {
       
-      debug_log('add_hit_with_cap cleanup failed: ' . $e->getMessage());
+      debug_log('trim_hits() failed: ' . $e->getMessage());
       
     }
     
     
-    // Add the new hit using existing method
-    return $this->add_hit( $key, $identity );
-    
-    
-  } // add_hit_with_cap()
+  } // trim_hits()
   
     
     
