@@ -1148,19 +1148,17 @@ class User {
 
 
       // Check whether we have an ongoing password reset request
-      $reset_started = isset($user_to_reset['password_reset_started']) ?? null;
+      $reset_started = $user_to_reset['password_reset_started'] ?? null;
 
 
       if ( Utils::is_valid_datetime($reset_started) ):
 
         $reset_started_datetime = new DateTime($reset_started, new DateTimeZone('UTC'));
         
-        // Add 30 minutes to the current time
-        $threshold_time = $now->modify("+{$password_reset_age} minutes");
+        // Resets started after this time are still ongoing.
+        $threshold_time = (clone $now)->modify("-{$password_reset_age} minutes");
         
-        // Compare the two DateTime objects
-        // @todo Use debug_log to double-check my logic here.
-        if ( $reset_started_datetime <= $threshold_time ):
+        if ( $reset_started_datetime > $threshold_time ):
 
           // There has already been a password reset requested
           // too recently, just bail
