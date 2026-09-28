@@ -849,43 +849,20 @@ class FormHandler {
       
 
       // Check whether the `locked_until` column is set to a 
-      // date in the future for this user. If it is, this
-      // user is locked out.
+      // date in the future for this user. If it is, an admin
+      // has timed this user out.
       // Do not proceed with any verification.
-      // Extend the lockout and redirect with an error.
       if ( isset($user_to_login['locked_until']) &&
             Utils::is_valid_datetime($user_to_login['locked_until']) &&  
             Utils::is_future_datetime($user_to_login['locked_until'])
           ):
-          
-
-        $extended_locked_until = $this->User->extend_lockout($user_to_login);
-        
-        $locked_until = ( $extended_locked_until ) ? $extended_locked_until : $user_to_login['locked_until'];
-        
       
-        $retry_after_str = Utils::format_date($locked_until);
-      
-        $retry_after_header = Utils::format_date($locked_until, 'D, d M Y H:i:s') . ' GMT';
+        $retry_after_str = Utils::format_date($user_to_login['locked_until']);
         
         $err_msg = "You're timed out. Try again after {$retry_after_str}.";
       
-      
-        header("Retry-After: {$retry_after_header}");
-      
         // Login attempt failed. Redirect back with an error.
-        Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
-
-
-      elseif ( isset($user_to_login['locked_until']) &&
-          Utils::is_valid_datetime($user_to_login['locked_until']) &&  
-          Utils::is_past_datetime($user_to_login['locked_until'])
-        ):
-        
-        
-        // User was locked out but it expired. Clear the lockout.
-        $this->User->remove_lockout($user_to_login, 'lockout-only');
-        
+        Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
 
       endif;
 
@@ -904,8 +881,6 @@ class FormHandler {
         $is_logged_in = $this->Auth->login( $user_to_login['id'], $update_last_login, $remember_me );
         
       else:
-        
-        $this->User->increment_failed_login($user_to_login);
         
         $is_logged_in = false;
         
@@ -926,8 +901,6 @@ class FormHandler {
       $this->Limits->clear('form_login', $client_ip);
       
       $this->Limits->clear('form_login_account', $email_hash);
-      
-      $this->User->remove_lockout($user_to_login);
       
       
       if ( !$this->User->is_verified() ):
