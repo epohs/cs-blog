@@ -79,7 +79,8 @@ class RateLimits {
   
   
   /**
-   * Check and consume tokens for a specific limiter.
+   * Check whether this client is under the limit, recording
+   * a hit unless $increment is false.
    *
    * @param string $key Identifier of the rate limiter.
    * @param string $identity Who is being limited, e.g. a client IP.
@@ -258,13 +259,6 @@ class RateLimits {
   private function count_tries_used(string $key, string $identity): int|false {
     
     
-    if  ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
-    
-    
     // Always use UTC/GMT as our baseline.
     $current_time = gmdate('Y-m-d H:i:s');
     
@@ -375,17 +369,8 @@ class RateLimits {
     
   /**
    * Delete all expired hits for a given limiter.
-   *
-   * @return int|false Number of rows deleted or false if no key.
    */
-  private function delete_expired(string $key): int|false {
-
-    
-    if ( !isset($this->limiters[$key]) ):
-        
-      return false;
-      
-    endif;
+  private function delete_expired(string $key): void {
 
     
     $current_time = gmdate('Y-m-d H:i:s');
@@ -404,13 +389,10 @@ class RateLimits {
       $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       
       $stmt->execute();
-      
-      // Return the number of rows deleted
-      return $stmt->rowCount();
 
     } catch (PDOException $e) {
       
-      return 0;
+      debug_log('delete_expired() failed: ' . $e->getMessage());
 
     }
     
