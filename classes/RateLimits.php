@@ -108,9 +108,10 @@ class RateLimits {
     $tries_used = $this->count_tries_used($key, $identity);
     
     
+    // If we can't count, err on the side of blocking.
     if ( $tries_used === false ):
       
-      return true;
+      return false;
       
     endif;
     
@@ -307,6 +308,8 @@ class RateLimits {
       
 
     } catch (PDOException $e) {
+      
+      debug_log('count_tries_used() failed: ' . $e->getMessage());
         
       return false;
       
