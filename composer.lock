@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "a6309ef0c4542d00f5b44f15c970a024",
+    "content-hash": "8701d2baa25ee2b5686217cd4023d42c",
     "packages": [
         {
             "name": "erusev/parsedown",
@@ -843,26 +843,26 @@
         },
         {
             "name": "wildbit/postmark-php",
-            "version": "v6.0.8",
+            "version": "v7.0.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/ActiveCampaign/postmark-php.git",
-                "reference": "bf81875bd91480a1177093f87be84122cd7805b6"
+                "reference": "f0a53b741833d4b2d1a3827c0bd66e70f4d26d62"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/ActiveCampaign/postmark-php/zipball/bf81875bd91480a1177093f87be84122cd7805b6",
-                "reference": "bf81875bd91480a1177093f87be84122cd7805b6",
+                "url": "https://api.github.com/repos/ActiveCampaign/postmark-php/zipball/f0a53b741833d4b2d1a3827c0bd66e70f4d26d62",
+                "reference": "f0a53b741833d4b2d1a3827c0bd66e70f4d26d62",
                 "shasum": ""
             },
             "require": {
                 "guzzlehttp/guzzle": "^7.8",
-                "php": "~8.0 || ~8.1 || ~8.2"
+                "php": "~8.1 || ~8.2|| ~8.3 || ~8.4"
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "^3.40",
                 "phpstan/phpstan": "^1.10",
-                "phpunit/phpunit": "^9"
+                "phpunit/phpunit": "^10.0"
             },
             "type": "library",
             "autoload": {
@@ -877,9 +877,9 @@
             "description": "The officially supported client for Postmark (http://postmarkapp.com)",
             "support": {
                 "issues": "https://github.com/ActiveCampaign/postmark-php/issues",
-                "source": "https://github.com/ActiveCampaign/postmark-php/tree/v6.0.8"
+                "source": "https://github.com/ActiveCampaign/postmark-php/tree/v7.0.0"
             },
-            "time": "2024-05-08T12:09:42+00:00"
+            "time": "2025-07-11T11:40:30+00:00"
         }
     ],
     "packages-dev": [],
