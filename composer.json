@@ -1,8 +1,8 @@
 {
     "require": {
         "php": "^8.4",
-        "erusev/parsedown": "^1.7",
-        "league/html-to-markdown": "^5.1",
+        "erusev/parsedown": "^1.8",
+        "league/html-to-markdown": "^5.1.2",
         "wildbit/postmark-php": "^7.0"
     },
     "config": {
