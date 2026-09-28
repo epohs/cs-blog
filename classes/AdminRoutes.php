@@ -453,6 +453,24 @@ class AdminRoutes {
 
     else:
       
+      $Limits = RateLimits::get_instance();
+      
+      $client_ip = RateLimits::client_ip();
+      
+      
+      // Clients that are currently rate limited get a 429 so
+      // anything watching status codes can see it.
+      if ( !$Limits->check('form_login', $client_ip, false) ):
+        
+        $retry_after = $Limits->get_retry_after('form_login', $client_ip);
+        
+        http_response_code(429);
+        
+        header('Retry-After: ' . max(1, strtotime($retry_after . ' UTC') - time()));
+        
+      endif;
+      
+      
       $nonce = $this->Auth::set_nonce('login');
       
       $this->get_template( ['login'], null, ['nonce' => $nonce] );

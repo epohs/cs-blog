@@ -802,16 +802,12 @@ class FormHandler {
       $retry_after = $this->Limits->get_retry_after('form_login', $client_ip);
       
       $retry_after_str = Utils::format_date($retry_after);
-      
-      $retry_after_header = Utils::format_date($retry_after, 'D, d M Y H:i:s') . ' GMT';
-      
-      
-      header("Retry-After: {$retry_after_header}");
 
       $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
       
       // Login attempt failed. Redirect back with an error.
-      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
+      // The login page sends the 429 and Retry-After header.
+      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
 
 
     endif;
