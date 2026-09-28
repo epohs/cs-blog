@@ -53,27 +53,27 @@ class RateLimits {
    * @param string $key Unique identifier for the rate limiter.
    * @param int $limit Maximum number of actions allowed.
    * @param string $interval Time window for the rate limit (e.g., '5 minutes').
+   *
+   * @throws InvalidArgumentException A bad limit or interval would
+   *         otherwise block every request to this limiter.
    */
-  public function set(string $key, int $limit, string $interval): bool {
+  public function set(string $key, int $limit, string $interval): void {
     
     
     $interval_in_seconds = Utils::convert_to_seconds($interval);
     
     
-    if ( $interval_in_seconds ):
+    if ( !$interval_in_seconds || ($limit < 1) ):
       
-      $this->limiters[$key] = [
-        'limit' => $limit,
-        'interval' => $interval_in_seconds
-      ];
-      
-      return true;
-      
-    else:
-      
-      return false;
+      throw new InvalidArgumentException("Bad rate limit for {$key}: {$limit} per '{$interval}'");
       
     endif;
+    
+    
+    $this->limiters[$key] = [
+      'limit' => $limit,
+      'interval' => $interval_in_seconds
+    ];
     
     
   } // set()
