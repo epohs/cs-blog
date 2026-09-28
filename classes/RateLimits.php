@@ -101,7 +101,7 @@ class RateLimits {
     
     
     // Calculate the number of tries used
-    $tries_used = $this->get_tries_used($key, $identity);
+    $tries_used = $this->count_tries_used($key, $identity);
 
 
     // If the number of tries used has reached the number of tries
@@ -110,7 +110,7 @@ class RateLimits {
     //
     // We clear the expired tries during failed attempts to put
     // the database burden on the offenders.
-    if ( is_countable($tries_used) && (count($tries_used) >= $this->limiters[$key]['limit']) ):
+    if ( ($tries_used !== false) && ($tries_used >= $this->limiters[$key]['limit']) ):
 
       $del = $this->delete_expired($key);
       
@@ -300,16 +300,14 @@ class RateLimits {
     
     
   /**
-   * Get the tries used for a specific limiter.
+   * Count the unexpired tries used for a specific limiter.
    *
    * @param string $key Identifier of the rate limiter.
    * @param string $identity Who is being limited.
-   * @param int $limit Number of tries to return. Default is the
-   *.       limit defined by the limiter.
    *
-   * @return array|false Array of tries used.
+   * @return int|false Number of tries used, or false if the query failed.
    */
-  public function get_tries_used(string $key, string $identity, ?int $limit = 0): array|false {
+  private function count_tries_used(string $key, string $identity): int|false {
     
     
     if  ( !isset($this->limiters[$key]) ):
@@ -319,20 +317,15 @@ class RateLimits {
     endif;
     
     
-    $limit = (int) ($limit ?: $this->limiters[$key]['limit']);
-
-    
     // Always use UTC/GMT as our baseline.
     $current_time = gmdate('Y-m-d H:i:s');
     
     
-    $query = 'SELECT *
+    $query = 'SELECT COUNT(*)
               FROM `RateLimits`
               WHERE `key` = :key
                 AND `identity` = :identity
-                AND `expires_at` > :current_time
-              ORDER BY `expires_at` DESC
-              LIMIT :limit';
+                AND `expires_at` > :current_time';
     
     
     try {
@@ -341,19 +334,13 @@ class RateLimits {
     
       
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
-      $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
+      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       
       
       $stmt->execute();
       
-      $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      
-      // Reorder to chronological order.
-      usort($results, fn($a, $b) => strtotime($a['expires_at']) <=> strtotime($b['expires_at']));
-      
-      return $results;
+      return (int) $stmt->fetchColumn();
       
 
     } catch (PDOException $e) {
@@ -363,7 +350,7 @@ class RateLimits {
     }
     
 
-  } // get_tries_used()
+  } // count_tries_used()
   
     
     
@@ -390,21 +377,41 @@ class RateLimits {
     endif;
 
    
-    $limit = $this->limiters[$key]['limit'];
+    $current_time = gmdate('Y-m-d H:i:s');
     
     
-    $tries_used = $this->get_tries_used($key, $identity, $limit);
+    // A client is allowed again once it has fewer than `limit`
+    // unexpired tries, which is when its `limit`-th newest try expires.
+    $query = 'SELECT `expires_at`
+              FROM `RateLimits`
+              WHERE `key` = :key
+                AND `identity` = :identity
+                AND `expires_at` > :current_time
+              ORDER BY `expires_at` DESC
+              LIMIT 1 OFFSET :offset';
     
-    $first_try = is_array($tries_used) && !empty($tries_used) ? reset($tries_used) : null;
+    
+    try {
 
-    $expires_at = !is_null($first_try) ? $first_try['expires_at'] : 'now';
-
-    $expires_at_date = new DateTime($expires_at, new DateTimeZone('UTC'));
+      $stmt = $this->pdo->prepare($query);
       
-    $retry_after = $expires_at_date->format('Y-m-d H:i:s');
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
+      $stmt->bindValue(':offset', $this->limiters[$key]['limit'] - 1, PDO::PARAM_INT);
+      
+      $stmt->execute();
+      
+      $retry_after = $stmt->fetchColumn();
+      
+    } catch (PDOException $e) {
+      
+      $retry_after = false;
+      
+    }
     
     
-    return $retry_after;
+    return $retry_after ?: $current_time;
     
     
   } // get_retry_after()
