@@ -416,7 +416,48 @@ class RateLimits {
     
 
   } // delete_expired()
-  
+
+
+
+
+
+
+
+
+  /**
+   * Clear all hits for this client, along with any expired hits
+   * for this limiter. Use after the limited action succeeds.
+   *
+   * @param string $key Identifier of the rate limiter.
+   * @param string $identity Who is being limited.
+   */
+  public function clear(string $key, string $identity): void {
+
+
+    $query = 'DELETE FROM `RateLimits`
+              WHERE `key` = :key
+                AND (`identity` = :identity OR `expires_at` < :current_time)';
+
+
+    try {
+
+      $stmt = $this->pdo->prepare($query);
+
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':current_time', gmdate('Y-m-d H:i:s'), PDO::PARAM_STR);
+
+      $stmt->execute();
+
+    } catch (PDOException $e) {
+
+      debug_log('clear() failed: ' . $e->getMessage());
+
+    }
+
+
+  } // clear()
+
   
   
   

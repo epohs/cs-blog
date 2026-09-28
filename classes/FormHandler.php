@@ -915,7 +915,7 @@ class FormHandler {
     if ( $is_logged_in ):
 
 
-      $this->Limits->delete_expired('form_login');
+      $this->Limits->clear('form_login', $client_ip);
       
       $this->User->remove_lockout($user_to_login);
       
