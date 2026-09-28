@@ -72,10 +72,6 @@ class FormHandler {
     $this->add_form('signup', 'signup');
     $this->add_form('forgot', 'forgot_password');
     $this->add_form('password-reset', 'password_reset');
-    
-    
-    //$this->Limits->set('new_user', 2, '5 minutes');
-    $this->Limits->set('form_login', 5, '5 minutes');
 
     
   } // __construct()

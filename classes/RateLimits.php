@@ -31,6 +31,11 @@ class RateLimits {
     $this->pdo = $Db->get_pdo();
     
     
+    // Limiters are defined here so every route sees the same ones.
+    //$this->set('new_user', 2, '5 minutes');
+    $this->set('form_login', 5, '5 minutes');
+    
+    
   } // _construct()
     
     
