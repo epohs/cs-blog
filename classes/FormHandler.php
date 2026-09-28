@@ -996,6 +996,15 @@ class FormHandler {
    */
   private function signup() {
         
+    
+    $client_ip = RateLimits::client_ip();
+    
+    if ( !$this->Limits->check('form_signup', $client_ip) ):
+      
+      $this->rate_limited_redirect('signup', 'form_signup', $client_ip);
+      
+    endif;
+    
       
     Routing::nonce_redirect($this->nonce, 'signup');
         
@@ -1022,8 +1031,6 @@ class FormHandler {
       
       // Test whether the user was successfully added.
       if ( $new_user_id ):
-        
-        // @todo Add a pretty strict rate limit for this.
         
         // Manually set logged in cookie and session but
         // do not set last login timestamp.            
@@ -1097,6 +1104,15 @@ class FormHandler {
    * Reset user password.
    */
   private function forgot_password(): void {
+    
+    
+    $client_ip = RateLimits::client_ip();
+    
+    if ( !$this->Limits->check('form_forgot', $client_ip) ):
+      
+      $this->rate_limited_redirect('forgot', 'form_forgot', $client_ip);
+      
+    endif;
 
 
     Routing::nonce_redirect($this->nonce, 'forgot');

@@ -32,9 +32,10 @@ class RateLimits {
     
     
     // Limiters are defined here so every route sees the same ones.
-    //$this->set('new_user', 2, '5 minutes');
     $this->set('form_login', 5, '5 minutes');
     $this->set('form_login_account', 10, '15 minutes');
+    $this->set('form_signup', 5, '1 hour');
+    $this->set('form_forgot', 5, '15 minutes');
     
     
   } // _construct()
