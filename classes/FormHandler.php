@@ -72,10 +72,6 @@ class FormHandler {
     $this->add_form('signup', 'signup');
     $this->add_form('forgot', 'forgot_password');
     $this->add_form('password-reset', 'password_reset');
-    
-    
-    //$this->Limits->set('new_user', 2, '5 minutes');
-    $this->Limits->set('form_login', 5, '5 minutes');
 
     
   } // __construct()
@@ -795,25 +791,32 @@ class FormHandler {
   private function login(): void {
 
     
-    // This form is rate limited. Redirect with an error
-    // if the form has been submitted too many times.
-    if ( !$this->Limits->check('form_login') ):
+    $client_ip = RateLimits::client_ip();
+    
+    // Hash the email so addresses aren't stored in the RateLimits table.
+    $email_hash = hash('sha256', strtolower(trim($this->post_vars['email'] ?? '')));
+    
+    
+    // This form is rate limited per client IP, and per account so
+    // an attacker spread across many IPs can't hammer one account.
+    $limited_by = null;
+    
+    if ( !$this->Limits->check('form_login', $client_ip) ):
+      
+      $limited_by = ['form_login', $client_ip];
+      
+    elseif ( !$this->Limits->check('form_login_account', $email_hash) ):
+      
+      $limited_by = ['form_login_account', $email_hash];
+      
+    endif;
+    
+    
+    // Redirect with an error if either limit has been reached.
+    // The login page sends the 429 and Retry-After header.
+    if ( $limited_by ):
 
-      
-      $retry_after = $this->Limits->get_retry_after('form_login');
-      
-      $retry_after_str = Utils::format_date($retry_after);
-      
-      $retry_after_header = Utils::format_date($retry_after, 'D, d M Y H:i:s') . ' GMT';
-      
-      
-      header("Retry-After: {$retry_after_header}");
-
-      $err_msg = "Too many login attempts. Try again after {$retry_after_str}.";
-      
-      // Login attempt failed. Redirect back with an error.
-      Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
-
+      $this->rate_limited_redirect('login', ...$limited_by);
 
     endif;
 
@@ -837,43 +840,20 @@ class FormHandler {
       
 
       // Check whether the `locked_until` column is set to a 
-      // date in the future for this user. If it is, this
-      // user is locked out.
+      // date in the future for this user. If it is, an admin
+      // has timed this user out.
       // Do not proceed with any verification.
-      // Extend the lockout and redirect with an error.
       if ( isset($user_to_login['locked_until']) &&
             Utils::is_valid_datetime($user_to_login['locked_until']) &&  
             Utils::is_future_datetime($user_to_login['locked_until'])
           ):
-          
-
-        $extended_locked_until = $this->User->extend_lockout($user_to_login);
-        
-        $locked_until = ( $extended_locked_until ) ? $extended_locked_until : $user_to_login['locked_until'];
-        
       
-        $retry_after_str = Utils::format_date($locked_until);
-      
-        $retry_after_header = Utils::format_date($locked_until, 'D, d M Y H:i:s') . ' GMT';
+        $retry_after_str = Utils::format_date($user_to_login['locked_until']);
         
         $err_msg = "You're timed out. Try again after {$retry_after_str}.";
       
-      
-        header("Retry-After: {$retry_after_header}");
-      
         // Login attempt failed. Redirect back with an error.
-        Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg], 429 );
-
-
-      elseif ( isset($user_to_login['locked_until']) &&
-          Utils::is_valid_datetime($user_to_login['locked_until']) &&  
-          Utils::is_past_datetime($user_to_login['locked_until'])
-        ):
-        
-        
-        // User was locked out but it expired. Clear the lockout.
-        $this->User->remove_lockout($user_to_login, 'lockout-only');
-        
+        Routing::redirect_with_alert( $this->Page->url_for('login'), ['code' => '001', 'text' => $err_msg] );
 
       endif;
 
@@ -893,14 +873,17 @@ class FormHandler {
         
       else:
         
-        $this->User->increment_failed_login($user_to_login);
-        
         $is_logged_in = false;
         
       endif;
 
       
     else:
+      
+      // Hash the password anyway so a missing account takes as long
+      // as a wrong password, and response times don't reveal which
+      // email addresses exist.
+      password_hash($this->post_vars['password'] ?? '', PASSWORD_DEFAULT);
       
       $is_logged_in = false;
       
@@ -911,9 +894,9 @@ class FormHandler {
     if ( $is_logged_in ):
 
 
-      $this->Limits->delete_expired('form_login');
+      $this->Limits->clear('form_login', $client_ip);
       
-      $this->User->remove_lockout($user_to_login);
+      $this->Limits->clear('form_login_account', $email_hash);
       
       
       if ( !$this->User->is_verified() ):
@@ -1013,6 +996,15 @@ class FormHandler {
    */
   private function signup() {
         
+    
+    $client_ip = RateLimits::client_ip();
+    
+    if ( !$this->Limits->check('form_signup', $client_ip) ):
+      
+      $this->rate_limited_redirect('signup', 'form_signup', $client_ip);
+      
+    endif;
+    
       
     Routing::nonce_redirect($this->nonce, 'signup');
         
@@ -1039,8 +1031,6 @@ class FormHandler {
       
       // Test whether the user was successfully added.
       if ( $new_user_id ):
-        
-        // @todo Add a pretty strict rate limit for this.
         
         // Manually set logged in cookie and session but
         // do not set last login timestamp.            
@@ -1114,6 +1104,15 @@ class FormHandler {
    * Reset user password.
    */
   private function forgot_password(): void {
+    
+    
+    $client_ip = RateLimits::client_ip();
+    
+    if ( !$this->Limits->check('form_forgot', $client_ip) ):
+      
+      $this->rate_limited_redirect('forgot', 'form_forgot', $client_ip);
+      
+    endif;
 
 
     Routing::nonce_redirect($this->nonce, 'forgot');
@@ -1278,6 +1277,29 @@ class FormHandler {
 
 
 
+  /**
+   * Redirect back to a rate limited form with an error saying
+   * when the client can try again.
+   */
+  private function rate_limited_redirect(string $path, string $key, string $identity): void {
+    
+    
+    $retry_after_str = Utils::format_date( $this->Limits->get_retry_after($key, $identity) );
+    
+    $err_msg = "Too many attempts. Try again after {$retry_after_str}.";
+    
+    Routing::redirect_with_alert( $this->Page->url_for($path), ['code' => '001', 'text' => $err_msg] );
+    
+    
+  } // rate_limited_redirect()
+  
+  
+  
+  
+  
+  
+  
+  
   /**
    * Add a form to be processed by this class.
    *

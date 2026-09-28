@@ -4,7 +4,8 @@
  * Allow for the creation of limits to the number of times a user can 
  * carry out a given action within a given period of time.
  *
- * User identification is handled both by IP address and session variables.
+ * Callers decide who is being limited by passing an identity,
+ * such as the client IP address.
  * 
  * @todo This needs to check for Redis and use that if available
  */
@@ -28,6 +29,13 @@ class RateLimits {
     $Db = Database::get_instance();
     
     $this->pdo = $Db->get_pdo();
+    
+    
+    // Limiters are defined here so every route sees the same ones.
+    $this->set('form_login', 5, '5 minutes');
+    $this->set('form_login_account', 10, '15 minutes');
+    $this->set('form_signup', 5, '1 hour');
+    $this->set('form_forgot', 5, '15 minutes');
     
     
   } // _construct()
@@ -78,68 +86,68 @@ class RateLimits {
   
   
   /**
-   * Check and consume tokens for a specific limiter.
+   * Check whether this client is under the limit, recording
+   * a hit unless $increment is false.
    *
    * @param string $key Identifier of the rate limiter.
+   * @param string $identity Who is being limited, e.g. a client IP.
    * @param bool $increment Should a hit be added to the limiter.
    *
    * @return bool True if the request is allowed, false otherwise.
    */
-  public function check(string $key, ?bool $increment = true ): bool {
-    
-    
-    $return = false;
+  public function check(string $key, string $identity, bool $increment = true): bool {
     
     
     if ( !isset($this->limiters[$key]) ):
       
-      return $return;
+      return false;
       
     endif;
     
     
-    // Calculate the number of tries used
-    $tries_used = $this->get_tries_used($key);
-
-
-    // If the number of tries used has reached the number of tries
-    // allowed by this limiter, leave the return value false as
-    // this attempt failed, otherwise set return to true.
-    //
-    // We clear the expired tries during failed attempts to put
-    // the database burden on the offenders.
-    if ( is_countable($tries_used) && (count($tries_used) >= $this->limiters[$key]['limit']) ):
-
-      $del = $this->delete_expired($key);
+    $limit = $this->limiters[$key]['limit'];
+    
+    
+    // Add the hit before counting. Each request then counts itself
+    // along with every hit added before it, so a burst of concurrent
+    // requests can't all read the same count and slip in together.
+    $hit_added = $increment && $this->add_hit( $key, $identity );
+    
+    $tries_used = $this->count_tries_used($key, $identity);
+    
+    
+    // If we can't count, err on the side of blocking.
+    if ( $tries_used === false ):
       
-    else:
-      
-      $return = true;
+      return false;
       
     endif;
     
-
+    
+    // Don't count the hit just added against this request.
+    $tries_before = ( $hit_added ) ? $tries_used - 1 : $tries_used;
+    
+    
+    if ( $tries_before < $limit ):
+      
+      return true;
+      
+    endif;
+    
+    
+    // Rate limited. We clear the expired tries during failed
+    // attempts to put the database burden on the offenders, and
+    // cap the hits kept for this client at 2x the limit.
+    $this->delete_expired($key);
     
     if ( $increment ):
       
-      if ( $return ):
-        
-        // Normal case: request allowed, just add the hit.
-        $this->add_hit( $key );
-        
-      else:
-        
-        // Rate limited: add hit but enforce cap at 2x limit.
-        $cap = $this->limiters[$key]['limit'] * 2;
-        
-        $this->add_hit_with_cap( $key, $cap );
-        
-      endif;
+      $this->trim_hits( $key, $identity, $limit * 2 );
       
     endif;
     
     
-    return $return;
+    return false;
     
 
   } // check()
@@ -155,31 +163,9 @@ class RateLimits {
    * Add a new entry for this limiter. Set the expires_at
    * to the appropriate number of seconds in the future.
    * 
-   * @return int The ID of the hit added or false if adding failed.
+   * @return bool True if the hit was added.
    */
-  private function add_hit( string $key ): int|false {
-    
-    
-    if ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
-    
-    
-    $client_ip = Utils::get_client_ip();
-    
-    $session_id = Session::get_key('id');
-    
-    
-    // If neither the session ID, nor client IP are valid
-    // then we can't identify the user, and rate limiting is
-    // useless.
-    if ( !$session_id && ($client_ip === false) ):
-      
-      return false;
-      
-    endif;
+  private function add_hit( string $key, string $identity ): bool {
     
 
     $seconds = $this->limiters[$key]['interval'];
@@ -191,8 +177,8 @@ class RateLimits {
     $expires_at_str = $date->format('Y-m-d H:i:s');
     
 
-    $query = 'INSERT INTO `RateLimits` (`key`, `client_ip`, `session_id`, `expires_at`) 
-              VALUES (:key, :client_ip, :session_id, :expires_at)';
+    $query = 'INSERT INTO `RateLimits` (`key`, `identity`, `expires_at`) 
+              VALUES (:key, :identity, :expires_at)';
 
 
     try {
@@ -201,21 +187,11 @@ class RateLimits {
       
       // Bind parameters
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
-      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
       $stmt->bindValue(':expires_at', $expires_at_str, PDO::PARAM_STR);
       
       
-      // Execute the query
-      if ( $stmt->execute() ):
-        
-        return $this->pdo->lastInsertId();
-        
-      else:
-        
-        return false;
-        
-      endif;
+      return $stmt->execute();
       
     } catch (PDOException $e) {
       
@@ -233,91 +209,44 @@ class RateLimits {
 
 
   /**
-   * Add a hit while enforcing a maximum row cap for this client.
-   * Deletes oldest rows (even if unexpired) to stay under the cap.
+   * Delete all but the newest hits for this client, even if they
+   * haven't expired, so an offender can't grow the table forever.
    *
    * @param string $key Identifier of the rate limiter.
+   * @param string $identity Who is being limited.
    * @param int $cap Maximum rows to keep for this client/key.
-   *
-   * @return int|false The ID of the hit added or false if adding failed.
    */
-  private function add_hit_with_cap( string $key, int $cap ): int|false {
-
-
-    if ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
+  private function trim_hits( string $key, string $identity, int $cap ): void {
     
     
-    $client_ip = Utils::get_client_ip();
-    
-    $session_id = Session::get_key('id');
-    
-    
-    if ( !$session_id && ($client_ip === false) ):
-      
-      return false;
-      
-    endif;
+    $query = 'DELETE FROM `RateLimits`
+              WHERE `id` IN (
+                SELECT `id` FROM `RateLimits`
+                WHERE `key` = :key
+                  AND `identity` = :identity
+                ORDER BY `id` DESC
+                LIMIT -1 OFFSET :cap
+              )';
     
     
     try {
       
-      // Count current rows for this client/key
-      $count_query = 'SELECT COUNT(*) FROM `RateLimits`
-                      WHERE `key` = :key
-                        AND (`client_ip` = :client_ip OR `session_id` = :session_id)';
-      
-      $stmt = $this->pdo->prepare($count_query);
+      $stmt = $this->pdo->prepare($query);
       
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
-      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':cap', $cap, PDO::PARAM_INT);
+      
       $stmt->execute();
-      
-      $current_count = (int) $stmt->fetchColumn();
-      
-      
-      // If at or above cap, delete oldest rows to make room
-      if ( $current_count >= $cap ):
-        
-        $rows_to_delete = $current_count - $cap + 1;
-        
-        $delete_query = 'DELETE FROM `RateLimits`
-                         WHERE `id` IN (
-                           SELECT `id` FROM `RateLimits`
-                           WHERE `key` = :key
-                             AND (`client_ip` = :client_ip OR `session_id` = :session_id)
-                           ORDER BY `expires_at` ASC
-                           LIMIT :rows_to_delete
-                         )';
-        
-        $stmt = $this->pdo->prepare($delete_query);
-        
-        $stmt->bindValue(':key', $key, PDO::PARAM_STR);
-        $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
-        $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
-        $stmt->bindValue(':rows_to_delete', $rows_to_delete, PDO::PARAM_INT);
-        
-        $stmt->execute();
-        
-      endif;
-      
       
     } catch (PDOException $e) {
       
-      debug_log('add_hit_with_cap cleanup failed: ' . $e->getMessage());
+      debug_log('trim_hits() failed: ' . $e->getMessage());
       
     }
     
     
-    // Add the new hit using existing method
-    return $this->add_hit( $key );
-    
-    
-  } // add_hit_with_cap()
+  } // trim_hits()
   
     
     
@@ -327,42 +256,25 @@ class RateLimits {
     
     
   /**
-   * Get the tries used for a specific limiter.
+   * Count the unexpired tries used for a specific limiter.
    *
    * @param string $key Identifier of the rate limiter.
-   * @param int $limit Number of tries to return. Default is the
-   *.       limit defined by the limiter.
+   * @param string $identity Who is being limited.
    *
-   * @return array|false Array of tries used.
+   * @return int|false Number of tries used, or false if the query failed.
    */
-  public function get_tries_used(string $key, ?int $limit = 0): array|false {
+  private function count_tries_used(string $key, string $identity): int|false {
     
-    
-    if  ( !isset($this->limiters[$key]) ):
-      
-      return false;
-      
-    endif;
-    
-    
-    $limit = (int) ($limit ?: $this->limiters[$key]['limit']);
-
     
     // Always use UTC/GMT as our baseline.
     $current_time = gmdate('Y-m-d H:i:s');
-
-    $client_ip = Utils::get_client_ip();
-    
-    $session_id = Session::get_key('id');
     
     
-    $query = 'SELECT *
+    $query = 'SELECT COUNT(*)
               FROM `RateLimits`
               WHERE `key` = :key
-                AND (`client_ip` = :client_ip OR `session_id` = :session_id)
-                AND `expires_at` > :current_time
-              ORDER BY `expires_at` DESC
-              LIMIT :limit';
+                AND `identity` = :identity
+                AND `expires_at` > :current_time';
     
     
     try {
@@ -371,30 +283,25 @@ class RateLimits {
     
       
       $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
       $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
-      $stmt->bindValue(':client_ip', $client_ip, PDO::PARAM_STR);
-      $stmt->bindValue(':session_id', $session_id, PDO::PARAM_STR);
-      $stmt->bindValue(':limit', $limit, PDO::PARAM_INT);
       
       
       $stmt->execute();
       
-      $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
-      
-      // Reorder to chronological order.
-      usort($results, fn($a, $b) => strtotime($a['expires_at']) <=> strtotime($b['expires_at']));
-      
-      return $results;
+      return (int) $stmt->fetchColumn();
       
 
     } catch (PDOException $e) {
+      
+      debug_log('count_tries_used() failed: ' . $e->getMessage());
         
       return false;
       
     }
     
 
-  } // get_tries_used()
+  } // count_tries_used()
   
     
     
@@ -407,10 +314,11 @@ class RateLimits {
    * Get the next time when this limiter can be successfully hit again.
    *
    * @param string $key Identifier of the rate limiter.
+   * @param string $identity Who is being limited.
    *
    * @return string|false Next available retry time, or false if limiter not found.
    */
-  public function get_retry_after(string $key): string|false {
+  public function get_retry_after(string $key, string $identity): string|false {
     
     
     if ( !isset($this->limiters[$key]) ):
@@ -420,21 +328,41 @@ class RateLimits {
     endif;
 
    
-    $limit = $this->limiters[$key]['limit'];
+    $current_time = gmdate('Y-m-d H:i:s');
     
     
-    $tries_used = $this->get_tries_used($key, $limit);
+    // A client is allowed again once it has fewer than `limit`
+    // unexpired tries, which is when its `limit`-th newest try expires.
+    $query = 'SELECT `expires_at`
+              FROM `RateLimits`
+              WHERE `key` = :key
+                AND `identity` = :identity
+                AND `expires_at` > :current_time
+              ORDER BY `expires_at` DESC
+              LIMIT 1 OFFSET :offset';
     
-    $first_try = is_array($tries_used) && !empty($tries_used) ? reset($tries_used) : null;
+    
+    try {
 
-    $expires_at = !is_null($first_try) ? $first_try['expires_at'] : 'now';
-
-    $expires_at_date = new DateTime($expires_at, new DateTimeZone('UTC'));
+      $stmt = $this->pdo->prepare($query);
       
-    $retry_after = $expires_at_date->format('Y-m-d H:i:s');
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
+      $stmt->bindValue(':offset', $this->limiters[$key]['limit'] - 1, PDO::PARAM_INT);
+      
+      $stmt->execute();
+      
+      $retry_after = $stmt->fetchColumn();
+      
+    } catch (PDOException $e) {
+      
+      $retry_after = false;
+      
+    }
     
     
-    return $retry_after;
+    return $retry_after ?: $current_time;
     
     
   } // get_retry_after()
@@ -448,17 +376,8 @@ class RateLimits {
     
   /**
    * Delete all expired hits for a given limiter.
-   *
-   * @return int|false Number of rows deleted or false if no key.
    */
-  public function delete_expired(string $key): int|false {
-
-    
-    if ( !isset($this->limiters[$key]) ):
-        
-      return false;
-      
-    endif;
+  private function delete_expired(string $key): void {
 
     
     $current_time = gmdate('Y-m-d H:i:s');
@@ -477,19 +396,57 @@ class RateLimits {
       $stmt->bindValue(':current_time', $current_time, PDO::PARAM_STR);
       
       $stmt->execute();
-      
-      // Return the number of rows deleted
-      return $stmt->rowCount();
 
     } catch (PDOException $e) {
       
-      return 0;
+      debug_log('delete_expired() failed: ' . $e->getMessage());
 
     }
     
 
   } // delete_expired()
-  
+
+
+
+
+
+
+
+
+  /**
+   * Clear all hits for this client, along with any expired hits
+   * for this limiter. Use after the limited action succeeds.
+   *
+   * @param string $key Identifier of the rate limiter.
+   * @param string $identity Who is being limited.
+   */
+  public function clear(string $key, string $identity): void {
+
+
+    $query = 'DELETE FROM `RateLimits`
+              WHERE `key` = :key
+                AND (`identity` = :identity OR `expires_at` < :current_time)';
+
+
+    try {
+
+      $stmt = $this->pdo->prepare($query);
+
+      $stmt->bindValue(':key', $key, PDO::PARAM_STR);
+      $stmt->bindValue(':identity', $identity, PDO::PARAM_STR);
+      $stmt->bindValue(':current_time', gmdate('Y-m-d H:i:s'), PDO::PARAM_STR);
+
+      $stmt->execute();
+
+    } catch (PDOException $e) {
+
+      debug_log('clear() failed: ' . $e->getMessage());
+
+    }
+
+
+  } // clear()
+
   
   
   
@@ -510,8 +467,7 @@ class RateLimits {
         'CREATE TABLE IF NOT EXISTS `RateLimits` (
           `id` INTEGER PRIMARY KEY AUTOINCREMENT,
           `key` VARCHAR(64) NOT NULL,
-          `client_ip` VARCHAR(255),
-          `session_id` VARCHAR(32),
+          `identity` VARCHAR(255) NOT NULL,
           `expires_at` DATETIME DEFAULT CURRENT_TIMESTAMP
         )'
       );
@@ -521,8 +477,7 @@ class RateLimits {
         'CREATE INDEX IF NOT EXISTS idx_ratelimits_lookup 
           ON RateLimits(
             `key`,
-            `client_ip`,
-            `session_id`, 
+            `identity`,
             `expires_at`
         )'
       );
@@ -542,6 +497,23 @@ class RateLimits {
     
   } // make_tables()
     
+    
+    
+    
+    
+    
+    
+    
+    
+  /**
+   * The client IP to limit by. Clients whose IP can't be
+   * determined share a single bucket.
+   */
+  public static function client_ip(): string {
+    
+    return Utils::get_client_ip() ?: 'unknown';
+    
+  } // client_ip()
     
     
     

@@ -1148,19 +1148,17 @@ class User {
 
 
       // Check whether we have an ongoing password reset request
-      $reset_started = isset($user_to_reset['password_reset_started']) ?? null;
+      $reset_started = $user_to_reset['password_reset_started'] ?? null;
 
 
       if ( Utils::is_valid_datetime($reset_started) ):
 
         $reset_started_datetime = new DateTime($reset_started, new DateTimeZone('UTC'));
         
-        // Add 30 minutes to the current time
-        $threshold_time = $now->modify("+{$password_reset_age} minutes");
+        // Resets started after this time are still ongoing.
+        $threshold_time = (clone $now)->modify("-{$password_reset_age} minutes");
         
-        // Compare the two DateTime objects
-        // @todo Use debug_log to double-check my logic here.
-        if ( $reset_started_datetime <= $threshold_time ):
+        if ( $reset_started_datetime > $threshold_time ):
 
           // There has already been a password reset requested
           // too recently, just bail
@@ -1214,21 +1212,18 @@ class User {
     $stmt = $this->pdo->prepare('SELECT `id`
                                 FROM `Users`
                                 WHERE `password_reset_token` = :token
-                                AND `password_reset_started` <= :token_expires
+                                AND `password_reset_started` > :oldest_valid
                                 LIMIT 1');
 
-                            
-    $now = new DateTime('now', new DateTimeZone('UTC'));
 
     $password_reset_age = $this->Config->get('password_reset_age');
 
-    $token_expires_datetime = $now->modify("+{$password_reset_age} minutes");
-
-    $token_expires = Utils::format_date($token_expires_datetime, 'Y-m-d H:i:s');
+    // Tokens are valid for password_reset_age minutes after they're created.
+    $oldest_valid = gmdate('Y-m-d H:i:s', time() - ($password_reset_age * 60));
 
     $stmt->execute([
       ':token' => $token,
-      ':token_expires' => $token_expires
+      ':oldest_valid' => $oldest_valid
     ]);
 
 
@@ -1274,178 +1269,15 @@ class User {
   
   
   /**
-   * Increment the failed_login_attempts column for the given user.
+   * Remove the time out from a given user.
    */
-  function increment_failed_login(array $user, ?bool $extend_lockout = true): bool {
-    
-
-    $user_id = $user['id'];
-    
-    $failed_login_attempts = (int) $user['failed_login_attempts'];
-    
-
-    if ( $failed_login_attempts <= 50 ):
-
-      $failed_login_attempts++;
-
-      // Extend the lockout period but do not increment
-      // the failed lockout count.
-      if ( $extend_lockout ):
-        
-        $this->extend_lockout($user, false);
-        
-      endif;
-      
-
-      $stmt = $this->pdo->prepare('
-        UPDATE `Users` 
-        SET `failed_login_attempts` = :failed_login_attempts
-        WHERE `id` = :id
-      ');
-
-
-      $stmt->bindValue(':failed_login_attempts', $failed_login_attempts, PDO::PARAM_INT);
-      $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
-
-
-      return $stmt->execute();
-
-    else:
-
-      return false;
-
-    endif;
-
-  } // increment_failed_login()
-
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * Extend the locked_until timestamp for a given user.
-   * 
-   * The length of the extension of the lockout depends on
-   * the number of failed login attempts.
-   *
-   * @todo Test this thoroughly.
-   */
-  function extend_lockout(array $user, ?bool $increment = true): string|false {
-    
-
-    $user_id = $user['id'];
-    $failed_login_attempts = (int) $user['failed_login_attempts'];
-    $now = new DateTime('now', new DateTimeZone('UTC'));
-    
-    
-    if ( isset($user['locked_until']) && Utils::is_valid_datetime($user['locked_until']) ):
-
-      $locked_until = new DateTime($user['locked_until'], new DateTimeZone('UTC'));
-
-    else:
-
-      $locked_until = null;
-
-    endif;
-  
-    
-    if ( $increment ):
-      
-      $this->increment_failed_login($user, false);
-      
-    endif;
-    
-    
-    if ( $failed_login_attempts < 5 ):
-      
-      return false;
-      
-    endif;
-
-  
-    if ( is_null($locked_until) ):
-
-      $new_locked_until = $now->modify('+5 minutes');
-      
-    elseif ($failed_login_attempts <= 10 ):
-
-      $new_locked_until = max($now, $locked_until)->modify('+5 minutes');
-  
-    elseif ( $failed_login_attempts <= 15 ):
-
-      $new_locked_until = max($now, $locked_until)->modify('+30 minutes');
-  
-    else:
-
-      $new_locked_until = max($now, $locked_until)->modify('+1 hour');
-  
-    endif;
-    
-    
-    $new_locked_until = $new_locked_until->format('Y-m-d H:i:s');
-    
-  
-    $stmt = $this->pdo->prepare('
-      UPDATE `Users` 
-      SET `locked_until` = :locked_until 
-      WHERE `id` = :id
-    ');
-
-
-    $stmt->bindValue(':locked_until', $new_locked_until, PDO::PARAM_STR);
-    $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
-  
-    $stmt->execute();
-    
-    return $new_locked_until;
-
-  } // extend_lockout()
-  
-  
-  
-  
-  
-  
-  
-  
-  /**
-   * Remove the lockout from a given user.
-   *
-   * Conditionally remove only the locked_until timestamp, or
-   * the failed_login_attempts. Defaults to removing both.
-   */
-  function remove_lockout(array|int $user, ?string $mode = 'all'): void {
+  function remove_lockout(array|int $user): void {
     
 
     $user_id = is_array($user) ? (int) $user['id'] : $user;
-
-  
-    if ( $mode == 'lockout-only' ):
-      
-      $query = 'UPDATE `Users` SET `locked_until` = NULL WHERE `id` = :id';
-      
-    elseif ( $mode == 'attempts-only' ):
-      
-      $query = 'UPDATE `Users` SET `failed_login_attempts` = 0 WHERE `id` = :id';
-      
-    elseif ( $mode == 'all' ):
-      
-      $query = 'UPDATE `Users`
-                SET `failed_login_attempts` = 0,
-                    `locked_until` = NULL
-                WHERE `id` = :id';
-      
-    else:
-      
-      return;
-      
-    endif;
     
     
-    $stmt = $this->pdo->prepare($query);
+    $stmt = $this->pdo->prepare('UPDATE `Users` SET `locked_until` = NULL WHERE `id` = :id');
     
     $stmt->bindValue(':id', $user_id, PDO::PARAM_INT);
     
@@ -1552,7 +1384,6 @@ class User {
           `verify_key` VARCHAR(16) UNIQUE,
           `password_reset_token` VARCHAR(64),
           `password_reset_started` DATETIME,
-          `failed_login_attempts` INTEGER DEFAULT 0,
           `login_token`  VARCHAR(16) UNIQUE,
           `locked_until` DATETIME,
           `is_banned` BOOLEAN DEFAULT 0,
