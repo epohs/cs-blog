@@ -889,6 +889,11 @@ class FormHandler {
       
     else:
       
+      // Hash the password anyway so a missing account takes as long
+      // as a wrong password, and response times don't reveal which
+      // email addresses exist.
+      password_hash($this->post_vars['password'] ?? '', PASSWORD_DEFAULT);
+      
       $is_logged_in = false;
       
     endif;
