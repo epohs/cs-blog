@@ -1,7 +1,14 @@
 {
     "require": {
-        "wildbit/postmark-php": "^6.0",
+        "php": "^8.4",
+        "erusev/parsedown": "^1.7",
         "league/html-to-markdown": "^5.1",
-        "erusev/parsedown": "^1.7"
+        "wildbit/postmark-php": "^6.0"
+    },
+    "config": {
+        "platform": {
+            "php": "8.4"
+        },
+        "sort-packages": true
     }
 }
