@@ -1214,21 +1214,18 @@ class User {
     $stmt = $this->pdo->prepare('SELECT `id`
                                 FROM `Users`
                                 WHERE `password_reset_token` = :token
-                                AND `password_reset_started` <= :token_expires
+                                AND `password_reset_started` > :oldest_valid
                                 LIMIT 1');
 
-                            
-    $now = new DateTime('now', new DateTimeZone('UTC'));
 
     $password_reset_age = $this->Config->get('password_reset_age');
 
-    $token_expires_datetime = $now->modify("+{$password_reset_age} minutes");
-
-    $token_expires = Utils::format_date($token_expires_datetime, 'Y-m-d H:i:s');
+    // Tokens are valid for password_reset_age minutes after they're created.
+    $oldest_valid = gmdate('Y-m-d H:i:s', time() - ($password_reset_age * 60));
 
     $stmt->execute([
       ':token' => $token,
-      ':token_expires' => $token_expires
+      ':oldest_valid' => $oldest_valid
     ]);
 
 
